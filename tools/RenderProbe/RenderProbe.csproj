@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF><UseWindowsForms>true</UseWindowsForms><Nullable>enable</Nullable>
+    <AssemblyName>Taskboard.RenderProbe</AssemblyName><ApplicationManifest>../../src/Taskboard.Desktop/app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/Taskboard.Desktop/CompositorPixels.cs" Link="CompositorPixels.cs" />
+    <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
+    <Compile Include="../../src/Taskboard.Desktop/LiveBackdrop.cs" Link="LiveBackdrop.cs" />
+    <Compile Include="../../src/Taskboard.Desktop/SurfaceContentRoot.cs" Link="SurfaceContentRoot.cs" />
+  </ItemGroup>
+</Project>

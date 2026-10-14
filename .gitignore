@@ -1,0 +1,23 @@
+bin/
+obj/
+build-*/
+.lark-tmp/
+test-output/
+可运行版/data/
+*.zip
+preserved-data/
+__pycache__/
+*.py[cod]
+release/
+
+# Local indexes, credentials and task data
+.codebase-memory/
+.codex/
+.aws/
+.env
+.env.*
+!.env.example
+**/data/
+**/launch-settings.json
+*.user
+*.suo

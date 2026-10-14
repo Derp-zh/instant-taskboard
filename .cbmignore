@@ -1,0 +1,7 @@
+preserved-data/
+docs/legacy/index-snapshot/
+**/bin/
+**/obj/
+test-output/
+release/
+**/__pycache__/

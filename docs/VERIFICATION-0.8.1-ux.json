@@ -1,0 +1,1045 @@
+{
+  "Version": "0.8.1",
+  "Date": "2026-10-14",
+  "Scope": "U32-U37 / A50-A55 / T52-T58",
+  "Product": "即时任务看板",
+  "FinalProgramHashes": {
+    "即时任务看板.exe": "F640D107101EA1F4A982B65824FC15BBA03DE4685C7C88D0B5381969C171682E",
+    "Taskboard.dll": "65CA2F87991BFEA0DA7DCF390A29E6BBF3AF30332885ECB76B3A0C59D2670C34",
+    "Taskboard.Core.dll": "A8B692CCA2357C8C49A091BD90C9369A93D017988E029237E2A8E0501B15377E"
+  },
+  "Core": {
+    "passed": 87,
+    "checks": [
+      "空内容不形成草稿或任务",
+      "仅改阶段名和新增空阶段不暂存",
+      "仅选AI不暂存",
+      "非空草稿暂存但不参与正式列表与搜索",
+      "无名称可以正式保存并以详情首行展示",
+      "编辑副本不修改正式任务",
+      "同一任务仅一份编辑会话",
+      "X放弃已建任务未提交修改",
+      "阶段改名不影响编号递增",
+      "新增阶段不切换当前阶段",
+      "稳定编号及前一当前后两阶段摘要",
+      "搜索覆盖非当前阶段正文",
+      "灵感只展示阶段0且保留全部阶段",
+      "跨列移动可连续撤销",
+      "提交标题保留后台提醒及列表变化",
+      "字段撤销保留后台更新",
+      "同列向后移动不发生偏移",
+      "撤销排序恢复原位置",
+      "删除任务",
+      "撤销删除恢复内容与顺序",
+      "删除选项清空任务及编辑引用",
+      "删除选项后保存撤销不恢复无效引用",
+      "睡眠错过多个周期只补一次且移入待操作",
+      "同一次到期不重复提醒",
+      "已完成任务停止提醒",
+      "一次性提醒只执行一次",
+      "每周提醒严格推进到未来",
+      "未提交编辑跨进程恢复但不变成正式修改",
+      "关闭新建草稿跨进程保留",
+      "损坏主文件从有效备份恢复且保留原件",
+      "主文件备份都坏时拒绝启动",
+      "坏数据不会被空看板覆盖",
+      "拒绝空阶段元素",
+      "拒绝无效当前阶段",
+      "拒绝重复任务编号",
+      "拒绝未知选项引用",
+      "拒绝非法窗口尺寸",
+      "拒绝非法颜色",
+      "拒绝空持久草稿",
+      "被占用的主文件使写入明确失败",
+      "写入失败不破坏旧文件",
+      "撤销仅保留本次运行最近20次提交",
+      "灵感自动输入保存不计入字段撤销步数",
+      "配置备份不含任务、阶段内容或草稿",
+      "平台配置及默认20%透明度可往返恢复",
+      "恢复配置不更改任务、提醒、草稿或未提交输入",
+      "恢复配置保留现有任务所引用选项",
+      "配置导入拒绝旧任务全量备份",
+      "配置包夹带任务字段时拒绝导入",
+      "拒绝超范围透明度",
+      "拒绝非有限透明度",
+      "旧版本缺少透明度字段时兼容默认20%",
+      "旧数据缺少球透明度时独立采用40%，普通窗口仍为20%",
+      "拒绝无限大的球透明度，防止合成画面失效",
+      "球透明度随配置备份恢复，源数据保持不变",
+      "灵感隐藏不计数，改名保持角色",
+      "保护列表禁止删除：随手记录",
+      "保护列表禁止删除：进行中",
+      "保护列表禁止删除：待操作",
+      "数量增加可恢复隐藏列并新增自定义列",
+      "自定义列任务不混入完善中",
+      "正式任务阻止删除列表",
+      "配置导入保留现有任务引用的列表且任务不变",
+      "空列表删除后撤销任务会恢复列表身份",
+      "自定义列移动撤销恢复准确列表",
+      "非空草稿阻止删除列表",
+      "所有列可隐藏而不丢任务",
+      "旧数据无列配置时兼容六列",
+      "历史来源不能宣称运行或自动流转",
+      "可信开始事件确认运行",
+      "等待回答进入待操作",
+      "权限等待独立显示",
+      "单项请求消失不冒充恢复执行",
+      "可信恢复回进行中且时间红点保留",
+      "别的会话事件不能污染关联",
+      "旧轮次结束不能覆盖当前运行",
+      "旧关联代次不能修改状态",
+      "正常结束进入待操作但不完成任务",
+      "失败单独记录",
+      "中断单独记录",
+      "断线待确认且不误报结束",
+      "AI事件不拉回已完成",
+      "自定义列不参与AI自动流转",
+      "乱序信号拒绝",
+      "标题提交保留监听最新状态",
+      "改绑提升代次并保留旧关联历史",
+      "300任务全部阶段搜索反馈低于200ms"
+    ],
+    "performance": {
+      "tasks": 300,
+      "stagesPerTask": 4,
+      "drafts": 10,
+      "searchMs": 0.056764999999999996,
+      "saveMs": 25.5853,
+      "loadMs": 22.3311
+    }
+  },
+  "UI": {
+    "passed": 77,
+    "checks": [
+      "六个独立窗口可见且不进入任务栏",
+      "编辑移动区72且编辑层级固定高于六列",
+      "透明内容表面接收原生字符输入，焦点可落到真实输入框",
+      "输入框左右圆弧内部都可命中",
+      "输入框圆弧之外的矩形角不触发输入",
+      "点击AI选择框打开选择菜单",
+      "再次点击AI选择框关闭菜单",
+      "实际输入不会立即修改正式任务",
+      "收起展开保留编辑窗口与未提交内容",
+      "点击真实X放弃修改并关闭编辑",
+      "点击真实保存按钮提交任务并关闭编辑",
+      "UI提交可撤销字段修改",
+      "真实新建X暂存且不参与任务搜索",
+      "全部新建窗口关闭后没有宿主或草稿列表残留",
+      "仅阶段0时阶段名胶囊隐藏且不可编辑",
+      "新增阶段后阶段0和阶段1名称胶囊均出现",
+      "框内阶段胶囊仍可独立编辑",
+      "圆角日期选择器仍可修改一次性提醒日期",
+      "旧新建窗口右移五分之一宽度",
+      "新建前台窗口在工作区中央",
+      "多份草稿只有一个真实宿主，虚线入口为窗口内部控件",
+      "三份草稿和切换区域共用同一个真实窗口",
+      "旧窗口可以切换到前台且不重复创建",
+      "关闭多份新建后宿主和虚线入口完全消失",
+      "全部草稿关闭后释放堆叠绘制和实时背景区域",
+      "列末新建入口找回同列非空暂存草稿",
+      "快速切换20次后无列表或编辑残留",
+      "快速切换后恢复输入命中",
+      "调整单列不会挤压邻列",
+      "鼠标位置不变时整组缩放不会因图案移动再次偏移",
+      "整组缩放的六列宽高比例相同（允许设备像素取整）",
+      "300任务搜索全部阶段低于200ms",
+      "搜索文字区域高度足够且光标具有可绘制区域",
+      "搜索框实际渲染可见文字像素，不能只验证输入属性",
+      "搜索框接收原生中文输入且保留真实键盘焦点",
+      "搜索框不会显示青色空滑块，长文本仍可用光标滚动",
+      "搜索组件按钮悬停使用普通箭头",
+      "真实搜索控件展示300项匹配结果",
+      "选中搜索结果隐藏结果并保留搜索词",
+      "搜索X清空输入和结果",
+      "卡片内部空白缩到3/5，卡片之间间距保持8",
+      "拖动目标有虚线边框卡片占位",
+      "相同落点100次移动不重建或重排卡片预览",
+      "拖动预览不修改任务顺序及状态",
+      "落点改变时才更新插入预览",
+      "取消拖动恢复源卡片且不产生任务修改",
+      "结束拖动后所有列无落点预览残留",
+      "设置有六分区含监听且不再管理字段选项",
+      "设置滑块实时将透明度更新为60%",
+      "球透明度独立调节，不改变普通窗口",
+      "设置滚动条固定6单位细宽",
+      "点击球收起时设置窗口随组隐藏",
+      "重新展开恢复原来的设置窗口",
+      "主动关闭的设置窗口不会在重新展开时复活",
+      "编辑开关100次无窗口列表增长",
+      "六列新建入口与正式任务处于同一滚动列表末尾",
+      "灵感新建在列内录入且不打开编辑窗口",
+      "灵感结束录入按钮仅显示√",
+      "灵感非空自动建立正式任务",
+      "灵感自动保存后输入区保持打开，插入卡片不会误触发离开编辑",
+      "收起前立即提交灵感最后输入",
+      "实际UI数据落盘且恢复有效",
+      "真实配置恢复仅更新设置，不修改任务和草稿",
+      "隐藏灵感后显示数量为5且窗口关闭",
+      "改名同步独立窗口并保留待操作身份",
+      "新增列表立即生成独立窗口",
+      "真实新建保存进入自定义列",
+      "自定义列可移动到改名后的待操作",
+      "自定义列移列可撤销",
+      "空自定义列删除后移除窗口",
+      "任务删除撤销可恢复原自定义窗口",
+      "全部隐藏的最大范围为空且不崩溃",
+      "悬浮范围包含小窗口和上下通道，侧边范围外收起",
+      "切换到空数据路径复制数据且保留原目录",
+      "新数据路径入口已持久保存，可供重启读取",
+      "可以安全切回原数据路径，数据不混合",
+      "空闲一分钟平均CPU低于1%"
+    ],
+    "initialLayoutMs": 606.5874,
+    "idleSeconds": 60.0065267,
+    "cpuPercent": 0.05468155183192765,
+    "cpuCorePercent": 1.0936310366385529,
+    "mouseMoved": false,
+    "runtime": "8.0.31",
+    "artifactDirectory": "<project-root>\\test-output\\ux08-desktop-final-14\\ui-artifacts"
+  },
+  "Mouse": {
+    "Passed": 42,
+    "Checks": [
+      "左键悬浮球实际展开六列",
+      "新默认六列外框在工作区中央",
+      "默认最大范围宽度为屏幕的八分之七（7/8）",
+      "默认列表间距增大至24",
+      "悬浮球和搜索条避开当前缩放下的任务栏",
+      "搜索框真实键盘输入值正确",
+      "搜索框真实键盘输入在桌面上有可见文字像素",
+      "搜索框桌面上有可见输入光标，覆盖闪烁周期",
+      "任务输入框左侧圆弧内部可点击输入",
+      "任务输入框右侧圆弧内部可点击输入",
+      "AI选择框第一次真实点击展开",
+      "AI选择框第二次真实点击收起",
+      "AI选择框第三次真实点击再次展开",
+      "优先级选择框第一次真实点击展开",
+      "优先级选择框第二次真实点击收起",
+      "优先级选择框第三次真实点击再次展开",
+      "实际鼠标和键盘修改并点击保存",
+      "实际X点击放弃修改",
+      "真实拖动卡片跟随鼠标位移",
+      "跟随卡片穿透鼠标，目标列可接收拖放",
+      "松手后跟随窗口释放无残留",
+      "跨窗口实际拖放改变列表并落盘",
+      "拖动没有误开编辑窗口",
+      "Esc取消拖放不改变顺序或状态",
+      "真实列内拖动到末尾改变顺序",
+      "真实悬浮球撤销菜单恢复列内排序",
+      "菜单四边模式实际拉伸窗口",
+      "四边拉伸没有挤压邻列",
+      "左下图案实际拖动等比例缩放六列",
+      "新建第二草稿仍只有同一个真实窗口",
+      "点击旧稿露出区在同一窗口内部切换",
+      "点击列表后草稿编辑仍在列表上层",
+      "球实际收起共享草稿与设置",
+      "收起圆球内部可点击，圆外透明区域不遮挡",
+      "重新打开恢复原共享宿主与设置",
+      "全部关闭共享草稿后没有残留",
+      "右键长按实际移动悬浮球",
+      "实际悬浮球收起无列残留",
+      "真实悬停预览宽度缩为198",
+      "球向上进入间隙后预览仍保持",
+      "鼠标进入预览内部可持续操作",
+      "离开完整悬浮范围后预览自动关闭"
+    ],
+    "MouseMoved": true,
+    "DataDirectory": "<project-root>\\test-output\\ux08-mouse-final-07"
+  },
+  "DynamicWindows": {
+    "sampledDesktopFrames": true,
+    "mouseMoved": false,
+    "reports": [
+      {
+        "name": "列-灵感库",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.4334,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-完善中",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.8035,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-进行中",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.6174,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-待操作",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.7194,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-暂搁置",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.9537,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-已完成",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.6708,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "新建堆叠",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 187,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7585462,
+        "blueSample": -13281384,
+        "backgroundUpdateObservedMs": 42.5902,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "已建编辑",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.6231,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "设置",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 85.0141,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "搜索结果",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 43.3441,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "待操作预览",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 37.018,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "辅助提示",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 36.774,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "圆形悬浮球",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "backgroundOutsideDifference": 314,
+        "redSample": -7519926,
+        "blueSample": -13281383,
+        "backgroundUpdateObservedMs": 42.8303,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "圆外像素无底板",
+        "passed": true,
+        "outsidePoints": 96,
+        "maximumCornerDifference": 0
+      },
+      {
+        "name": "系统合成动画像素",
+        "passed": true,
+        "durationTargetMs": 100,
+        "opening": {
+          "Frames": [
+            {
+              "Ms": 183.7335,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 0
+            },
+            {
+              "Ms": 201.4843,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 0
+            },
+            {
+              "Ms": 243.92,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 468
+            },
+            {
+              "Ms": 280.2629,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 300.4868,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 317.1613,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 334.7906,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 358.2877,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 389.7097,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 419.6425,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 449.3437,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 467.2909,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 498.7184,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 528.0594,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 558.5105,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 578.3887,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            }
+          ],
+          "OutsideDifferenceNotSampled": null
+        },
+        "closing": {
+          "Frames": [
+            {
+              "Ms": 26.4261,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 0
+            },
+            {
+              "Ms": 50.2714,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 471
+            },
+            {
+              "Ms": 68.3396,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 387
+            },
+            {
+              "Ms": 99.4179,
+              "ColumnNativeRegionHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 247
+            },
+            {
+              "Ms": 134.157,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 158.4457,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 175.3414,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 195.2554,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 224.1299,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 254.167,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 284.4888,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 316.1182,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 345.3309,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 363.722,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 393.6208,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 425.0808,
+              "ColumnNativeRegionHeightPixels": 0,
+              "BallWidthPixels": 87,
+              "VisibleBallWidthPixels": 87
+            }
+          ],
+          "OutsideDifferenceNotSampled": null
+        }
+      }
+    ]
+  },
+  "ActualAnimationPixels": {
+    "passed": true,
+    "refreshHz": 165.0056101907465,
+    "beginMs": 0.7534,
+    "blockBeginMs": 46.0904,
+    "blockEndMs": 108.2039,
+    "sampleX": 1452,
+    "sampleY": 1175,
+    "sampleWidth": 555,
+    "ballBounds": "1452,1131,555,87",
+    "ballVisible": true,
+    "independent": true,
+    "distinctIntermediatePixelWidths": 6,
+    "pixelWidthsWhileUiBusy": [
+      199,
+      284,
+      340,
+      424
+    ],
+    "frames": [
+      {
+        "Ms": 8.736,
+        "Width": 87
+      },
+      {
+        "Ms": 21.4501,
+        "Width": 555
+      },
+      {
+        "Ms": 33.2185,
+        "Width": 115
+      },
+      {
+        "Ms": 51.3754,
+        "Width": 199
+      },
+      {
+        "Ms": 69.1598,
+        "Width": 284
+      },
+      {
+        "Ms": 81.4745,
+        "Width": 340
+      },
+      {
+        "Ms": 99.7526,
+        "Width": 424
+      },
+      {
+        "Ms": 111.8045,
+        "Width": 481
+      },
+      {
+        "Ms": 130.3768,
+        "Width": 555
+      },
+      {
+        "Ms": 142.2216,
+        "Width": 555
+      },
+      {
+        "Ms": 159.5435,
+        "Width": 555
+      },
+      {
+        "Ms": 177.7271,
+        "Width": 555
+      },
+      {
+        "Ms": 189.8934,
+        "Width": 555
+      },
+      {
+        "Ms": 208.1484,
+        "Width": 555
+      },
+      {
+        "Ms": 220.2583,
+        "Width": 555
+      },
+      {
+        "Ms": 238.4137,
+        "Width": 555
+      }
+    ],
+    "measure": "Actual screen pixels sampled on another thread; no timer ticks counted as rendered frames."
+  },
+  "Performance": {
+    "passed": true,
+    "displayRefreshHz": 165.00288755053214,
+    "desktopComposedFrames": 16,
+    "desktopRefreshes": 16,
+    "intervalMs": 999.4575,
+    "compositorAnimations": true,
+    "frameBudgetMs": 8.333333333333334,
+    "operationFeedbackBudgetMs": 200,
+    "animationDurationMs": 100,
+    "searchMaximumMs": 0.1056,
+    "searchP95Ms": 0.0647,
+    "toggleSynchronousFeedbackMs": [
+      92.7131,
+      24.2036,
+      91.5287,
+      22.7434,
+      84.331,
+      30.2182
+    ],
+    "feedbackDetails": [
+      {
+        "Expanded": true,
+        "LastWorkspaceRevealMs": 46.5748,
+        "LastBallRevealMs": 33.5582,
+        "LastEditorRestoreMs": 0.0675,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 7.9869,
+            "LastSnapshotMs": 0.0231,
+            "LastShowMs": 5.8083
+          },
+          {
+            "LastAnimationPreparationMs": 6.758,
+            "LastSnapshotMs": 0.0097,
+            "LastShowMs": 4.7369
+          },
+          {
+            "LastAnimationPreparationMs": 9.9475,
+            "LastSnapshotMs": 0.0095,
+            "LastShowMs": 8.1213
+          },
+          {
+            "LastAnimationPreparationMs": 6.3807,
+            "LastSnapshotMs": 0.0084,
+            "LastShowMs": 4.5869
+          },
+          {
+            "LastAnimationPreparationMs": 7.0529,
+            "LastSnapshotMs": 0.0082,
+            "LastShowMs": 5.2008
+          },
+          {
+            "LastAnimationPreparationMs": 8.3643,
+            "LastSnapshotMs": 0.0084,
+            "LastShowMs": 6.264
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": false,
+        "LastWorkspaceRevealMs": 12.462,
+        "LastBallRevealMs": 5.1368,
+        "LastEditorRestoreMs": 0.0462,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 2.8591,
+            "LastSnapshotMs": 0.0071,
+            "LastShowMs": 0
+          },
+          {
+            "LastAnimationPreparationMs": 1.7796,
+            "LastSnapshotMs": 0.0041,
+            "LastShowMs": 0
+          },
+          {
+            "LastAnimationPreparationMs": 2.0447,
+            "LastSnapshotMs": 0.0026,
+            "LastShowMs": 0
+          },
+          {
+            "LastAnimationPreparationMs": 1.993,
+            "LastSnapshotMs": 0.0029,
+            "LastShowMs": 0.0002
+          },
+          {
+            "LastAnimationPreparationMs": 1.8238,
+            "LastSnapshotMs": 0.0033,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 1.8713,
+            "LastSnapshotMs": 0.0025,
+            "LastShowMs": 0.0001
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": true,
+        "LastWorkspaceRevealMs": 46.2241,
+        "LastBallRevealMs": 35.1918,
+        "LastEditorRestoreMs": 0.0725,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 7.1897,
+            "LastSnapshotMs": 0.0543,
+            "LastShowMs": 4.8254
+          },
+          {
+            "LastAnimationPreparationMs": 6.2489,
+            "LastSnapshotMs": 0.0101,
+            "LastShowMs": 4.835
+          },
+          {
+            "LastAnimationPreparationMs": 8.3812,
+            "LastSnapshotMs": 0.0109,
+            "LastShowMs": 6.1314
+          },
+          {
+            "LastAnimationPreparationMs": 7.2727,
+            "LastSnapshotMs": 0.0098,
+            "LastShowMs": 5.0838
+          },
+          {
+            "LastAnimationPreparationMs": 9.0655,
+            "LastSnapshotMs": 0.0089,
+            "LastShowMs": 5.7504
+          },
+          {
+            "LastAnimationPreparationMs": 7.9687,
+            "LastSnapshotMs": 0.0101,
+            "LastShowMs": 5.7932
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": false,
+        "LastWorkspaceRevealMs": 10.6408,
+        "LastBallRevealMs": 5.2755,
+        "LastEditorRestoreMs": 0.0357,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 2.4364,
+            "LastSnapshotMs": 0.0072,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 1.6558,
+            "LastSnapshotMs": 0.0035,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 1.6602,
+            "LastSnapshotMs": 0.0024,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 1.6044,
+            "LastSnapshotMs": 0.0024,
+            "LastShowMs": 0.0002
+          },
+          {
+            "LastAnimationPreparationMs": 1.5563,
+            "LastSnapshotMs": 0.0027,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 1.641,
+            "LastSnapshotMs": 0.0025,
+            "LastShowMs": 0
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": true,
+        "LastWorkspaceRevealMs": 41.4078,
+        "LastBallRevealMs": 32.0044,
+        "LastEditorRestoreMs": 0.0726,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 6.6021,
+            "LastSnapshotMs": 0.0153,
+            "LastShowMs": 4.5369
+          },
+          {
+            "LastAnimationPreparationMs": 5.6859,
+            "LastSnapshotMs": 0.0081,
+            "LastShowMs": 4.4849
+          },
+          {
+            "LastAnimationPreparationMs": 6.7123,
+            "LastSnapshotMs": 0.0071,
+            "LastShowMs": 5.1376
+          },
+          {
+            "LastAnimationPreparationMs": 7.6108,
+            "LastSnapshotMs": 0.0089,
+            "LastShowMs": 4.8453
+          },
+          {
+            "LastAnimationPreparationMs": 8.6422,
+            "LastSnapshotMs": 0.0096,
+            "LastShowMs": 6.7913
+          },
+          {
+            "LastAnimationPreparationMs": 6.0785,
+            "LastSnapshotMs": 0.0087,
+            "LastShowMs": 4.4834
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": false,
+        "LastWorkspaceRevealMs": 17.8601,
+        "LastBallRevealMs": 6.2533,
+        "LastEditorRestoreMs": 0.0438,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 3.5998,
+            "LastSnapshotMs": 0.0074,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 3.2211,
+            "LastSnapshotMs": 0.0053,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.363,
+            "LastSnapshotMs": 0.0044,
+            "LastShowMs": 0.0002
+          },
+          {
+            "LastAnimationPreparationMs": 2.6641,
+            "LastSnapshotMs": 0.0051,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.4568,
+            "LastSnapshotMs": 0.0047,
+            "LastShowMs": 0
+          },
+          {
+            "LastAnimationPreparationMs": 3.418,
+            "LastSnapshotMs": 0.0041,
+            "LastShowMs": 0
+          }
+        ],
+        "editors": 0
+      }
+    ],
+    "columnsPreparationMs": [
+      {
+        "Title": "灵感库",
+        "LastAnimationPreparationMs": 3.5998
+      },
+      {
+        "Title": "完善中",
+        "LastAnimationPreparationMs": 3.2211
+      },
+      {
+        "Title": "进行中",
+        "LastAnimationPreparationMs": 2.363
+      },
+      {
+        "Title": "待操作",
+        "LastAnimationPreparationMs": 2.6641
+      },
+      {
+        "Title": "暂搁置",
+        "LastAnimationPreparationMs": 2.4568
+      },
+      {
+        "Title": "已完成",
+        "LastAnimationPreparationMs": 3.418
+      }
+    ],
+    "ballPreparationMs": 6.1732,
+    "note": "DWM counters describe the desktop, not individual app frames. Pixel animation evidence is recorded separately. Actual displayed frames are limited by monitor refresh."
+  },
+  "CodexReadOnly": {
+    "passed": true,
+    "existingThreadsRead": 28,
+    "status": "历史服务可读 · 实时状态待确认",
+    "liveTransportConnected": false,
+    "metadataOnly": true,
+    "mutationMethodsBlocked": true,
+    "conversationContentsLogged": false
+  },
+  "EvidenceDirectories": {
+    "core": "test-output/ux08-core-final-01",
+    "uiAndDesktop": "test-output/ux08-desktop-final-14",
+    "mouse": "test-output/ux08-mouse-final-07",
+    "codex": "test-output/ux08-codex-final-bytes"
+  },
+  "EvidenceBoundary": "Mouse evidence was collected before the last changes to MotionChecks only; interactive runtime code is unchanged. Final UI/pixel evidence uses the delivered runtime bytes.",
+  "Limits": [
+    "120Hz is supported by independent composition, not inferred from an 8ms timer. Monitor/system load limit actual presentation; pixel sampling does not enumerate every display refresh.",
+    "Existing Codex history and IDs are readable. The current desktop live bridge is not connected; history never drives automatic lane changes.",
+    "Windows 11 on this device tested; mixed-DPI multiple displays, other Windows builds, first-time autostart and machine migration are not covered.",
+    "Parallel notification listening module retains its separate real-notification/audio acceptance boundary; this UI report does not certify it."
+  ],
+  "FailuresPreserved": "Earlier isolated runs remain unchanged. Corrected checks wait for actual background colors, sample away from moving edges, read current input bounds, use native mouse hit messages and place sorting drops at the list bottom."
+}
