@@ -16,6 +16,9 @@ internal sealed class BallSurface : SurfaceWindow
     private readonly BoardController controller;
     private readonly Border orb;
     private readonly TextBlock badge;
+    private readonly Border countBubble;
+    internal Border CountBubble => countBubble;
+    internal string CountText => badge.Text;
     private readonly Grid expanded;
     private readonly TextBox search;
     private readonly DispatcherTimer hover;
@@ -59,7 +62,13 @@ internal sealed class BallSurface : SurfaceWindow
         var settings = Ui.Button("设置", controller.Settings); settings.Cursor = Cursors.Arrow; settings.Padding = new Thickness(3); Grid.SetColumn(settings, 2); expanded.Children.Add(settings);
         Root.Children.Add(new Border { Child = expanded, CornerRadius = new CornerRadius(27), Background = Brushes.Transparent });
         var orbStack = new Grid(); orbStack.Children.Add(new System.Windows.Shapes.Ellipse { Stroke=Ui.Line,StrokeThickness=1,IsHitTestVisible=false }); orbStack.Children.Add(Brand.OrbGlyph());
-        badge = Ui.Label("", 10, Ui.Brush("#F28F98")); badge.HorizontalAlignment = HorizontalAlignment.Right; badge.VerticalAlignment = VerticalAlignment.Top; orbStack.Children.Add(badge);
+        badge = new TextBlock { Text = "", FontSize = 10, FontWeight = FontWeights.SemiBold, Foreground = Ui.Text, TextWrapping = TextWrapping.NoWrap };
+        countBubble = new Border { Width = 18, Height = 18, CornerRadius = new CornerRadius(9), Padding = new Thickness(2),
+            Background = Ui.Brush("#334258"), BorderBrush = Ui.Brush("#F28F98"), BorderThickness = new Thickness(1),
+            HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 4, 8, 0),
+            Visibility = Visibility.Collapsed, IsHitTestVisible = false,
+            Child = new Viewbox { Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly, Child = badge } };
+        orbStack.Children.Add(countBubble);
         orb = new Border { Child = orbStack, Width = 54, Height = 54, CornerRadius = new CornerRadius(27), Background = Brushes.Transparent,
             BorderThickness = new Thickness(0), HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(2), Cursor = Cursors.Arrow };
         Root.Children.Add(orb);
@@ -133,7 +142,13 @@ internal sealed class BallSurface : SurfaceWindow
         UpdateBadge();
     }
     internal void ClickDuringAnimation() => controller.Toggle();
-    public void UpdateBadge() { var count = controller.Engine.State.Tasks.Count(x => x.ColumnId is null && x.Lane == Lane.Action); badge.Text = count > 0 ? count.ToString() : ""; }
+    public void UpdateBadge()
+    {
+        var action = controller.Engine.State.Preferences.Columns.Single(x => x.BuiltinLane == Lane.Action);
+        var count = controller.Engine.State.Tasks.Count(action.Contains);
+        badge.Text = count > 0 ? count.ToString(System.Globalization.CultureInfo.InvariantCulture) : "";
+        countBubble.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
     public void RefreshData() { UpdateBadge(); if (results.IsVisible) ShowResults(); if (preview.IsVisible) ShowPreview(); }
     public void HidePopups() { hover.Stop(); results.Hide(); preview.Hide(); }
     private void PopupPlace(SurfaceWindow window)

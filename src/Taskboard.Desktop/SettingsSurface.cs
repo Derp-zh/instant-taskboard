@@ -11,12 +11,13 @@ namespace Taskboard.Desktop;
 
 internal sealed partial class SettingsSurface : SurfaceWindow
 {
+    protected override bool ScrollEnabled => true;
     private readonly BoardController controller;
     private readonly Grid content = new();
     private readonly Dictionary<string, ScrollViewer> pages = new();
     private readonly Dictionary<string, Button> navigation = new();
     internal string CurrentSection { get; private set; } = "主设置";
-    internal static readonly string[] Sections = ["主设置", "窗口", "监听", "数据与备份", "AI平台接入情况", "飞书接入情况"];
+    internal static readonly string[] Sections = ["主设置", "窗口", "监听", "归档", "数据与备份", "AI平台接入情况", "飞书接入情况"];
     public SettingsSurface(BoardController controller) : base(760, 680)
     {
         this.controller = controller; Title = "即时任务看板设置";
@@ -37,7 +38,7 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         foreach (var (section, button) in navigation) { button.Background = section == name ? Ui.Brush("#36574F") : Ui.Card; button.Foreground = section == name ? Ui.Accent : Ui.Text; }
         if (!pages.TryGetValue(name, out var page))
         {
-            var panel = name switch { "主设置" => MainSettings(), "窗口" => WindowSettings(), "监听" => ListeningSettings(), "数据与备份" => DataSettings(), "AI平台接入情况" => PlatformSettings(false), _ => PlatformSettings(true) };
+            var panel = name switch { "主设置" => MainSettings(), "窗口" => WindowSettings(), "监听" => ListeningSettings(), "归档" => ArchiveSettings(), "数据与备份" => DataSettings(), "AI平台接入情况" => PlatformSettings(false), _ => PlatformSettings(true) };
             page = new ScrollViewer { Content = panel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, Padding = new Thickness(10, 0, 4, 10) }; pages.Add(name, page);
         }
         content.Children.Clear(); content.Children.Add(page);
@@ -55,7 +56,12 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         var shortcut = Ui.Button("创建桌面快捷方式", () => Try(StartupLinks.Shortcut)); shortcut.IsEnabled = !controller.Isolated; panel.Children.Add(shortcut);
         var repair = Ui.Button("修复开机启动路径", () => Try(() => StartupLinks.SetAutoStart(controller.Engine.State.Preferences.AutoStart))); repair.IsEnabled = !controller.Isolated; panel.Children.Add(repair);
         if (!controller.Isolated && StartupLinks.PathChanged()) panel.Children.Add(Ui.Label("文件夹位置已变化，可重新创建快捷方式并修复启动路径。", 12, Ui.Muted));
-        panel.Children.Add(Ui.Label("即时任务看板 0.8.1 · 本地保存，新增逐应用通知音监听。", 12, Ui.Muted)); return panel;
+        if (!controller.Isolated)
+        {
+            panel.Children.Add(Ui.Label(StartupLinks.AutoStartStatus(), 12, Ui.Muted));
+            panel.Children.Add(Ui.Button("Windows启动应用设置", () => Try(() => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("ms-settings:startupapps") { UseShellExecute = true }))));
+        }
+        panel.Children.Add(Ui.Label("即时任务看板 0.9.1 · 紧凑卡片与快捷新建。", 12, Ui.Muted)); return panel;
     }
     private StackPanel WindowSettings()
     {
@@ -120,6 +126,18 @@ internal sealed partial class SettingsSurface : SurfaceWindow
             catch (Exception e) { Ui.Error("路径未切换：" + e.Message); }
         }));
         panel.Children.Add(Ui.Label("配置备份包含窗口、选项及平台接入配置，不包含任务、草稿和阶段详情。", 12, Ui.Muted));
+        panel.Children.Add(Ui.Label("配置保存路径", 14));
+        panel.Children.Add(Ui.Label(controller.Store.ConfigurationDirectory ?? "当前任务目录内", 12, Ui.Muted));
+        panel.Children.Add(Ui.Button("切换配置路径", async () =>
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "选择配置保存目录" }; if (dialog.ShowDialog(this) != true) return;
+            try
+            {
+                if (File.Exists(Path.Combine(dialog.FolderName, "settings.json")) && !await Ui.Confirm("目标已有程序配置，采用这些配置并保留当前任务及归档。是否切换？", "切换配置")) return;
+                await controller.ChangeConfigurationDirectory(dialog.FolderName); RefreshSection();
+            }
+            catch (Exception e) { Ui.Error("配置路径未切换：" + e.Message); }
+        }));
         panel.Children.Add(Ui.Button("导出配置备份", async () =>
         {
             if (!await controller.Flush()) return;

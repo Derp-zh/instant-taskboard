@@ -1,0 +1,61 @@
+{
+  "version": "0.8.2",
+  "date": "2026-10-14T20:22:29.457887+08:00",
+  "integrated": [
+    "notification listening",
+    "embedded Alarm04 default audio",
+    "100ms central scroll animation"
+  ],
+  "checks": {
+    "core": 87,
+    "listening": 49,
+    "scroll": 39,
+    "desktop": 77,
+    "mouse": 42
+  },
+  "evidence": {
+    "core": "test-output/merge082-core-01/report.json",
+    "listening": "test-output/merge082-listening-final/listening-report.json",
+    "scroll": "test-output/merge082-scroll-final/scroll-report.json",
+    "desktop": "test-output/merge082-desktop-02/ui-report.json",
+    "mouse": "test-output/merge082-mouse-01/desktop-report.json",
+    "liveMovement": "test-output/merge082-desktop-02/motion-report.json"
+  },
+  "programSHA256": {
+    "即时任务看板.exe": "AEFADFC0C616EB554A22E35D20DD8E95FA273927ED94FFD70D7A9F26E989A356",
+    "Taskboard.dll": "FBB55D5F847518B0A7DCB4555341F963881947B1FD43FC34002603502ACCBE3D",
+    "Taskboard.Core.dll": "681AA5E0A5212A6493D4DAACC1B13A0364E6039C02448DA78AECE771BB3CDBF8"
+  },
+  "defaultAudioSHA256": "7C28D771DEBC496783A1694F99A3B7E21D02047245F8F7FCE5CD4D7A84CA99F8",
+  "scroll": {
+    "durationMs": 100,
+    "flashMs": 25,
+    "revealMs": 75,
+    "scope": [
+      "draft stack",
+      "task editor",
+      "settings"
+    ],
+    "actualIntermediatePixelsSampled": true
+  },
+  "liveMovement": {
+    "windowTypes": 13,
+    "allChecksPassed": true,
+    "perWindowMovementSamples": 19
+  },
+  "corePerformance": {
+    "tasks": 300,
+    "stagesPerTask": 4,
+    "drafts": 10,
+    "searchMs": 0.067347,
+    "saveMs": 33.903,
+    "loadMs": 23.0062
+  },
+  "boundaries": [
+    "Only isolated task data was used; real task data was not read or changed.",
+    "Real Windows notification sound settings were not modified during tests.",
+    "Actual app capture, original sound suppression and restoration still need a separate real-app acceptance.",
+    "120Hz compositor support is not a guarantee of frame rate on every device.",
+    "Codex desktop live bridge and Feishu cloud sync retain their previous pending status."
+  ]
+}

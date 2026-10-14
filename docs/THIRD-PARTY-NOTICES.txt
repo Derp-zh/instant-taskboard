@@ -1,5 +1,9 @@
 即时任务看板 0.8
 
+Default notification audio: Alarm04.wav from the user's Windows media directory,
+embedded at the user's request. This Microsoft Windows audio asset is separate
+from the MIT-licensed graphics bindings below; no additional audio license is granted here.
+
 The self-contained .NET runtime retains its accompanying license files.
 Graphics bindings redistributed with this application:
 Vortice.Windows (Direct2D1, Direct3D11, DXGI, DCommon): Copyright (c) Amer Koleci and Contributors.

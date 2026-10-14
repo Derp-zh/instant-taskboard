@@ -68,6 +68,12 @@ internal static class VisualChecks
             File.WriteAllText(Path.Combine(controller.Store.DirectoryPath, "transparency-report.json"), JsonSerializer.Serialize(new { passed = percentagesPassed, samples }));
             if (!percentagesPassed) throw new InvalidOperationException("透明度百分比视觉变化不符合预期");
             controller.SetGlassTransparency(20); glass.Hide();
+            // A moving wallpaper or another running version can change the
+            // underlying pixel between samples. Give this test a stable owned
+            // background covering the outline as well as the actual card.
+            backdrop.Root.Children.Clear(); backdrop.Root.Background = Ui.Brush("#487ADD");
+            backdrop.Left = area.Left; backdrop.Top = area.Top; backdrop.Width = area.Width; backdrop.Height = area.Height;
+            Native.Raise(backdrop); await Task.Delay(220);
             var draft = controller.NewTask(Lane.Paused); await Task.Delay(250); var host = draft.Host!;
             var paneWidth = controller.LastDraftBounds[0].Width;
             using var stack = Capture(host.Left, host.Top, host.Width, host.Height, host, Path.Combine(output, "transparent-outline-stack.png"));

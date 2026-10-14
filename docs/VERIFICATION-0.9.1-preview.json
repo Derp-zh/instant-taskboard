@@ -1,0 +1,66 @@
+{
+  "version": "0.9.1",
+  "releaseLabel": "preview",
+  "date": "2026-10-14T22:57:23.420566+08:00",
+  "status": "implemented; offscreen checks passed; desktop acceptance deferred by user",
+  "requirements": [
+    "U55/A73",
+    "U56/A74",
+    "U57/A75",
+    "U58/A76",
+    "U59/A77",
+    "U60/A78",
+    "U61/A79",
+    "U62/A80",
+    "U63/A81",
+    "U64/A82",
+    "U65/A83"
+  ],
+  "checks": {
+    "core": 114,
+    "compact": 38,
+    "integration": 17,
+    "appearance": 12,
+    "listening": 49
+  },
+  "evidence": {
+    "core": "test-output/compact091-core-01/report.json",
+    "compact": "test-output/compact091-rules-delivery/compact-report.json",
+    "integration": "test-output/compact091-integration-delivery/integration-report.json",
+    "appearance": "test-output/compact091-appearance-delivery/appearance-report.json",
+    "listening": "test-output/compact091-listening-delivery/listening-report.json"
+  },
+  "programSHA256": {
+    "即时任务看板.exe": "B52A8CC8C322B60D1A8645339D650713F6A16A25B6562D4A3A9385E7FA8F827B",
+    "Taskboard.dll": "0AB7F051CFC0EA74BCB5BCC05625D91CB9278DD1F775A49391342272473E54D3",
+    "Taskboard.Core.dll": "9768CF023505660AE05DDA7CF4E509C7D6C3EDEF4822293C79404DBAB4CF69A7"
+  },
+  "corePerformance": {
+    "tasks": 300,
+    "stagesPerTask": 4,
+    "drafts": 10,
+    "searchMs": 0.06637,
+    "saveMs": 27.1146,
+    "loadMs": 18.7028
+  },
+  "lastOffscreenSwapPreparationMs": 62.6363,
+  "renderArtifacts": [
+    "test-output/compact091-rules-delivery/formal-card.png",
+    "test-output/compact091-rules-delivery/quick-entry.png",
+    "test-output/compact091-rules-delivery/numbered-stack.png"
+  ],
+  "evidenceScopes": {
+    "core": "Task history, paths, persistence and backwards-compatible draft creation time; exact tested Core DLL matches publish output.",
+    "compact": "Real WPF offscreen layout, hit structure, compositor setup/completion, quick entry save, direct outside-click policy calls, draft numbering, deletion and reopen.",
+    "nativeObserver": "Registration and immediate disposal checked; physical outside clicks were not executed.",
+    "animation": "100ms compositor timeline and interruption/cleanup checked offscreen; actual displayed intermediate frames, perceived fluency and flicker were not sampled."
+  },
+  "boundaries": [
+    "User declined desktop/mouse coordination for now; no real mouse or on-screen acceptance was performed.",
+    "Only isolated task and configuration data was used; no real task data or notification sounds changed.",
+    "No real startup entry update, shortcut creation, reboot or login was performed for this preview.",
+    "0.9.0 desktop evidence remains historical; it does not validate this preview runtime.",
+    "Real notification sound replacement, Codex desktop live bridge and Feishu cloud sync remain separate pending work."
+  ],
+  "pendingDesktopAcceptance": "docs/ACCEPTANCE-0.9.1.md"
+}

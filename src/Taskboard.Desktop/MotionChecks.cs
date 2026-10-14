@@ -92,6 +92,7 @@ internal static class MotionChecks
             reports.Add(new { name = "系统合成动画像素", passed = intermediate && ball.UsesIndependentAnimation,
                 durationTargetMs = 100, opening, closing }); Write();
             if (!intermediate || !ball.UsesIndependentAnimation) throw new InvalidOperationException("展开没有中间画面或未使用系统合成");
+            await DraftDealChecks.Run(controller, background);
             async Task<AnimationEvidence> ObserveAnimation(bool expand)
             {
                 var frames = new List<AnimationFrame>();
@@ -125,7 +126,10 @@ internal static class MotionChecks
     {
         // Keep the probe away from moving rounded edges and text/input surfaces.
         // Window coordinates can lead the DWM-presented position by one frame.
-        var point = window.PointToScreen(window is BallSurface ? new Point(7,window.Height/2) : new Point(30,window.Height-60)); using var bitmap = new Drawing.Bitmap(3, 3);
+        var local = window is BallSurface ? new Point(7, window.Height / 2)
+            : window is DraftStackSurface or TaskEditorWindow ? new Point(window.GlassRegions().First().Bounds.Width / 2, window.Height - 25)
+            : new Point(30, window.Height - 60);
+        var point = window.PointToScreen(local); using var bitmap = new Drawing.Bitmap(3, 3);
         using (var graphics = Drawing.Graphics.FromImage(bitmap)) graphics.CopyFromScreen((int)point.X, (int)point.Y, 0, 0, bitmap.Size);
         return bitmap.GetPixel(1, 1);
     }
@@ -159,9 +163,12 @@ internal static class MotionChecks
     }
     private static Drawing.Bitmap Capture(SurfaceWindow window, string path)
     {
-        var scale = Native.GetDpiForWindow(new WindowInteropHelper(window).Handle) / 96.0; var point = window.PointToScreen(new Point());
+        // Hidden WPF visuals can detach their PresentationSource. The native HWND
+        // still supplies the rectangle needed for the before-show desktop sample.
+        var handle = new WindowInteropHelper(window).EnsureHandle();
+        var scale = Native.GetDpiForWindow(handle) / 96.0; var bounds = Native.ScreenBounds(window);
         var bitmap = new Drawing.Bitmap((int)Math.Round(window.Width * scale), (int)Math.Round(window.Height * scale));
-        using (var graphics = Drawing.Graphics.FromImage(bitmap)) graphics.CopyFromScreen((int)point.X, (int)point.Y, 0, 0, bitmap.Size);
+        using (var graphics = Drawing.Graphics.FromImage(bitmap)) graphics.CopyFromScreen((int)bounds.X, (int)bounds.Y, 0, 0, bitmap.Size);
         bitmap.Save(path, Drawing.Imaging.ImageFormat.Png); return bitmap;
     }
     private static IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject

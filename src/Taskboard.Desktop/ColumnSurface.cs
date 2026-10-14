@@ -11,7 +11,7 @@ using Taskboard.Core;
 
 namespace Taskboard.Desktop;
 
-internal sealed class ColumnSurface : SurfaceWindow
+internal sealed partial class ColumnSurface : SurfaceWindow
 {
     private readonly BoardController controller;
     public BoardColumn Definition { get; private set; }
@@ -27,6 +27,9 @@ internal sealed class ColumnSurface : SurfaceWindow
     private readonly MenuItem resizeToggle;
     private readonly Grid edges = new();
     private Action? flushInline;
+    private Action? finishInline;
+    private Action? releaseInlineInput;
+    private Guid? inlineTask;
     private System.Windows.Threading.DispatcherTimer? inlineTimer;
     private Guid? draggedTask;
     private Grid? cardPreview;
@@ -37,14 +40,16 @@ internal sealed class ColumnSurface : SurfaceWindow
     {
         this.controller = controller; Definition = definition; MinWidth = 80; MinHeight = 260; WindowLayer = 0;
         Title = definition.Name;
-        Root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(58) });
+        Root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) });
         Root.RowDefinitions.Add(new RowDefinition());
         Root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        var header = new Grid { Margin = new Thickness(12, 6, 12, 0), Background = Brushes.Transparent };
+        var header = new Grid { Margin = new Thickness(12, 3.6, 12, 0), Background = Brushes.Transparent };
         header.ColumnDefinitions.Add(new ColumnDefinition()); header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var title = heading = Ui.Label(definition.Name, 15); title.FontWeight = FontWeights.SemiBold;
+        title.Margin = new Thickness(0, 2.4, 0, 2.4);
         title.VerticalAlignment = VerticalAlignment.Center; header.Children.Add(title);
         count = Ui.Label("0", 12, Ui.Muted); count.VerticalAlignment = VerticalAlignment.Center;
+        count.Margin = new Thickness(0, 2.4, 0, 2.4);
         Grid.SetColumn(count, 1); header.Children.Add(count); Root.Children.Add(header); MoveWith(header);
         list = new ListBox { ItemsSource = items, Background = Brushes.Transparent, BorderThickness = new Thickness(0),
             Padding = new Thickness(10, 0, 10, 0), HorizontalContentAlignment = HorizontalAlignment.Stretch, AllowDrop = true };
@@ -124,7 +129,7 @@ internal sealed class ColumnSurface : SurfaceWindow
             group.DragStarted += (_, _) => controller.BeginWorkspaceResize(); group.DragDelta += (_, _) => controller.ResizeWorkspaceFromPointer(); group.DragCompleted += (_, _) => controller.EndWorkspaceResize();
         }
         Refresh(); ApplySettings();
-        Closed += (_, _) => inlineTimer?.Stop();
+        Closed += (_, _) => { inlineTimer?.Stop(); releaseInlineInput?.Invoke(); };
     }
 
     private void Edge(HorizontalAlignment horizontal, VerticalAlignment vertical, Cursor cursor, Action<DragDeltaEventArgs> drag)
@@ -141,7 +146,7 @@ internal sealed class ColumnSurface : SurfaceWindow
     {
         InvalidateAnimation();
         if (cardPreview is not null) items.Remove(cardPreview);
-        var desired = controller.Engine.State.Tasks.Where(x => Definition.Contains(x) && x.Id != draggedTask).ToArray();
+        var desired = controller.Engine.State.Tasks.Where(x => Definition.Contains(x) && x.Id != draggedTask && x.Id != inlineTask).ToArray();
         for (var i = items.Count - 1; i >= 0; i--) if (items[i] is WorkItem item && !desired.Any(x => x.Id == item.Id)) items.RemoveAt(i);
         for (var i = 0; i < desired.Length; i++)
         {
@@ -150,7 +155,7 @@ internal sealed class ColumnSurface : SurfaceWindow
             if (existing is not null) { var index = items.IndexOf(existing); items.Move(index, i); if (!ReferenceEquals(items[i], desired[i])) items[i] = desired[i]; }
             else items.Insert(i, desired[i]);
         }
-        count.Text = edgeResize ? "调整中" : (desired.Length + (cardPreview is null ? 0 : 1)).ToString();
+        count.Text = edgeResize ? "调整中" : (desired.Length + (cardPreview is null ? 0 : 1) + (inlineTask is Guid id && controller.Engine.State.Tasks.Any(x => x.Id == id && Definition.Contains(x)) ? 1 : 0)).ToString();
         if (cardPreview is not null) InsertPreview();
     }
     internal void BeginCardDrag(Guid id) { draggedTask = id; Refresh(); }
@@ -213,70 +218,6 @@ internal sealed class ColumnSurface : SurfaceWindow
     }
     internal void RevealNewEntry() { list.ScrollIntoView(footer); list.UpdateLayout(); }
     internal bool NewEntryIsLast => ReferenceEquals(items.LastOrDefault(), footer) && VisualTreeHelper.GetParent(footer) is not null;
-    private void InlineNew()
-    {
-        var session = controller.Engine.State.Sessions.FirstOrDefault(x => x.Inline) ?? controller.Engine.NewSession(Lane.Inspiration, true);
-        footer.Children.Clear(); var panel = new StackPanel();
-        var title = Ui.Input(session.Working.Title); title.ToolTip = "任务名称（可空）";
-        var detail = Ui.Input(session.Working.Stages[0].Text, true); detail.MaxHeight = 140; detail.ToolTip = "灵感详情";
-        var note = Ui.Label("输入后自动保存", 11, Ui.Muted);
-        var timer = inlineTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
-        Guid? saved = null;
-        var dirty = session.Working.HasContent;
-        var ended = false;
-        var savingInline = false;
-        void SaveInline()
-        {
-            if (ended || !dirty) return;
-            var focused = System.Windows.Input.Keyboard.FocusedElement as UIElement;
-            var keepFocus = panel.IsKeyboardFocusWithin && controller.Expanded;
-            timer.Stop(); session.Working.Title = title.Text; session.Working.Stages[0].Text = detail.Text;
-            if (!session.Working.HasContent) { if (saved is null) controller.Engine.StageSession(session); return; }
-            dirty = false;
-            if (saved is Guid deleted && !controller.Engine.State.Tasks.Any(x => x.Id == deleted))
-            { note.Text = "任务已被删除，输入仍在此处；重新新建即可继续。"; return; }
-            if (saved is null)
-            {
-                savingInline = true;
-                try { saved = controller.Engine.Submit(session, false).Id; }
-                finally { savingInline = false; }
-                session = controller.Engine.Edit(saved.Value);
-            }
-            else
-            {
-                controller.Engine.Submit(session, false); session = controller.Engine.Edit(saved.Value);
-            }
-            controller.Engine.State.Sessions.Remove(session); // inline input is already an official task; no extra editor draft
-            // Inserting the official card before the inline footer may recycle
-            // its container. Keep an ongoing edit in the same live input.
-            if (keepFocus) { RevealNewEntry(); focused?.Focus(); }
-            note.Text = "正在保存…";
-            controller.Persist(async () => { note.Text = "已保存"; await System.Threading.Tasks.Task.CompletedTask; });
-        }
-        void Changed()
-        {
-            dirty = true;
-            session.Working.Title = title.Text; session.Working.Stages[0].Text = detail.Text;
-            if (saved is null) controller.Engine.StageSession(session);
-            timer.Stop(); timer.Start();
-        }
-        title.TextChanged += (_, _) => Changed(); detail.TextChanged += (_, _) => Changed(); timer.Tick += (_, _) => SaveInline();
-        panel.Children.Add(title); panel.Children.Add(detail); panel.Children.Add(note);
-        void Finish() { if (ended) return; SaveInline(); ended = true; timer.Stop(); flushInline = null; inlineTimer = null; ResetFooter(); }
-        flushInline = SaveInline;
-        var finish = Ui.Button("√", Finish); finish.ToolTip = "结束录入"; panel.Children.Add(finish);
-        footer.Children.Add(Ui.Panel(panel));
-        RevealNewEntry();
-        panel.LostKeyboardFocus += (_, _) =>
-        {
-            if (savingInline) return;
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (panel.IsKeyboardFocusWithin || ended) return; Finish();
-            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
-        };
-        title.Focus();
-    }
     public void PrepareHide() => flushInline?.Invoke();
     private static T? Ancestor<T>(DependencyObject? source) where T : DependencyObject
     { for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current)) if (current is T value) return value; return null; }
@@ -301,16 +242,16 @@ internal sealed class TaskCard : Border
     public static readonly DependencyProperty ControllerProperty = DependencyProperty.Register(nameof(Controller), typeof(BoardController), typeof(TaskCard),
         new PropertyMetadata(null, (d, _) => ((TaskCard)d).Build()));
     public BoardController Controller { get => (BoardController)GetValue(ControllerProperty); set => SetValue(ControllerProperty, value); }
+    public bool ArchivedPreview { get; set; }
     private Point start;
     private bool pressed;
     private long flashGeneration;
     public TaskCard()
     {
-        Margin = new Thickness(0, 0, 0, 8); Padding = new Thickness(11, 6.6, 11, 6.6); CornerRadius = new CornerRadius(12);
-        Background = Ui.Card; BorderBrush = Ui.Line; BorderThickness = new Thickness(1); Cursor = Cursors.Hand;
+        TaskCardLayout.Frame(this); Cursor = Cursors.Hand;
         DataContextChanged += (_, _) => Build();
-        PreviewMouseDown += (_,_) => { if (DataContext is WorkItem { TimerUnread:true } item) { item.TimerUnread = false; Controller.Engine.Notify([item.Id]); } };
-        MouseLeftButtonDown += (_, e) => { start = e.GetPosition(this); pressed = true; CaptureMouse(); e.Handled = true; };
+        PreviewMouseDown += (_,_) => { if (!ArchivedPreview && DataContext is WorkItem { TimerUnread:true } item) { item.TimerUnread = false; Controller.Engine.Notify([item.Id]); } };
+        MouseLeftButtonDown += (_, e) => { if (ArchivedPreview) return; start = e.GetPosition(this); pressed = true; CaptureMouse(); e.Handled = true; };
         MouseMove += (_, e) =>
         {
             if (!pressed || e.LeftButton != MouseButtonState.Pressed || DataContext is not WorkItem item) return;
@@ -329,17 +270,20 @@ internal sealed class TaskCard : Border
     private void Build()
     {
         if (DataContext is not WorkItem item || Controller is null) return;
-        var stack = new StackPanel(); var title = Ui.Label(item.DisplayTitle, 13); title.FontWeight = FontWeights.SemiBold;
-        title.TextTrimming = TextTrimming.CharacterEllipsis; title.MaxHeight = 42; stack.Children.Add(title);
+        var stack = new StackPanel(); var title = Ui.Label(item.DisplayTitle, 13, Ui.Accent); title.FontWeight = FontWeights.SemiBold;
+        title.Tag = "TaskTitle"; title.TextTrimming = TextTrimming.CharacterEllipsis; title.MaxHeight = 42; stack.Children.Add(TaskCardLayout.Title(title));
         var stages = BoardEngine.CardStages(item); var showNames = item.Lane != Lane.Inspiration && item.Stages.Count > 1;
         foreach (var stage in stages)
         {
             if (showNames)
             {
                 if (stack.Children.Count > 1) stack.Children.Add(new Border { Height = 1, Background = Ui.Line, Margin = new Thickness(0, 3.6, 0, 2.4) });
-                stack.Children.Add(Ui.Label(stage.Name, 11, Ui.Muted));
+                var name = Ui.Pill(stage.Name, "#9CAAC2"); name.HorizontalAlignment = HorizontalAlignment.Left;
+                name.Tag = "TaskStageName"; name.ToolTip = stage.Name;
+                var label = (TextBlock)name.Child; label.FontSize = 12; label.TextWrapping = TextWrapping.NoWrap; label.TextTrimming = TextTrimming.CharacterEllipsis;
+                stack.Children.Add(name);
             }
-            var text = Ui.Label(stage.Text, stage.Id == item.CurrentStageId || !showNames ? 13 : 11, Ui.Muted);
+            var text = Ui.Label(stage.Text, stage.Id == item.CurrentStageId || !showNames ? 14 : 12, Ui.Text); text.Tag = "TaskStageDetails";
             text.TextTrimming = TextTrimming.CharacterEllipsis; text.MaxHeight = showNames ? 42 : 64; stack.Children.Add(text);
         }
         var pills = new WrapPanel();
@@ -352,8 +296,17 @@ internal sealed class TaskCard : Border
         Compact(stack); var content = new Grid(); content.Children.Add(stack);
         if (item.TimerUnread) content.Children.Add(new System.Windows.Shapes.Ellipse { Width=6,Height=6,Fill=Ui.Brush("#F28F98"),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,IsHitTestVisible=false });
         Child = content;
+        if (ArchivedPreview)
+        {
+            var historyMenu = new ContextMenu(); var restore = new MenuItem { Header = "取消归档" };
+            restore.Click += (_, _) => Controller.UnarchiveTask(item.Id); historyMenu.Items.Add(restore); ContextMenu = historyMenu; Cursor = Cursors.Arrow; return;
+        }
         var menu = new ContextMenu(); var delete = new MenuItem { Header = "删除任务（可撤销）" };
         delete.Click += (_, _) => Controller.DeleteTask(item.Id); menu.Items.Add(delete);
+        if (Controller.Engine.CanArchive(item))
+        {
+            var archive = new MenuItem { Header = "归档" }; archive.Click += (_, _) => Controller.ArchiveTask(item.Id); menu.Items.Add(archive);
+        }
         if (item.PendingReasons.Contains("定时提醒到期"))
         {
             var acknowledge = new MenuItem { Header = "已查看提醒" };

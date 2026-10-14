@@ -79,7 +79,7 @@ internal static class DesktopChecks
         Assert(controller.Engine.State.Tasks[0].Title == "UI实际保存", "点击真实保存按钮提交任务并关闭编辑");
         controller.Undo(); Assert(controller.Engine.State.Tasks[0].Title == oldTitle, "UI提交可撤销字段修改");
         var draftEditor = controller.NewTask(Lane.Running); await Idle(); Descendants<TextBox>(draftEditor.Root).First().Text = "UI持久草稿";
-        Invoke(Descendants<Button>(draftEditor.Root).First(x => Equals(x.Content, "×"))); await Until(() => !controller.Editors.Contains(draftEditor));
+        Invoke(Descendants<Button>(draftEditor.Root).First(x => Equals(x.Content, "×"))); await Until(() => !controller.Editors.Contains(draftEditor)); await Idle();
         Assert(controller.Engine.State.Sessions.Any(x => x.TaskId is null && x.Working.Title == "UI持久草稿") && !controller.Engine.Search("UI持久草稿").Any(), "真实新建X暂存且不参与任务搜索");
         Assert(!Application.Current.Windows.OfType<DraftStackSurface>().Any(x => x.IsVisible), "全部新建窗口关闭后没有宿主或草稿列表残留");
         var single = controller.NewTask(Lane.Running); await Idle();
@@ -110,11 +110,13 @@ internal static class DesktopChecks
         single.Activate(); await Idle();
         Assert(single.IsActive && controller.Editors.Count == 3, "旧窗口可以切换到前台且不重复创建");
         foreach (var draft in new[] { single, second, third }) { Invoke(Descendants<Button>(draft.Root).First(x => Equals(x.Content, "×"))); await Until(() => !controller.Editors.Contains(draft)); }
+        await Idle();
         Assert(!Application.Current.Windows.OfType<DraftStackSurface>().Single().IsVisible, "关闭多份新建后宿主和虚线入口完全消失");
         Assert(Application.Current.Windows.OfType<DraftStackSurface>().Single().DraftCount == 0, "全部草稿关闭后释放堆叠绘制和实时背景区域");
         var resumed = controller.OpenNewEntry(Lane.Running); await Idle();
         Assert(controller.Editors.Count == 4 && resumed.Session.Working.HasContent, "列末新建入口找回同列非空暂存草稿");
         foreach (var draft in controller.Editors.ToArray()) { Invoke(Descendants<Button>(draft.Root).First(x => Equals(x.Content, "×"))); await Until(() => !controller.Editors.Contains(draft)); }
+        await Idle();
         for (var i = 0; i < 20; i++) { controller.Toggle(); await Task.Delay(12); }
         controller.SetExpanded(false); await Task.Delay(160);
         File.WriteAllText(Path.Combine(testDirectory,"rapid-toggle-state.json"),JsonSerializer.Serialize(new { controller.Expanded, columns=controller.Columns.Select(x=>new{x.Title,x.IsVisible,rootVisible=x.Root.IsVisible}),editors=controller.Editors.Select(x=>new{x.IsVisible,host=x.Host?.IsVisible,x.Session.Visible}) }));
@@ -190,7 +192,7 @@ internal static class DesktopChecks
         Assert(controller.Columns.All(x => !Descendants<System.Windows.Shapes.Rectangle>(x.Root).Any(r => r.StrokeDashArray.Count == 2 && r.Stroke == Ui.Accent)), "结束拖动后所有列无落点预览残留");
         controller.Settings(); await Idle();
         var settings = Application.Current.Windows.OfType<SettingsSurface>().First(); Capture(settings.Root, Path.Combine(output, "settings.png"));
-        Assert(SettingsSurface.Sections.Length == 6 && SettingsSurface.Sections.Contains("监听") && Descendants<Button>(settings.Root).All(x => !Equals(x.Content, "AI 选项") && !Equals(x.Content, "优先级选项")), "设置有六分区含监听且不再管理字段选项");
+        Assert(SettingsSurface.Sections.Length == 7 && SettingsSurface.Sections.Contains("监听") && SettingsSurface.Sections.Contains("归档") && Descendants<Button>(settings.Root).All(x => !Equals(x.Content, "AI 选项") && !Equals(x.Content, "优先级选项")), "设置有七分区含监听和归档且不再管理字段选项");
         settings.SelectSection("窗口"); await Idle(); var transparency = Descendants<Slider>(settings.Root).Single(x => Equals(x.ToolTip, "毛玻璃透明度")); transparency.Value = 60;
         Assert(controller.Engine.State.Preferences.GlassTransparency == 60 && SurfaceWindow.Transparency == 60, "设置滑块实时将透明度更新为60%");
         var ballSlider = Descendants<Slider>(settings.Root).Single(x => Equals(x.ToolTip, "悬浮球透明度")); ballSlider.Value = 65;
@@ -214,7 +216,7 @@ internal static class DesktopChecks
         Assert(controller.Columns.All(x => x.NewEntryIsLast), "六列新建入口与正式任务处于同一滚动列表末尾");
         Invoke(Descendants<Button>(inspiration.Root).First(x => Equals(x.Content, "＋ 新建任务"))); await Idle();
         Assert(controller.Editors.Count == 0, "灵感新建在列内录入且不打开编辑窗口");
-        Assert(Descendants<Button>(inspiration.Root).Any(x => Equals(x.Content, "√")), "灵感结束录入按钮仅显示√");
+        Assert(Descendants<Button>(inspiration.Root).Any(x => Equals(x.Content, "✓") && x.Width == 20 && x.Height == 20), "灵感结束录入按钮为详情内圆形✓");
         var inlineInputs = Descendants<TextBox>(inspiration.Root).ToArray(); inlineInputs[1].Text = "UI灵感直接输入";
         await Task.Delay(750);
         Assert(controller.Engine.State.Tasks.Count == 301 && controller.Engine.Search("UI灵感直接输入").Single().Lane == Lane.Inspiration, "灵感非空自动建立正式任务");
@@ -273,7 +275,11 @@ internal static class DesktopChecks
         File.WriteAllText(Path.Combine(testDirectory, "ui-report.json"), JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
         await controller.Exit();
     }
-    private static async Task Idle() => await Application.Current.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+    private static async Task Idle()
+    {
+        await Until(() => !Application.Current.Windows.OfType<SurfaceWindow>().Any(x => x.IsScrollAnimating || x.IsContentSwapping));
+        await Application.Current.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+    }
     private static async Task Until(Func<bool> condition)
     { var timer = Stopwatch.StartNew(); while (!condition()) { if (timer.Elapsed.TotalSeconds > 10) throw new TimeoutException("UI操作超时"); await Task.Delay(25); } }
     private static IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject

@@ -140,6 +140,14 @@ var invalidBall = Copies.Of(engine.State); invalidBall.Preferences.BallTranspare
 Reject(() => Validation.Check(invalidBall), "拒绝无限大的球透明度，防止合成画面失效");
 var ballConfiguration = ConfigurationBackup.Capture(engine.State, root); ballConfiguration.Preferences.BallTransparency = 55;
 Assert(ballConfiguration.Apply(engine.State).Preferences.BallTransparency == 55 && engine.State.Preferences.BallTransparency == 40, "球透明度随配置备份恢复，源数据保持不变");
+await IntegrationRules.Run(root, Assert);
+var draftClock = new BoardEngine(new BoardState()); var clockSession = draftClock.NewSession(Lane.Action);
+Assert(clockSession.CreatedUtc is { Kind: DateTimeKind.Utc }, "新建草稿记录独立UTC创建时间");
+clockSession.Working.Title = "创建时间保存样本"; clockSession.CreatedUtc = new DateTime(2026, 10, 14, 1, 0, 0, DateTimeKind.Utc); draftClock.StageSession(clockSession);
+var clockStore = new AtomicStore(Path.Combine(root, "draft-clock")); await clockStore.SaveAsync(draftClock.State);
+Assert(clockStore.Load().Sessions.Single().CreationTime == clockSession.CreatedUtc, "草稿创建时间跨保存和重启保留");
+clockSession.CreatedUtc = null;
+Assert(clockSession.CreationTime == clockSession.Original.UpdatedUtc, "旧草稿缺少创建字段时使用原始时间，切换不改创建先后");
 var perf = new BoardEngine(new BoardState());
 var lists = new BoardEngine(new BoardState());
 var inspirationColumn = lists.State.Preferences.Columns.First(x => x.BuiltinLane == Lane.Inspiration);

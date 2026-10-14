@@ -1,0 +1,385 @@
+{
+  "version": "0.9.0",
+  "date": "2026-10-14T21:53:47.601219+08:00",
+  "integrated": [
+    "notification listening",
+    "embedded Alarm04 default audio",
+    "100ms central scroll animation",
+    "in-orb action count",
+    "stage name bubbles",
+    "independent system data and configuration paths",
+    "safe portable migration",
+    "centered group resize",
+    "20 task archives",
+    "20-step redo",
+    "latest-version startup registration"
+  ],
+  "checks": {
+    "core": 111,
+    "listening": 49,
+    "scroll": 39,
+    "desktop": 77,
+    "mouse": 49,
+    "appearance": 12,
+    "integration": 17,
+    "startup": 3
+  },
+  "evidence": {
+    "core": "test-output/integrated090-core-05/report.json",
+    "listening": "test-output/integrated090-listening-final-02/listening-report.json",
+    "scroll": "test-output/integrated090-scroll-final-02/scroll-report.json",
+    "desktop": "test-output/integrated090-desktop-final-03/ui-report.json",
+    "mouse": "test-output/integrated090-mouse-final-02/desktop-report.json",
+    "appearance": "test-output/integrated090-appearance-final-02/appearance-report.json",
+    "integration": "test-output/integrated090-integration-final-02/integration-report.json",
+    "startup": "test-output/integrated090-startup-final/startup-entry-report.json",
+    "liveMovement": "test-output/integrated090-desktop-final-03/motion-report.json",
+    "operationPerformance": "test-output/integrated090-desktop-final-03/performance-report.json",
+    "cardDragPerformance": "test-output/integrated090-desktop-final-03/drag-performance.json"
+  },
+  "programSHA256": {
+    "即时任务看板.exe": "00D1549DCF14F7F7645375BFDCB07BDC4F077791AA5F60F41C322760EBBB31A8",
+    "Taskboard.dll": "FBC8F283B936066FDE0889DB6875D1CD6BF485B1A31CB261B631B5022C03063D",
+    "Taskboard.Core.dll": "146173A69712C7ED29EBF71ED76403B84195111747932DB11039D196DFECD92B"
+  },
+  "defaultAudioSHA256": "7C28D771DEBC496783A1694F99A3B7E21D02047245F8F7FCE5CD4D7A84CA99F8",
+  "scroll": {
+    "durationMs": 100,
+    "flashMs": 25,
+    "revealMs": 75,
+    "scope": [
+      "draft stack",
+      "task editor",
+      "settings"
+    ],
+    "actualIntermediatePixelsSampled": true
+  },
+  "liveMovement": {
+    "windowTypes": 13,
+    "allChecksPassed": true,
+    "perWindowMovementSamples": 19
+  },
+  "corePerformance": {
+    "tasks": 300,
+    "stagesPerTask": 4,
+    "drafts": 10,
+    "searchMs": 0.041865,
+    "saveMs": 21.599,
+    "loadMs": 23.9687
+  },
+  "evidenceScopes": {
+    "core": "111 isolated rule, archive, redo, atomic persistence, configuration recovery and version selection checks.",
+    "finalBuild": "All listening, appearance, integration, scroll, desktop and real-input checks ran against the same final 0.9.0 runtime files.",
+    "startup": "The existing current-user startup entry was updated and read back. Version catalogue checks used isolated fixtures; no reboot or login was performed."
+  },
+  "boundaries": [
+    "Only isolated task data was used; real task data was not read or changed.",
+    "Real Windows notification sound settings were not modified during tests.",
+    "Actual app capture, original sound suppression and restoration still need a separate real-app acceptance.",
+    "120Hz compositor support is not a guarantee of frame rate on every device.",
+    "Codex desktop live bridge and Feishu cloud sync retain their previous pending status.",
+    "The existing 0.8.2 user process was preserved. Real task migration happens after it exits and the user starts 0.9.0 normally."
+  ],
+  "startup": {
+    "passed": 3,
+    "priorCommand": "\"<project-root>\\release\\即时任务看板-0.8.2\\即时任务看板.exe\"",
+    "command": "\"<project-root>\\release\\即时任务看板-0.9.0\\即时任务看板.exe\" --startup",
+    "latestExecutable": "<project-root>\\release\\即时任务看板-0.9.0\\即时任务看板.exe",
+    "status": "自启入口有效 · 已登记版本中的最新版",
+    "preservedDisabledPreference": false,
+    "realRegistryReadBack": true,
+    "rebootPerformed": false
+  },
+  "operationPerformance": {
+    "passed": true,
+    "displayRefreshHz": 165.03284153546556,
+    "desktopComposedFrames": 16,
+    "desktopRefreshes": 16,
+    "intervalMs": 1000.2283,
+    "compositorAnimations": true,
+    "frameBudgetMs": 8.333333333333334,
+    "operationFeedbackBudgetMs": 200,
+    "animationDurationMs": 100,
+    "searchMaximumMs": 0.0452,
+    "searchP95Ms": 0.0332,
+    "toggleSynchronousFeedbackMs": [
+      96.1888,
+      26.7366,
+      106.9493,
+      26.7208,
+      110.0892,
+      30.6249
+    ],
+    "feedbackDetails": [
+      {
+        "Expanded": true,
+        "LastWorkspaceRevealMs": 47.5985,
+        "LastBallRevealMs": 37.8102,
+        "LastEditorRestoreMs": 0.0777,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 8.7102,
+            "LastSnapshotMs": 0.0184,
+            "LastShowMs": 6.2732
+          },
+          {
+            "LastAnimationPreparationMs": 7.2099,
+            "LastSnapshotMs": 0.0099,
+            "LastShowMs": 5.7403
+          },
+          {
+            "LastAnimationPreparationMs": 9.469,
+            "LastSnapshotMs": 0.0083,
+            "LastShowMs": 7.4971
+          },
+          {
+            "LastAnimationPreparationMs": 6.9538,
+            "LastSnapshotMs": 0.0083,
+            "LastShowMs": 4.9075
+          },
+          {
+            "LastAnimationPreparationMs": 7.0256,
+            "LastSnapshotMs": 0.0098,
+            "LastShowMs": 4.9369
+          },
+          {
+            "LastAnimationPreparationMs": 8.1275,
+            "LastSnapshotMs": 0.0089,
+            "LastShowMs": 6.1028
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": false,
+        "LastWorkspaceRevealMs": 14.6214,
+        "LastBallRevealMs": 6.6327,
+        "LastEditorRestoreMs": 0.0364,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 2.9379,
+            "LastSnapshotMs": 0.0047,
+            "LastShowMs": 0.0002
+          },
+          {
+            "LastAnimationPreparationMs": 2.4238,
+            "LastSnapshotMs": 0.005,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.2858,
+            "LastSnapshotMs": 0.0036,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.3959,
+            "LastSnapshotMs": 0.0042,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.1554,
+            "LastSnapshotMs": 0.0039,
+            "LastShowMs": 0
+          },
+          {
+            "LastAnimationPreparationMs": 2.3186,
+            "LastSnapshotMs": 0.0034,
+            "LastShowMs": 0
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": true,
+        "LastWorkspaceRevealMs": 52.544,
+        "LastBallRevealMs": 43.7655,
+        "LastEditorRestoreMs": 0.1138,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 8.3267,
+            "LastSnapshotMs": 0.0182,
+            "LastShowMs": 5.9068
+          },
+          {
+            "LastAnimationPreparationMs": 8.2217,
+            "LastSnapshotMs": 0.0098,
+            "LastShowMs": 6.5364
+          },
+          {
+            "LastAnimationPreparationMs": 8.7426,
+            "LastSnapshotMs": 0.0114,
+            "LastShowMs": 5.4846
+          },
+          {
+            "LastAnimationPreparationMs": 9.751,
+            "LastSnapshotMs": 0.0096,
+            "LastShowMs": 7.5118
+          },
+          {
+            "LastAnimationPreparationMs": 8.5464,
+            "LastSnapshotMs": 0.0103,
+            "LastShowMs": 5.6792
+          },
+          {
+            "LastAnimationPreparationMs": 8.8455,
+            "LastSnapshotMs": 0.0082,
+            "LastShowMs": 6.2532
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": false,
+        "LastWorkspaceRevealMs": 14.1381,
+        "LastBallRevealMs": 6.3592,
+        "LastEditorRestoreMs": 0.0554,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 2.6925,
+            "LastSnapshotMs": 0.0049,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.3343,
+            "LastSnapshotMs": 0.0042,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.0089,
+            "LastSnapshotMs": 0.004,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 1.6316,
+            "LastSnapshotMs": 0.0027,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.4007,
+            "LastSnapshotMs": 0.0025,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.9679,
+            "LastSnapshotMs": 0.0039,
+            "LastShowMs": 0
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": true,
+        "LastWorkspaceRevealMs": 50.9694,
+        "LastBallRevealMs": 46.0777,
+        "LastEditorRestoreMs": 0.0883,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 8.0648,
+            "LastSnapshotMs": 0.0165,
+            "LastShowMs": 5.8541
+          },
+          {
+            "LastAnimationPreparationMs": 7.3736,
+            "LastSnapshotMs": 0.0094,
+            "LastShowMs": 5.7265
+          },
+          {
+            "LastAnimationPreparationMs": 8.7364,
+            "LastSnapshotMs": 0.0093,
+            "LastShowMs": 5.893
+          },
+          {
+            "LastAnimationPreparationMs": 9.2526,
+            "LastSnapshotMs": 0.0089,
+            "LastShowMs": 6.7322
+          },
+          {
+            "LastAnimationPreparationMs": 7.6833,
+            "LastSnapshotMs": 0.0088,
+            "LastShowMs": 5.5339
+          },
+          {
+            "LastAnimationPreparationMs": 9.7375,
+            "LastSnapshotMs": 0.0098,
+            "LastShowMs": 7.0783
+          }
+        ],
+        "editors": 0
+      },
+      {
+        "Expanded": false,
+        "LastWorkspaceRevealMs": 17.7269,
+        "LastBallRevealMs": 6.224,
+        "LastEditorRestoreMs": 0.038,
+        "columns": [
+          {
+            "LastAnimationPreparationMs": 3.6051,
+            "LastSnapshotMs": 0.0069,
+            "LastShowMs": 0.0002
+          },
+          {
+            "LastAnimationPreparationMs": 2.3786,
+            "LastSnapshotMs": 0.0054,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 2.6753,
+            "LastSnapshotMs": 0.004,
+            "LastShowMs": 0
+          },
+          {
+            "LastAnimationPreparationMs": 2.6927,
+            "LastSnapshotMs": 0.0044,
+            "LastShowMs": 0.0001
+          },
+          {
+            "LastAnimationPreparationMs": 3.4057,
+            "LastSnapshotMs": 0.0049,
+            "LastShowMs": 0.0003
+          },
+          {
+            "LastAnimationPreparationMs": 2.8255,
+            "LastSnapshotMs": 0.0065,
+            "LastShowMs": 0
+          }
+        ],
+        "editors": 0
+      }
+    ],
+    "columnsPreparationMs": [
+      {
+        "Title": "灵感库",
+        "LastAnimationPreparationMs": 3.6051
+      },
+      {
+        "Title": "完善中",
+        "LastAnimationPreparationMs": 2.3786
+      },
+      {
+        "Title": "进行中",
+        "LastAnimationPreparationMs": 2.6753
+      },
+      {
+        "Title": "待操作",
+        "LastAnimationPreparationMs": 2.6927
+      },
+      {
+        "Title": "暂搁置",
+        "LastAnimationPreparationMs": 3.4057
+      },
+      {
+        "Title": "已完成",
+        "LastAnimationPreparationMs": 2.8255
+      }
+    ],
+    "ballPreparationMs": 6.1191,
+    "note": "DWM counters describe the desktop, not individual app frames. Pixel animation evidence is recorded separately. Actual displayed frames are limited by monitor refresh."
+  },
+  "cardDragPerformance": {
+    "SnapshotMs": 1.2038,
+    "MaxMoveMs": 1.2662,
+    "MaxPreviewMs": 1.0328,
+    "PositionUpdates": 1,
+    "PreviewUpdates": 2
+  }
+}

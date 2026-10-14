@@ -7,7 +7,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Taskboard</AssemblyName>
-    <Version>0.8.1</Version>
+    <Version>0.9.1</Version>
     <Product>即时任务看板</Product>
     <Title>即时任务看板</Title>
     <ApplicationIcon>Assets/orb.ico</ApplicationIcon>
@@ -16,6 +16,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="Assets/orb.ico" />
+    <EmbeddedResource Include="Assets/Alarm04.wav" LogicalName="Taskboard.DefaultNotification.wav" />
     <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
     <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
     <ProjectReference Include="../Taskboard.Core/Taskboard.Core.csproj" />

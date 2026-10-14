@@ -21,3 +21,6 @@ release/
 **/launch-settings.json
 *.user
 *.suo
+
+# Supplied locally from the Windows installation during build
+src/Taskboard.Desktop/Assets/Alarm04.wav

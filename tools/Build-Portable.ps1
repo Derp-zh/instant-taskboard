@@ -6,6 +6,12 @@ if (-not $destination.StartsWith($repository + [System.IO.Path]::DirectorySepara
     throw '发布目录必须位于当前项目内。'
 }
 if (Test-Path -LiteralPath (Join-Path $destination 'data')) { throw '发布目录含用户数据，停止构建。' }
+$defaultSound = Join-Path $repository 'src/Taskboard.Desktop/Assets/Alarm04.wav'
+if (-not (Test-Path -LiteralPath $defaultSound)) {
+    $systemSound = Join-Path ([Environment]::GetFolderPath('Windows')) 'Media/Alarm04.wav'
+    if (-not (Test-Path -LiteralPath $systemSound)) { throw '请在Windows上构建，或将可合法使用的Alarm04.wav放入src/Taskboard.Desktop/Assets；该系统音频不随公开源码提供。' }
+    Copy-Item -LiteralPath $systemSound -Destination $defaultSound
+}
 $packageCache = Join-Path $repository 'test-output/nuget-packages'
 dotnet publish (Join-Path $repository 'src/Taskboard.Desktop/Taskboard.Desktop.csproj') -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:DebugType=None -p:DebugSymbols=false "-p:RestorePackagesPath=$packageCache" -o $destination --nologo
 if ($LASTEXITCODE -ne 0) { throw '发布失败。' }

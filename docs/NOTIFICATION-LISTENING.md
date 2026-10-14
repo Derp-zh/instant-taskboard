@@ -1,6 +1,6 @@
 # Windows通知监听与逐应用音频
 
-日期：2026-10-14。版本：0.8.1监听试用模块。
+日期：2026-10-14。版本：0.9.0整合版（真实通知声音替换仍待专项验收）。当前整合证据见[0.9.0验证](VERIFICATION-0.9.0.json)，下文原监听实验记录保留。
 
 ## 用户确认的需求
 
@@ -12,11 +12,13 @@
 
 1. 设置→监听→刷新应用列表→添加应用。
 2. 选择准确的Windows通知发送方；必要时填写横幅中的准确显示名。
-3. 选择音频并试听，开启该应用替换和总开关。
+3. 默认使用内置Alarm04，可直接试听，也可选择自定义音频；开启该应用替换和总开关。
 4. 让应用发一条实际通知，检查近期捕获和声音；其他应用可继续独立添加。
 5. 关闭总开关、关闭规则、删除规则或正常退出时尝试恢复原通知音。收起看板继续监听。
 
-音频保存原路径，不复制文件；配置备份含规则和路径，不携带音频。移动音频后需要重新选择。
+默认音按用户指定的Windows `Alarm04.wav`内置到程序资源，使用`builtin:alarm04`标识，运行时校验并释放到临时缓存，不依赖当前电脑的Windows媒体目录。程序移动或导入配置后仍可使用；“使用默认音”可恢复默认。旧配置的空音频路径自动使用内置音，已选音频不覆盖。监听总开关及新规则仍默认关闭。
+
+自选音频保存原路径，不复制文件；配置备份含规则和路径，不携带自选音频。移动自选音频后需要重新选择。默认音来源SHA256：`7C28D771DEBC496783A1694F99A3B7E21D02047245F8F7FCE5CD4D7A84CA99F8`。
 
 ## 实现与边界
 
@@ -33,6 +35,8 @@
 参考：[微软通知监听说明](https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/notification-listener)、[MediaPlayer](https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.mediaplayer?view=windowsdesktop-8.0)、[作者直接使用SoundFile的通知脚本源码](https://github.com/imabdk/Toast-Notification-Script/blob/master/Remediate-ToastNotification.ps1)。注册表发送方路径已以本机只读枚举补充核实。
 
 ## 验证
+
+0.8.2整合版：49项监听与默认音隔离检查通过；新增检查包括默认资源内容与指定Alarm04一致、独立于Windows媒体目录、实际解码、旧空路径与新应用默认音、便携配置备份及恢复默认入口。最终运行包重新验证，证据见`test-output/merge082-listening-final/listening-report.json`及`VERIFICATION-0.8.2.json`。以下43项为0.8.1来源记录，真实通知替换边界未改变。
 
 Release构建零警告、零错误；原87项数据规则回归通过。43项监听隔离检查覆盖准确匹配、歧义、合并通知、去重、旧数据、配置备份、原值先持久保存、正常恢复、模拟重启、外部更改、失败重试、设置入口、多应用及保存。使用Windows编码器生成实际MP3/M4A，与WAV一起实际解码并零音量播放完成；损坏MP3及不存在的M4A被拒绝。隐藏控件树渲染检查界面，未移动鼠标、未操作正式任务数据。
 

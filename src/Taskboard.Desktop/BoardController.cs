@@ -15,7 +15,7 @@ using Forms = System.Windows.Forms;
 
 namespace Taskboard.Desktop;
 
-internal sealed class BoardController : IDisposable
+internal sealed partial class BoardController : IDisposable
 {
     public BoardEngine Engine { get; private set; }
     public AtomicStore Store { get; private set; }
@@ -38,6 +38,7 @@ internal sealed class BoardController : IDisposable
     private SurfaceWindow? previouslyActive;
     private bool layingOutDrafts;
     private int draftPage;
+    private Guid? lastClosedDraft;
     internal Rect[] LastDraftBounds { get; private set; } = [];
     private SettingsSurface? settings;
     private readonly Forms.NotifyIcon tray;
@@ -98,8 +99,8 @@ internal sealed class BoardController : IDisposable
     }
     public BoardController(string dataDirectory, bool isolated, bool smoke)
     {
-        Isolated = isolated; Smoke = smoke; Store = new AtomicStore(dataDirectory);
-        pathSelectionFile = Path.Combine(isolated ? Path.GetFullPath(dataDirectory) : AppContext.BaseDirectory, "launch-settings.json");
+        Isolated = isolated; Smoke = smoke; Store = new AtomicStore(dataDirectory, isolated ? Path.Combine(dataDirectory, "configuration") : DataPaths.ConfigurationDirectory());
+        pathSelectionFile = isolated ? Path.Combine(Path.GetFullPath(dataDirectory), "launch-settings.json") : DataPaths.SelectionFile;
         Engine = new BoardEngine(Store.Load()); AttachEngine();
         Listening = new NotificationListeningService(Application.Current.Dispatcher, () => Engine.State.Preferences.Listening, isolated,
             isolated ? Path.Combine(dataDirectory, "notification-sound-restore.json") :
@@ -127,10 +128,11 @@ internal sealed class BoardController : IDisposable
             if (process == Environment.ProcessId) { Application.Current.Dispatcher.BeginInvoke(new Action(Native.RaiseBall)); return; }
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (Expanded && !SuppressCollapse && !Smoke) SetExpanded(false);
+                if (Expanded && !SuppressCollapse && !Smoke && DismissibleWindow() is null && Environment.TickCount64 - lastProtectedClick > 500) SetExpanded(false);
             }));
         };
         foregroundHook = SetWinEventHook(3, 3, IntPtr.Zero, foregroundCallback, 0, 0, 0);
+        if (!Smoke) outsideClicks = new OutsideClickObserver(this);
     }
     public async Task Start()
     {
@@ -140,7 +142,7 @@ internal sealed class BoardController : IDisposable
         {
             var machine = StartupLinks.MachineIdentity();
             var markers = Engine.State.Preferences.MachineMarkers;
-            if (!markers.ContainsKey("shortcut:" + machine))
+            if (!markers.TryGetValue("shortcut:" + machine, out var oldShortcut) || !string.Equals(oldShortcut, Environment.ProcessPath, StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
@@ -150,16 +152,13 @@ internal sealed class BoardController : IDisposable
                 }
                 catch (Exception e) { Report("首次桌面快捷方式创建失败：" + e.Message); }
             }
-            if (!markers.ContainsKey("startup:" + machine))
+            try
             {
-                try
-                {
-                    StartupLinks.SetAutoStart(Engine.State.Preferences.AutoStart);
-                    markers["startup:" + machine] = Environment.ProcessPath ?? AppContext.BaseDirectory;
-                    Engine.Touch(); await Flush();
-                }
-                catch (Exception e) { Report("首次开机启动设置失败：" + e.Message); }
+                StartupLinks.SetAutoStart(Engine.State.Preferences.AutoStart);
+                markers["startup:" + machine] = Environment.ProcessPath ?? AppContext.BaseDirectory;
+                Engine.Touch(); await Flush();
             }
+            catch (Exception e) { Report("开机启动入口更新失败：" + e.Message); }
         }
         if (Store.RecoveryMessage is not null) Report(Store.RecoveryMessage);
         if (Engine.State.Sessions.Count > 0) Ball.ToolTip = $"已恢复{Engine.State.Sessions.Count}份草稿或未提交编辑，展开后继续。";
@@ -229,10 +228,11 @@ internal sealed class BoardController : IDisposable
     {
         if (exiting || Expanded == expanded) return;
         Expanded = expanded;
+        outsideTarget = null; outsideCount = 0;
         if (!expanded)
         {
             hiddenDialogs.Clear(); hiddenDialogs.AddRange(Native.Dialogs()); foreach (var dialog in hiddenDialogs) Native.ShowWindow(dialog, 0);
-            hiddenGroup.Clear(); hiddenGroup.AddRange(taskWindows.Values.Cast<SurfaceWindow>().Append(draftStack).Concat(auxiliary).Where(x => x.IsVisible).OrderBy(x => x.ActivationOrder));
+            hiddenGroup.Clear(); hiddenGroup.AddRange(taskWindows.Values.Cast<SurfaceWindow>().Append(draftStack).Concat(auxiliary).Where(x => x.ShouldRestore).OrderBy(x => x.ActivationOrder));
             previouslyActive = hiddenGroup.LastOrDefault(x => x.IsActive);
             foreach (var column in Columns) column.PrepareHide();
             foreach (var editor in Editors) editor.PrepareHide();
@@ -268,7 +268,7 @@ internal sealed class BoardController : IDisposable
         if (saved.Length == 0) return NewTask(lane, columnId);
         SetExpanded(true);
         foreach (var session in saved) { session.Visible = true; EnsureEditor(session); }
-        var front = EnsureEditor(saved[^1]); PromoteDraft(front); front.Activate(); Engine.Touch(); return front;
+        var front = EnsureEditor(saved.FirstOrDefault(x => x.Id == lastClosedDraft) ?? saved[^1]); PromoteDraft(front); front.Activate(); Engine.Touch(); return front;
     }
     public EditorSurface EditTask(Guid id)
     {
@@ -299,7 +299,7 @@ internal sealed class BoardController : IDisposable
     {
         Editors.Remove(editor); draftOrder.Remove(editor.Session.Id);
         if (taskWindows.Remove(editor.Session.Id, out var window)) { hiddenGroup.Remove(window); if (previouslyActive == window) previouslyActive = null; window.Destroy(); }
-        else draftStack.Detach(editor);
+        else if (Editors.Any(x => x.Session.TaskId is null)) draftStack.Detach(editor);
         Engine.State.Preferences.Positions.Remove("edit-" + editor.Session.Id); Engine.Touch();
         LayoutDrafts();
     }
@@ -309,7 +309,7 @@ internal sealed class BoardController : IDisposable
     {
         if (!Expanded) SetExpanded(true);
         if (editor.Session.TaskId is null)
-        { if (activate && ActiveDraft != editor.Session.Id) PromoteDraft(editor); else LayoutDrafts(); if (activate) draftStack.Activate(); }
+        { if (activate && ActiveDraft != editor.Session.Id) draftStack.SwapContent(() => PromoteDraft(editor), editor.Width, draftStack.SwitchDistance(editor)); else LayoutDrafts(); if (activate) draftStack.Activate(); }
         else if (taskWindows.TryGetValue(editor.Session.Id, out var window)) { window.Show(); if (activate) window.Activate(); }
         Native.RaiseBall();
     }
@@ -352,7 +352,15 @@ internal sealed class BoardController : IDisposable
     { auxiliary.Add(window); window.Closed += (_, _) => { auxiliary.Remove(window); hiddenGroup.Remove(window); if (previouslyActive == window) previouslyActive = null; }; }
     public void MoveTask(Guid id, Lane lane, Guid? before, Guid? columnId = null) { Engine.Move(id, lane, before, columnId); Persist(); }
     public void DeleteTask(Guid id) { Engine.Delete(id); Persist(); }
+    internal void DeleteDraft(EditorSurface editor)
+    { Engine.State.Sessions.Remove(editor.Session); Engine.Touch(); RemoveEditor(editor); editor.Destroy(); Persist(); }
+    internal int DraftNumber(Guid id) => Engine.State.Sessions.Where(x => x.TaskId is null && !x.Inline)
+        .Concat(Editors.Where(x => x.Session.TaskId is null).Select(x => x.Session)).DistinctBy(x => x.Id)
+        .OrderBy(x => x.CreationTime).ThenBy(x => x.Id).Select((x, i) => (x.Id, Number: i + 1)).FirstOrDefault(x => x.Id == id).Number;
     public void Undo() { Engine.Undo(); Persist(); }
+    public void Redo() { Engine.Redo(); Persist(); }
+    public void ArchiveTask(Guid id) { Engine.Archive(id); settings?.RefreshArchive(); Persist(); }
+    public void UnarchiveTask(Guid id) { Engine.Unarchive(id); ColumnsChanged(false); settings?.RefreshArchive(); Persist(); }
     public void Locate(Guid id)
     {
         var item = Engine.State.Tasks.FirstOrDefault(x => x.Id == id); if (item is null) return;
@@ -472,16 +480,16 @@ internal sealed class BoardController : IDisposable
         if (scaleStart is null) return; scaleDeltaX += deltaX; scaleDeltaY += deltaY;
         var area = WorkArea(Ball);
         if (Smoke) area = new Rect(-10000, -10000, area.Width, area.Height);
-        var requested = 1 + (-scaleDeltaX * scaleBounds.Width + scaleDeltaY * scaleBounds.Height) / (scaleBounds.Width * scaleBounds.Width + scaleBounds.Height * scaleBounds.Height);
+        var requested = 1 + 2 * (-scaleDeltaX * scaleBounds.Width + scaleDeltaY * scaleBounds.Height) / (scaleBounds.Width * scaleBounds.Width + scaleBounds.Height * scaleBounds.Height);
         var minimum = Math.Max(80 / scaleStart.Min(x => x.Width), 260 / scaleStart.Min(x => x.Height));
         var maximum = Math.Max(minimum, Math.Min(area.Width / scaleBounds.Width, area.Height / scaleBounds.Height));
         var factor = Math.Clamp(requested, minimum, maximum);
-        var left = Math.Clamp(scaleBounds.Right - scaleBounds.Width * factor, area.Left, Math.Max(area.Left, area.Right - scaleBounds.Width * factor));
-        var top = Math.Clamp(scaleBounds.Top, area.Top, Math.Max(area.Top, area.Bottom - scaleBounds.Height * factor));
+        var left = area.Left + (area.Width - scaleBounds.Width * factor) / 2;
+        var top = area.Top + (area.Height - scaleBounds.Height * factor) / 2;
         for (var i = 0; i < scaleWindows.Length; i++)
         {
             var position = scaleStart[i];
-            var dpi = Native.GetDpiForWindow(new WindowInteropHelper(scaleWindows[i]).Handle) / 96.0;
+            var dpi = Math.Max(96, Native.GetDpiForWindow(new WindowInteropHelper(scaleWindows[i]).EnsureHandle())) / 96.0;
             double Pixel(double value) => Math.Round(value * dpi) / dpi;
             scaleWindows[i].Place(new WindowPosition { X = Pixel(left + (position.X - scaleBounds.Left) * factor), Y = Pixel(top + (position.Y - scaleBounds.Top) * factor), Width = Pixel(position.Width * factor), Height = Pixel(position.Height * factor) });
         }
@@ -501,6 +509,7 @@ internal sealed class BoardController : IDisposable
         var menu = new ContextMenu();
         Add("设置", Settings); Add("隐藏悬浮球", HideBall); Add("恢复窗口默认位置", RestoreDefaults);
         var undo = Add("撤销", Undo); undo.IsEnabled = Engine.CanUndo;
+        var redo = Add("恢复", Redo); redo.IsEnabled = Engine.CanRedo;
         var ai = new MenuItem { Header = "AI" }; ai.Items.Add(new MenuItem { Header = "Codex · "+CodexStatus, IsEnabled = false }); ai.Items.Add(new MenuItem { Header = "dsh / workbuddy · 未接入", IsEnabled = false }); menu.Items.Add(ai);
         menu.PlacementTarget = target; menu.IsOpen = true;
         MenuItem Add(string text, Action action) { var item = new MenuItem { Header = text }; item.Click += (_, _) => action(); menu.Items.Add(item); return item; }
@@ -512,10 +521,11 @@ internal sealed class BoardController : IDisposable
         var ball = menu.Items.Add("隐藏悬浮球", null, (_, _) => { if (Engine.State.Preferences.BallVisible) HideBall(); else ShowBall(); });
         menu.Items.Add("恢复窗口默认位置", null, (_, _) => RestoreDefaults());
         var undo = menu.Items.Add("撤销", null, (_, _) => Undo());
+        var redo = menu.Items.Add("恢复", null, (_, _) => Redo());
         var ai = new Forms.ToolStripMenuItem("AI"); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("尚未接入 AI") { Enabled = false }); menu.Items.Add(ai);
         menu.Items.Add("展开 / 收起看板", null, (_, _) => Toggle());
         menu.Items.Add("退出程序", null, async (_, _) => await Exit());
-        menu.Opening += (_, _) => { ai.DropDownItems.Clear(); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("Codex · "+CodexStatus) { Enabled = false }); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("dsh / workbuddy · 未接入") { Enabled = false }); ball.Text = Engine.State.Preferences.BallVisible ? "隐藏悬浮球" : "恢复悬浮球"; undo.Enabled = Engine.CanUndo; Ball.HidePopups(); };
+        menu.Opening += (_, _) => { ai.DropDownItems.Clear(); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("Codex · "+CodexStatus) { Enabled = false }); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("dsh / workbuddy · 未接入") { Enabled = false }); ball.Text = Engine.State.Preferences.BallVisible ? "隐藏悬浮球" : "恢复悬浮球"; undo.Enabled = Engine.CanUndo; redo.Enabled = Engine.CanRedo; Ball.HidePopups(); };
         return menu;
     }
     private void HideBall() { Ball.HidePopups(); Ball.Hide(); Engine.State.Preferences.BallVisible = false; Engine.Touch(); }
@@ -603,13 +613,13 @@ internal sealed class BoardController : IDisposable
         {
             foreach (var column in Columns) column.PrepareHide(); foreach (var editor in Editors) editor.PrepareHide();
             if (!await Flush()) throw new IOException("原目录保存未完成，路径没有切换");
-            var next = new AtomicStore(target);
+            var next = new AtomicStore(target, Store.ConfigurationDirectory);
             var existing = File.Exists(next.MainPath) || File.Exists(next.MainPath + ".bak");
             var candidate = existing ? ConfigurationBackup.Capture(Engine.State, target).Apply(next.Load()) : Copies.Of(Engine.State);
             await saveGate.WaitAsync();
             try
             {
-                await next.SaveAsync(candidate); DataPaths.Save(pathSelectionFile, target);
+                await next.SaveAsync(candidate); DataPaths.Save(pathSelectionFile, target, Store.ConfigurationDirectory);
                 ResetEditors(); DetachEngine(); Engine = new BoardEngine(candidate); AttachEngine(); Store = next; dirtyVersion++; savedVersion = dirtyVersion;
                 SynchronizeColumns(); ColumnsChanged(false); OnChanged(candidate.Tasks.Select(x => x.Id).ToArray()); ApplySettings(); SurfaceWindow.SetTransparency(candidate.Preferences.GlassTransparency); RestorePositions();
                 if (Expanded) { foreach (var session in Engine.State.Sessions.Where(x => x.Visible && !x.Inline).ToArray()) EnsureEditor(session).Show(); LayoutDrafts(); }
@@ -649,10 +659,11 @@ internal sealed class BoardController : IDisposable
         foreach (var lease in directoryLocks) { lease.ReleaseMutex(); lease.Dispose(); } directoryLocks.Clear();
         saveTimer.Stop(); reminderTimer.Stop(); DetachEngine();
         if (foregroundHook != IntPtr.Zero) UnhookWinEvent(foregroundHook);
+        outsideClicks?.Dispose(); outsideClicks = null;
         _ = Codex.DisposeAsync(); tray.Visible = false; tray.Dispose(); trayIcon.Dispose();
         foreach (var editor in Editors.ToArray()) editor.Destroy(); Editors.Clear();
-        foreach (var window in taskWindows.Values.ToArray()) window.Destroy(); taskWindows.Clear();
-        foreach (var window in auxiliary.ToArray()) window.Destroy(); auxiliary.Clear(); draftStack.Destroy(); foreach (var column in Columns) column.Destroy(); Ball.Destroy();
+        foreach (var window in taskWindows.Values.ToArray()) window.Destroy(false); taskWindows.Clear();
+        foreach (var window in auxiliary.ToArray()) window.Destroy(false); auxiliary.Clear(); draftStack.Destroy(false); foreach (var column in Columns) column.Destroy(); Ball.Destroy();
     }
     private delegate void ForegroundCallback(IntPtr hook, uint @event, IntPtr hwnd, int objectId, int childId, uint thread, uint time);
     [DllImport("user32.dll")] private static extern IntPtr SetWinEventHook(uint min, uint max, IntPtr module, ForegroundCallback callback, uint process, uint thread, uint flags);

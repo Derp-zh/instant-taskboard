@@ -9,15 +9,52 @@ public sealed class AtomicStore
     public string MainPath => Path.Combine(DirectoryPath, "board.json");
     public string BackupPath => MainPath + ".bak";
     public string? RecoveryMessage { get; private set; }
+    public string? ConfigurationDirectory { get; }
+    public string? ConfigurationPath => ConfigurationDirectory is null ? null : Path.Combine(ConfigurationDirectory, "settings.json");
 
-    public AtomicStore(string directory) => DirectoryPath = Path.GetFullPath(directory);
+    public AtomicStore(string directory, string? configurationDirectory = null)
+    { DirectoryPath = Path.GetFullPath(directory); ConfigurationDirectory = configurationDirectory is null ? null : Path.GetFullPath(configurationDirectory); }
 
     public BoardState Load()
+    {
+        var state = LoadBoard();
+        if (ConfigurationPath is not string path || (!File.Exists(path) && !File.Exists(path + ".bak"))) return state;
+        ConfigurationBackup configuration;
+        try { configuration = ConfigurationBackup.Read(path); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidDataException)
+        {
+            try { configuration = ConfigurationBackup.Read(path + ".bak"); }
+            catch (Exception backup)
+            {
+                if (!File.Exists(MainPath) && !File.Exists(BackupPath)) throw new InvalidDataException("配置与备份都无法读取且没有任务恢复副本，原文件保留：" + backup.Message, e);
+                foreach (var original in new[] { path, path + ".bak" }) if (File.Exists(original)) File.Copy(original, original + ".damaged-" + Guid.NewGuid().ToString("N"));
+                ConfigurationBackup.Capture(state, DirectoryPath).Write(path);
+                RecoveryMessage = "配置与配置备份损坏，已从任务文件的完整恢复配置重建，损坏原件保留。";
+                return state;
+            }
+            if (File.Exists(path)) File.Copy(path, path + ".damaged-" + Guid.NewGuid().ToString("N"));
+            File.Copy(path + ".bak", path, true); RecoveryMessage = "配置主文件损坏，已从配置备份恢复，原文件保留。";
+        }
+        // A task commit is durable before its matching settings commit. On an
+        // interrupted two-file save, the embedded recovery settings are newer.
+        if (string.Equals(Path.TrimEndingDirectorySeparator(Path.GetFullPath(configuration.DataDirectory)), Path.TrimEndingDirectorySeparator(DirectoryPath), StringComparison.OrdinalIgnoreCase) &&
+            configuration.PersistenceRevision != Guid.Empty && state.PersistenceRevision != Guid.Empty && configuration.PersistenceRevision != state.PersistenceRevision)
+        { RecoveryMessage = (RecoveryMessage is null ? "" : RecoveryMessage + " ") + "上次配置保存未完成，使用任务文件内的完整配置恢复；下一次保存修复配置文件。"; return state; }
+        return configuration.Apply(state);
+    }
+
+    private BoardState LoadBoard()
     {
         Directory.CreateDirectory(DirectoryPath);
         if (!File.Exists(MainPath))
         {
             if (File.Exists(BackupPath)) return Recover("主文件缺失");
+            if (ConfigurationPath is string configuration && File.Exists(configuration))
+            {
+                var existing = ConfigurationBackup.Read(configuration);
+                if (string.Equals(Path.GetFullPath(existing.DataDirectory), DirectoryPath, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidDataException("任务文件和任务备份都缺失，原配置保留；不会建立空任务替代，请检查数据目录。");
+            }
             return new BoardState();
         }
         try { return Read(MainPath); }
@@ -53,6 +90,7 @@ public sealed class AtomicStore
         {
             await Task.Run(() =>
             {
+                snapshot.Version = 2; snapshot.PersistenceRevision = Guid.NewGuid();
                 Validation.Check(snapshot);
                 Directory.CreateDirectory(DirectoryPath);
                 var temp = MainPath + ".tmp-" + Guid.NewGuid().ToString("N");
@@ -79,6 +117,18 @@ public sealed class AtomicStore
                         finally { if (File.Exists(backupTemp)) File.Delete(backupTemp); }
                     }
                     File.Move(temp, MainPath, true);
+                    if (ConfigurationPath is string configuration)
+                    {
+                        Directory.CreateDirectory(ConfigurationDirectory!);
+                        if (File.Exists(configuration))
+                        {
+                            _ = ConfigurationBackup.Read(configuration);
+                            File.Copy(configuration, configuration + ".bak", true);
+                        }
+                        var settings = ConfigurationBackup.Capture(snapshot, DirectoryPath);
+                        settings.Preferences.Positions = Copies.Of(snapshot.Preferences.Positions);
+                        settings.Write(configuration);
+                    }
                 }
                 finally { if (File.Exists(temp)) File.Delete(temp); }
             }).ConfigureAwait(false);

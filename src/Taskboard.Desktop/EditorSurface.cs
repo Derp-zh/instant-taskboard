@@ -25,6 +25,16 @@ internal sealed class EditorSurface : Grid
     private readonly DispatcherTimer autosave;
     private bool submitting;
     private bool closing;
+    private readonly Button closeButton;
+    private readonly Border draftNumber;
+    private readonly TextBlock numberText;
+    internal int DraftNumber { get; private set; }
+    internal void SetDraftPresentation(bool front, int number)
+    {
+        DraftNumber = number; numberText.Text = number.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        closeButton.Visibility = front ? Visibility.Visible : Visibility.Collapsed;
+        draftNumber.Visibility = front ? Visibility.Collapsed : Visibility.Visible;
+    }
     public EditorSurface(BoardController controller, EditSession session)
     {
         this.controller = controller; Session = session;
@@ -34,7 +44,14 @@ internal sealed class EditorSurface : Grid
         var header = new Grid { Background = Brushes.Transparent, Cursor = System.Windows.Input.Cursors.SizeAll, Margin = new Thickness(14, 4, 10, 4) };
         header.ColumnDefinitions.Add(new ColumnDefinition()); header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.Children.Add(Ui.Label(session.TaskId is null ? "新建任务 · 自动暂存" : "编辑任务 · 保存后生效", 13));
-        var close = Ui.Button("×", CloseEditor); close.VerticalAlignment = VerticalAlignment.Center; Grid.SetColumn(close, 1); header.Children.Add(close); Root.Children.Add(header);
+        var legacyClose = Ui.Button("×", () => { }); legacyClose.FontFamily = new FontFamily("Microsoft YaHei UI"); legacyClose.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        numberText = new TextBlock { FontSize = 12, Foreground = Ui.Text };
+        draftNumber = new Border { Tag = "DraftOrdinal", Width = legacyClose.DesiredSize.Width - 6, Height = legacyClose.DesiredSize.Height - 6, Margin = new Thickness(3),
+            Background = Ui.Card, BorderBrush = Ui.Line, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(20), IsHitTestVisible = false,
+            Child = new Viewbox { Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly, Margin = new Thickness(8, 4, 8, 4), Child = numberText }, Visibility = Visibility.Collapsed };
+        closeButton = Ui.Button("×", CloseEditor); closeButton.Tag = "EditorClose"; closeButton.Width = closeButton.Height = 40; closeButton.Padding = new Thickness(0);
+        var closeSlot = new Grid { VerticalAlignment = VerticalAlignment.Center }; closeSlot.Children.Add(closeButton); closeSlot.Children.Add(draftNumber);
+        Grid.SetColumn(closeSlot, 1); header.Children.Add(closeSlot); Root.Children.Add(header);
         header.MouseLeftButtonDown += (_, e) =>
         {
             if (Host is null || e.ButtonState != System.Windows.Input.MouseButtonState.Pressed || SurfaceWindow.IsInteractive(e.OriginalSource as DependencyObject)) return;
@@ -52,7 +69,7 @@ internal sealed class EditorSurface : Grid
         var lane = laneSelector = new ComboBox { ItemsSource = controller.Engine.State.Preferences.Columns.Where(x => !x.Deleted).ToArray(), SelectedItem = BoardColumns.For(controller.Engine.State.Preferences,session.Working), Margin = new Thickness(0, 3, 5, 0), MinHeight = 32 };
         lane.SelectionChanged += (_, _) => { if (lane.SelectedItem is BoardColumn definition) { definition.Assign(session.Working); Changed(); } };
         statePanel.Children.Add(lane); row.Children.Add(statePanel);
-        var aiPanel = new StackPanel(); aiPanel.Children.Add(Ui.Label("AI（多选）", 12, Ui.Muted));
+        var aiPanel = new StackPanel(); aiPanel.Children.Add(Ui.Label("平台（多选）", 12, Ui.Muted));
         aiButton = Ui.Button("选择", () => ShowOptions(true)); aiPanel.Children.Add(aiButton); Grid.SetColumn(aiPanel, 1); row.Children.Add(aiPanel);
         var priorityPanel = new StackPanel(); priorityPanel.Children.Add(Ui.Label("优先级", 12, Ui.Muted));
         priorityButton = Ui.Button("选择", () => ShowOptions(false)); priorityPanel.Children.Add(priorityButton); Grid.SetColumn(priorityPanel, 2); row.Children.Add(priorityPanel);
@@ -109,7 +126,15 @@ internal sealed class EditorSurface : Grid
         Grid.SetRow(scroll, 1); Root.Children.Add(scroll);
         var bottom = new Grid { Margin = new Thickness(12, 6, 12, 12) };
         bottom.ColumnDefinitions.Add(new ColumnDefinition()); bottom.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        status = Ui.Label(session.TaskId is null ? "未保存到任务列表" : "修改尚未提交", 11, Ui.Muted); bottom.Children.Add(status);
+        bottom.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); bottom.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        status = Ui.Label(session.TaskId is null ? "未保存到任务列表" : "修改尚未提交", 11, Ui.Muted); Grid.SetColumnSpan(status, 2); bottom.Children.Add(status);
+        var delete = Ui.Button("删除任务", () =>
+        {
+            if (closing || submitting) return;
+            autosave.Stop();
+            if (Session.TaskId is Guid task) controller.DeleteTask(task);
+            else controller.DeleteDraft(this);
+        }); delete.HorizontalAlignment = HorizontalAlignment.Left; delete.Foreground = Ui.Brush("#F28F98"); Grid.SetRow(delete, 1); bottom.Children.Add(delete);
         var save = Ui.Button("保存任务", async () =>
         {
             if (submitting) return;
@@ -124,7 +149,7 @@ internal sealed class EditorSurface : Grid
             }
             finally { submitting = false; Root.IsEnabled = true; }
         }, true);
-        Grid.SetColumn(save, 1); bottom.Children.Add(save); Grid.SetRow(bottom, 2); Root.Children.Add(bottom);
+        Grid.SetColumn(save, 1); Grid.SetRow(save, 1); bottom.Children.Add(save); Grid.SetRow(bottom, 2); Root.Children.Add(bottom);
         autosave.Tick += async (_, _) => { autosave.Stop(); if (await controller.Flush()) status.Text = Session.TaskId is null ? "草稿已暂存" : "修改已暂存，正式任务仍保持原值"; };
     }
     private void Changed()
@@ -160,7 +185,7 @@ internal sealed class EditorSurface : Grid
         var selected = controller.Engine.State.AiOptions.Where(x => Session.Working.AiIds.Contains(x.Id)).Select(x => x.Name).ToArray();
         var caption = selected.Length == 0 ? "未选择 ▾" : selected[0] + (selected.Length > 1 ? " +" + (selected.Length - 1) : "");
         aiButton.Content = new TextBlock { Text = caption, TextTrimming = TextTrimming.CharacterEllipsis };
-        aiButton.ToolTip = selected.Length == 0 ? "未选择AI" : string.Join("、", selected);
+        aiButton.ToolTip = selected.Length == 0 ? "未选择平台" : string.Join("、", selected);
         var p = controller.Engine.State.PriorityOptions.FirstOrDefault(x => x.Id == Session.Working.PriorityId);
         priorityButton.Content = new TextBlock { Text = p?.Name ?? "未选择 ▾", TextTrimming = TextTrimming.CharacterEllipsis };
         priorityButton.ToolTip = p?.Name ?? "未选择优先级";
@@ -196,6 +221,7 @@ internal sealed class EditorSurface : Grid
     private async void CloseEditor()
     {
         if (closing || submitting) return;
+        if (Session.TaskId is null) { controller.CloseDraftWindow(); return; }
         closing = true; Root.IsEnabled = false;
         try
         {
@@ -206,6 +232,12 @@ internal sealed class EditorSurface : Grid
         finally { closing = false; Root.IsEnabled = true; }
     }
     public void PrepareHide() { aiMenu.Close(); priorityMenu.Close(); autosave.Stop(); controller.Engine.StageSession(Session); }
+    internal void Suspend()
+    {
+        if (closing || submitting) return;
+        PrepareHide(); Session.Visible = false; controller.Engine.StageSession(Session);
+        controller.RemoveEditor(this); Destroy();
+    }
     public void Show() => controller.ShowEditor(this, false);
     public void Activate() => controller.ShowEditor(this, true);
     public void Destroy() { aiMenu.Dispose(); priorityMenu.Dispose(); autosave.Stop(); Host = null; }
@@ -213,7 +245,7 @@ internal sealed class EditorSurface : Grid
     {
         optionManager.Children.Clear(); optionManager.Visibility = Visibility.Visible;
         var heading = new DockPanel(); var close = Ui.Button("×", () => optionManager.Visibility = Visibility.Collapsed); DockPanel.SetDock(close, Dock.Right); heading.Children.Add(close);
-        heading.Children.Add(Ui.Label(ai ? "AI选项" : "优先级选项", 14)); optionManager.Children.Add(heading);
+        heading.Children.Add(Ui.Label(ai ? "平台选项" : "优先级选项", 14)); optionManager.Children.Add(heading);
         foreach (var option in ai ? controller.Engine.State.AiOptions : controller.Engine.State.PriorityOptions)
         {
             var row = new DockPanel(); var remove = Ui.Button("删除", () => { controller.DeleteOption(option.Id, ai); ShowOptionManager(ai); }); DockPanel.SetDock(remove, Dock.Right); row.Children.Add(remove);
@@ -229,6 +261,7 @@ internal sealed class EditorSurface : Grid
 
 internal sealed class TaskEditorWindow : SurfaceWindow
 {
+    protected override bool ScrollEnabled => true;
     public EditorSurface View { get; }
     public TaskEditorWindow(EditorSurface view) : base(430, 650)
     { View = view; WindowLayer = 1; Title = "编辑任务"; Root.Children.Add(view); view.Host = this; Closed += (_, _) => view.Destroy(); }

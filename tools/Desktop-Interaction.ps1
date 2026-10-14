@@ -1,20 +1,22 @@
 # Run only after coordinating mouse use with the user. Always uses a fresh isolated data directory.
-param([string]$DataDirectory = 'test-output/desktop-20261013-01', [string]$Executable = 'release/Taskboard/Taskboard.exe')
+param([string]$DataDirectory = 'test-output/desktop-20261013-01', [string]$Executable = 'release/Taskboard/Taskboard.exe', [string]$SeedFile = 'test-output/core-20261013-03/performance/board.json', [switch]$VerifyCompact)
 $ErrorActionPreference = 'Stop'
 $repository = Split-Path -Parent $PSScriptRoot
 $testDirectory = [System.IO.Path]::GetFullPath((Join-Path $repository $DataDirectory))
 if (-not $testDirectory.StartsWith((Join-Path $repository 'test-output') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) { throw '必须使用项目的隔离测试目录。' }
 if (Test-Path -LiteralPath $testDirectory) { throw '测试目录必须是新的空目录。' }
 [System.IO.Directory]::CreateDirectory($testDirectory) | Out-Null
-$seed = Get-Content -LiteralPath (Join-Path $repository 'test-output/core-20261013-03/performance/board.json') -Raw | ConvertFrom-Json
+$seedFilePath = [System.IO.Path]::GetFullPath((Join-Path $repository $SeedFile))
+if (-not $seedFilePath.StartsWith((Join-Path $repository 'test-output') + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) { throw '种子数据必须来自隔离测试目录。' }
+$seed = Get-Content -LiteralPath $seedFilePath -Raw | ConvertFrom-Json
 $seed.Tasks = @($seed.Tasks[1], $seed.Tasks[2], $seed.Tasks[8])
 $seed.Sessions = @()
 $seed.Preferences.Positions = @{}
 $seed | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath (Join-Path $testDirectory 'board.json') -Encoding utf8
 $movingId = $seed.Tasks[0].Id
 $oldTitle = $seed.Tasks[0].Title
-$ux05 = $Executable -like '*0.5*' -or $Executable -like '*0.6*' -or $Executable -like '*0.7*' -or $Executable -like '*0.8*'
-$ux07 = $Executable -like '*0.7*' -or $Executable -like '*0.8*'
+$ux05 = $Executable -match '0\.[5-9]'
+$ux07 = $Executable -match '0\.[7-9]'
 $titleInputOffset = if ($ux05) { 120 } else { 96 }
 Add-Type -TypeDefinition @'
 using System;
@@ -283,6 +285,16 @@ try {
         $undoPopup=Get-TestWindow ''
         Click-Control (Get-Control $undoPopup ([System.Windows.Automation.ControlType]::MenuItem) '撤销'); Start-Sleep -Milliseconds 300
         Assert-Test (@((Read-TestData).Tasks | Where-Object Lane -eq 2)[0].Id -eq $movingId) '真实悬浮球撤销菜单恢复列内排序'
+        if ($Executable -like '*0.9*') {
+            [TaskboardMouseProbe]::Click($ball.Bounds.Right-29*$ballScale,$ball.Bounds.Top+29*$ballScale,$true)
+            $redoPopup=Get-TestWindow ''
+            Click-Control (Get-Control $redoPopup ([System.Windows.Automation.ControlType]::MenuItem) '恢复'); Start-Sleep -Milliseconds 300
+            Assert-Test (@((Read-TestData).Tasks | Where-Object Lane -eq 2)[-1].Id -eq $movingId) '真实恢复菜单重放列内排序'
+            [TaskboardMouseProbe]::Click($ball.Bounds.Right-29*$ballScale,$ball.Bounds.Top+29*$ballScale,$true)
+            $undoPopup=Get-TestWindow ''
+            Click-Control (Get-Control $undoPopup ([System.Windows.Automation.ControlType]::MenuItem) '撤销'); Start-Sleep -Milliseconds 300
+            Assert-Test (@((Read-TestData).Tasks | Where-Object Lane -eq 2)[0].Id -eq $movingId) '恢复后的操作仍可再次撤销'
+        }
     }
     [TaskboardMouseProbe]::Click($paused.Bounds.Left+40*$columnScale,$paused.Bounds.Top+180*$columnScale,$true)
     Capture-TestWindow $paused 'resize-menu.png'
@@ -301,6 +313,14 @@ try {
         $afterGroup = @([TaskboardMouseProbe]::Windows($testProcess.Id) | Where-Object { $_.Title -in @('灵感库','完善中','进行中','待操作','暂搁置','已完成') })
         $ratios = @($beforeGroup | ForEach-Object { $before=$_; $after=@($afterGroup | Where-Object Title -eq $before.Title)[0]; ($after.Bounds.Right-$after.Bounds.Left)/($before.Bounds.Right-$before.Bounds.Left) })
         Assert-Test ($ratios.Count -eq 6 -and ($ratios | Measure-Object -Maximum).Maximum-($ratios | Measure-Object -Minimum).Minimum -lt .025 -and $ratios[0] -lt .99) '左下图案实际拖动等比例缩放六列'
+        if ($Executable -like '*0.9*') {
+            $workArea=[System.Windows.Forms.Screen]::FromHandle($leftColumn.Handle).WorkingArea
+            $groupLeft=($afterGroup.Bounds.Left | Measure-Object -Minimum).Minimum
+            $groupRight=($afterGroup.Bounds.Right | Measure-Object -Maximum).Maximum
+            $groupTop=($afterGroup.Bounds.Top | Measure-Object -Minimum).Minimum
+            $groupBottom=($afterGroup.Bounds.Bottom | Measure-Object -Maximum).Maximum
+            Assert-Test ([Math]::Abs(($groupLeft+$groupRight)/2-($workArea.Left+$workArea.Right)/2) -lt 3 -and [Math]::Abs(($groupTop+$groupBottom)/2-($workArea.Top+$workArea.Bottom)/2) -lt 3) '实际整组拖动缩放将最大范围居中到工作区'
+        }
         $paused = Get-TestWindow '暂搁置'
         [TaskboardMouseProbe]::Click(($paused.Bounds.Left+$paused.Bounds.Right)/2,$paused.Bounds.Top+80*$columnScale)
         $draft = Get-TestWindow '新建任务'; $paneWidth = ($draft.Bounds.Right-$draft.Bounds.Left)/1.2
@@ -319,7 +339,16 @@ try {
         $ball = Get-TestWindow '即时任务看板入口'
         [TaskboardMouseProbe]::Click($ball.Bounds.Right-85*$ballScale,$ball.Bounds.Top+29*$ballScale)
         $settingWindow = Get-TestWindow '即时任务看板设置'; Capture-TestWindow $settingWindow 'sidebar-settings.png'
+        $ball = Get-TestWindow '即时任务看板入口'
+        Assert-Test ([TaskboardMouseProbe]::Hit($ball.Bounds.Right-29*$ballScale,$ball.Bounds.Top+29*$ballScale) -eq $ball.Handle) '设置上方悬浮球的真实点击目标可达'
         [TaskboardMouseProbe]::Click($ball.Bounds.Right-29*$ballScale,$ball.Bounds.Top+29*$ballScale)
+        $hideWatch=[Diagnostics.Stopwatch]::StartNew()
+        do {
+            $remaining=@([TaskboardMouseProbe]::Windows($testProcess.Id) | Where-Object { $_.Title -eq '新建任务' -or $_.Title -eq '即时任务看板设置' })
+            if ($remaining.Count -eq 0) { break }
+            Start-Sleep -Milliseconds 25
+        } while ($hideWatch.Elapsed.TotalMilliseconds -lt 1500)
+        [pscustomobject]@{ ObservedMs=$hideWatch.Elapsed.TotalMilliseconds; Remaining=$remaining } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $testDirectory 'group-hide-observation.json')
         Assert-Test (@([TaskboardMouseProbe]::Windows($testProcess.Id) | Where-Object { $_.Title -eq '新建任务' -or $_.Title -eq '即时任务看板设置' }).Count -eq 0) '球实际收起共享草稿与设置'
         $ball = Get-TestWindow '即时任务看板入口'
         Assert-Test ([TaskboardMouseProbe]::Circle($ball.Handle,$ball.Bounds.Right-$ball.Bounds.Left,$ball.Bounds.Bottom-$ball.Bounds.Top)) '收起圆球内部可点击，圆外透明区域不遮挡'
@@ -327,7 +356,7 @@ try {
         Assert-Test ((Get-TestWindow '新建任务').Handle -eq $draft.Handle -and (Get-TestWindow '即时任务看板设置').Handle -eq $settingWindow.Handle) '重新打开恢复原共享宿主与设置'
         $settingWindow = Get-TestWindow '即时任务看板设置'
         [TaskboardMouseProbe]::Click($settingWindow.Bounds.Right-42*$editorScale,$settingWindow.Bounds.Top+32*$editorScale)
-        foreach ($unused in 1..2) { $draft = Get-TestWindow '新建任务'; [TaskboardMouseProbe]::Click($draft.Bounds.Left+$paneWidth-31*$editorScale,$draft.Bounds.Top+35*$editorScale) }
+        $draft = Get-TestWindow '新建任务'; [TaskboardMouseProbe]::Click($draft.Bounds.Left+$paneWidth-31*$editorScale,$draft.Bounds.Top+35*$editorScale)
         Assert-Test (@([TaskboardMouseProbe]::Windows($testProcess.Id) | Where-Object Title -eq '新建任务').Count -eq 0) '全部关闭共享草稿后没有残留'
     }
     if ($Executable -like '*0.4*') {
@@ -363,6 +392,25 @@ try {
         }
         Assert-Test (@([TaskboardMouseProbe]::Windows($testProcess.Id) | Where-Object Title -eq '新建任务堆叠入口').Count -eq 0) '实际全部关闭新建后没有草稿列表残留'
     }
+    if ($VerifyCompact) { . (Join-Path $PSScriptRoot 'Compact-Interaction.ps1') }
+    if ($Executable -like '*0.9*') {
+        $running=Get-TestWindow '进行中'; $done=Get-TestWindow '已完成'
+        [TaskboardMouseProbe]::Drag(($running.Bounds.Left+$running.Bounds.Right)/2,$running.Bounds.Top+82*$columnScale,($done.Bounds.Left+$done.Bounds.Right)/2,$done.Bounds.Top+82*$columnScale)
+        Start-Sleep -Milliseconds 350
+        Assert-Test (@((Read-TestData).Tasks | Where-Object Id -eq $movingId)[0].Lane -eq 5) '实际拖放准备已完成归档样本'
+        [TaskboardMouseProbe]::Click(($done.Bounds.Left+$done.Bounds.Right)/2,$done.Bounds.Top+82*$columnScale,$true)
+        $archivePopup=Get-TestWindow ''
+        Click-Control (Get-Control $archivePopup ([System.Windows.Automation.ControlType]::MenuItem) '归档'); Start-Sleep -Milliseconds 350
+        Assert-Test (@((Read-TestData).Tasks | Where-Object Id -eq $movingId).Count -eq 0 -and @((Read-TestData).Archives | Where-Object { $_.Item.Id -eq $movingId }).Count -eq 1) '真实卡片右键归档移入历史并落盘'
+        $ball=Get-TestWindow '即时任务看板入口'
+        Click-Control (Get-Control $ball ([System.Windows.Automation.ControlType]::Button) '设置')
+        $settingWindow=Get-TestWindow '即时任务看板设置'
+        Click-Control (Get-Control $settingWindow ([System.Windows.Automation.ControlType]::Button) '归档')
+        Capture-TestWindow $settingWindow 'archive-settings.png'
+        Click-Control (Get-Control $settingWindow ([System.Windows.Automation.ControlType]::Button) '取消归档'); Start-Sleep -Milliseconds 350
+        Assert-Test (@((Read-TestData).Archives).Count -eq 0 -and @((Read-TestData).Tasks | Where-Object Id -eq $movingId)[0].Lane -eq 5) '真实设置取消归档恢复原已完成列表'
+        Click-Control (Get-Control $settingWindow ([System.Windows.Automation.ControlType]::Button) '×')
+    }
     $ball = Get-TestWindow '即时任务看板入口'
     [TaskboardMouseProbe]::Drag($ball.Bounds.Right-29*$ballScale,$ball.Bounds.Top+29*$ballScale,$ball.Bounds.Right-29*$ballScale-40,$ball.Bounds.Top+29*$ballScale-20,$false,$true)
     $movedBall = Get-TestWindow '即时任务看板入口'
@@ -379,7 +427,7 @@ try {
         $previewWindow = Get-TestWindow ''
         Assert-Test ([Math]::Abs(($previewWindow.Bounds.Right-$previewWindow.Bounds.Left)/$ballScale-198) -lt 2) '真实悬停预览宽度缩为198'
         Capture-TestWindow $previewWindow 'narrow-preview.png'
-        if ($Executable -like '*0.8*') {
+        if ($Executable -match '0\.[8-9]') {
             [TaskboardMouseProbe]::SetCursorPos($ball.Bounds.Right-29*$ballScale,$ball.Bounds.Top-4*$ballScale) | Out-Null
             Start-Sleep -Milliseconds 330
             Assert-Test (@([TaskboardMouseProbe]::Windows($testProcess.Id) | Where-Object Handle -eq $previewWindow.Handle).Count -eq 1) '球向上进入间隙后预览仍保持'

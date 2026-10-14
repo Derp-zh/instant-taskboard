@@ -6,7 +6,7 @@ public static partial class Validation
 {
     public static void Check(BoardState state)
     {
-        Require(state is not null && state.Version == 1, "不支持的数据版本");
+        Require(state is not null && state.Version is 1 or 2, "不支持的数据版本");
         Require(state!.Tasks is not null && state.Sessions is not null && state.AiOptions is not null && state.PriorityOptions is not null && state.Preferences is not null, "数据缺少必要字段");
         CheckOptions(state.AiOptions!); CheckOptions(state.PriorityOptions!);
         var ai = state.AiOptions!.Select(x => x.Id).ToHashSet();
@@ -14,6 +14,14 @@ public static partial class Validation
         Unique(state.Tasks!, x => x.Id); Unique(state.Sessions!, x => x.Id);
         foreach (var item in state.Tasks!) { CheckItem(item, ai, priority); Require(item.HasContent, "正式任务没有有效内容"); }
         var ids = state.Tasks!.Select(x => x.Id).ToHashSet();
+        Require(state.Archives is not null && state.Archives.Count <= 20, "归档数量超过20或集合无效");
+        Require(state.Archives!.All(x => x is not null && x.Item is not null && x.OriginalColumn is not null), "归档记录无效");
+        Require(state.Archives.Select(x => x.Item.Id).Distinct().Count() == state.Archives.Count, "归档任务重复");
+        foreach (var archive in state.Archives)
+        {
+            CheckItem(archive.Item, ai, priority);
+            Require(archive.Item.HasContent && !ids.Contains(archive.Item.Id) && archive.Item.ColumnId is null && archive.Item.Lane is Lane.Paused or Lane.Done && archive.OriginalColumn.BuiltinLane == archive.Item.Lane && archive.OriginalColumn.Id != Guid.Empty && !string.IsNullOrWhiteSpace(archive.OriginalColumn.Name) && archive.OriginalIndex >= 0 && archive.ArchivedUtc != default, "归档任务身份或来源无效");
+        }
         var editing = new HashSet<Guid>();
         var workingIds = new HashSet<Guid>();
         foreach (var s in state.Sessions!)

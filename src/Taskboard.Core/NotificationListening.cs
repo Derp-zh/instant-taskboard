@@ -4,11 +4,12 @@ public enum NotificationCaptureMode { Auto, Accessibility, WinRT }
 
 public sealed class NotificationSoundRule
 {
+    public const string BuiltInAudioPath = "builtin:alarm04";
     public Guid Id { get; set; } = Guid.NewGuid();
     public string AppName { get; set; } = "";
     public string AppId { get; set; } = "";
     public bool Enabled { get; set; } = true;
-    public string AudioPath { get; set; } = "";
+    public string AudioPath { get; set; } = BuiltInAudioPath;
 }
 
 public sealed class NotificationListeningOptions

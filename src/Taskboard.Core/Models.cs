@@ -75,6 +75,9 @@ public sealed class WorkItem
 
 public sealed class EditSession
 {
+    public DateTime? CreatedUtc { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public DateTime CreationTime => CreatedUtc ?? Original.UpdatedUtc;
     [System.Text.Json.Serialization.JsonRequired]
     public Guid Id { get; set; } = Guid.NewGuid();
     [System.Text.Json.Serialization.JsonRequired]
@@ -132,10 +135,20 @@ public sealed class Preferences
     public Dictionary<string, string> MachineMarkers { get; set; } = [];
 }
 
+public sealed class ArchivedTask
+{
+    public WorkItem Item { get; set; } = new();
+    public BoardColumn OriginalColumn { get; set; } = new();
+    public DateTime ArchivedUtc { get; set; } = DateTime.UtcNow;
+    public int OriginalIndex { get; set; }
+}
+
 public sealed class BoardState
 {
     [System.Text.Json.Serialization.JsonRequired]
-    public int Version { get; set; } = 1;
+    public int Version { get; set; } = 2;
+    public Guid PersistenceRevision { get; set; }
+    public List<ArchivedTask> Archives { get; set; } = [];
     [System.Text.Json.Serialization.JsonRequired]
     public List<WorkItem> Tasks { get; set; } = [];
     [System.Text.Json.Serialization.JsonRequired]

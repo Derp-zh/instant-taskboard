@@ -10,6 +10,7 @@ public sealed class ConfigurationBackup
     [JsonRequired] public string Format { get; set; } = "taskboard-configuration";
     [JsonRequired] public int Version { get; set; } = 1;
     [JsonRequired] public string DataDirectory { get; set; } = "";
+    public Guid PersistenceRevision { get; set; }
     [JsonRequired] public Preferences Preferences { get; set; } = new();
     [JsonRequired] public List<FieldOption> AiOptions { get; set; } = [];
     [JsonRequired] public List<FieldOption> PriorityOptions { get; set; } = [];
@@ -18,7 +19,7 @@ public sealed class ConfigurationBackup
     public static ConfigurationBackup Capture(BoardState state, string directory)
     {
         Validation.Check(state);
-        var result = new ConfigurationBackup { DataDirectory = Path.GetFullPath(directory), Preferences = Copies.Of(state.Preferences),
+        var result = new ConfigurationBackup { DataDirectory = Path.GetFullPath(directory), PersistenceRevision = state.PersistenceRevision, Preferences = Copies.Of(state.Preferences),
             AiOptions = Copies.Of(state.AiOptions), PriorityOptions = Copies.Of(state.PriorityOptions) };
         foreach (var key in result.Preferences.Positions.Keys.Where(x => x.StartsWith("edit-", StringComparison.Ordinal)).ToArray()) result.Preferences.Positions.Remove(key);
         return result;
@@ -55,11 +56,12 @@ public sealed class ConfigurationBackup
         var items = state.Tasks.Concat(state.Sessions.SelectMany(x => new[] { x.Working, x.Original })).ToArray();
         foreach (var column in state.Preferences.Columns.Where(x => items.Any(x.Contains)))
         {
-            var restored = candidate.Preferences.Columns.FirstOrDefault(x => x.Id == column.Id);
+            var restored = candidate.Preferences.Columns.FirstOrDefault(x => column.BuiltinLane is not null ? x.BuiltinLane == column.BuiltinLane : x.Id == column.Id);
             if (restored is null) candidate.Preferences.Columns.Add(Copies.Of(column)); else restored.Deleted = false;
         }
-        candidate.AiOptions = Merge(AiOptions, state.AiOptions, items.SelectMany(x => x.AiIds).ToHashSet());
-        candidate.PriorityOptions = Merge(PriorityOptions, state.PriorityOptions, items.Where(x => x.PriorityId is not null).Select(x => x.PriorityId!.Value).ToHashSet());
+        var references = items.Concat(state.Archives.Select(x => x.Item)).ToArray();
+        candidate.AiOptions = Merge(AiOptions, state.AiOptions, references.SelectMany(x => x.AiIds).ToHashSet());
+        candidate.PriorityOptions = Merge(PriorityOptions, state.PriorityOptions, references.Where(x => x.PriorityId is not null).Select(x => x.PriorityId!.Value).ToHashSet());
         Validation.Check(candidate); return candidate;
     }
     private static List<FieldOption> Merge(List<FieldOption> restored, List<FieldOption> current, HashSet<Guid> referenced)

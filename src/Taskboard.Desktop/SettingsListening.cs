@@ -51,7 +51,7 @@ internal sealed partial class SettingsSurface
         var volume = new Slider { Minimum = 0, Maximum = 100, Value = options.Volume * 100, Margin = new Thickness(6, 4, 6, 12) };
         volume.ValueChanged += (_, _) => { options.Volume = volume.Value / 100; volumeLabel.Text = $"替换音量 {volume.Value:0}%"; controller.Engine.Touch(); }; panel.Children.Add(volume);
         panel.Children.Add(Ui.Label("应用与音频", 15));
-        panel.Children.Add(Ui.Label("先选择Windows应用，再选择音频并启用。应用名精确匹配，忽略大小写和.exe；其他应用保持原通知音。", 12, Ui.Muted));
+        panel.Children.Add(Ui.Label("选择Windows应用后默认使用内置Alarm04，可换成自己的音频。应用名精确匹配，忽略大小写和.exe。", 12, Ui.Muted));
         panel.Children.Add(Ui.Button("刷新应用列表", async () => { await controller.Listening.RefreshApplications(); RefreshSection(); }));
         listeningRuleStatus.Clear();
         foreach (var rule in options.Rules.ToArray()) panel.Children.Add(ListeningRule(rule));
@@ -92,18 +92,22 @@ internal sealed partial class SettingsSurface
             { name.Text = rule.AppName; identity.Text = "此应用名已配置，请修改原条目"; return; }
             rule.AppName = value; await SaveListening();
         };
-        var path = Ui.Label(rule.AudioPath.Length > 0 ? rule.AudioPath : "还未选择音频", 11, Ui.Muted); body.Children.Add(path);
+        var path = Ui.Label(NotificationAudio.DisplayName(rule.AudioPath), 11, Ui.Muted); body.Children.Add(path);
         var buttons = new WrapPanel();
         buttons.Children.Add(Ui.Button("选择音频", async () =>
         {
             var dialog = new Microsoft.Win32.OpenFileDialog { Title = "选择此应用的通知音", Filter = "音频文件|*.wav;*.mp3;*.m4a;*.aac;*.wma|所有文件|*.*" };
             if (dialog.ShowDialog(this) != true) return;
             var error = await NotificationAudio.Validate(dialog.FileName); if (error is not null) { Ui.Error(error); return; }
-            rule.AudioPath = dialog.FileName; path.Text = rule.AudioPath; await SaveListening();
+            rule.AudioPath = dialog.FileName; path.Text = NotificationAudio.DisplayName(rule.AudioPath); await SaveListening();
+        }));
+        buttons.Children.Add(Ui.Button("使用默认音", async () =>
+        {
+            rule.AudioPath = NotificationSoundRule.BuiltInAudioPath; path.Text = NotificationAudio.DisplayName(rule.AudioPath); await SaveListening();
         }));
         buttons.Children.Add(Ui.Button("试听", async () => await controller.Listening.Preview(rule.AudioPath))); body.Children.Add(buttons);
         var status = Ui.Label(controller.Listening.RuleStatus(rule.Id), 11, Ui.Accent); listeningRuleStatus[rule.Id] = status; body.Children.Add(status);
-        body.Children.Add(Ui.Label("音频记录原文件位置，请保留文件。配置备份含应用规则及路径，不含音频文件。", 10, Ui.Muted));
+        body.Children.Add(Ui.Label("默认音内置，移动程序后仍可使用。自选音频记录原位置；配置备份不复制自选音频。", 10, Ui.Muted));
         return Ui.Panel(body);
     }
 }

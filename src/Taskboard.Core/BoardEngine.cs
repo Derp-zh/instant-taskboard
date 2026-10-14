@@ -1,10 +1,13 @@
 namespace Taskboard.Core;
 
-public sealed class BoardEngine(BoardState state)
+public sealed partial class BoardEngine(BoardState state)
 {
     private sealed record UndoEntry(WorkItem Before, WorkItem? After, int Index, bool Reorder);
     private readonly List<UndoEntry> undo = [];
+    private sealed record RedoEntry(UndoEntry Entry, int AfterIndex);
+    private readonly List<RedoEntry> redo = [];
     public bool CanUndo => undo.Count > 0;
+    public bool CanRedo => redo.Count > 0;
     public BoardState State { get; } = state;
     public event Action<IReadOnlyCollection<Guid>>? Changed;
     public event Action? Dirty;
@@ -12,7 +15,7 @@ public sealed class BoardEngine(BoardState state)
     public EditSession NewSession(Lane lane, bool inline = false)
     {
         var working = new WorkItem { Lane = lane };
-        return new EditSession { Working = working, Original = Copies.Of(working), Inline = inline };
+        return new EditSession { Working = working, Original = Copies.Of(working), Inline = inline, CreatedUtc = DateTime.UtcNow };
     }
 
     public EditSession Edit(Guid id)
@@ -21,7 +24,7 @@ public sealed class BoardEngine(BoardState state)
         if (existing is not null) { existing.Visible = true; return existing; }
         var item = State.Tasks.First(x => x.Id == id);
         if (item.TimerUnread) { item.TimerUnread = false; Notify([id]); }
-        var s = new EditSession { TaskId = id, Original = Copies.Of(item), Working = Copies.Of(item) };
+        var s = new EditSession { TaskId = id, Original = Copies.Of(item), Working = Copies.Of(item), CreatedUtc = DateTime.UtcNow };
         State.Sessions.Add(s); Touch(); return s;
     }
 
@@ -62,6 +65,7 @@ public sealed class BoardEngine(BoardState state)
             var existing = State.Tasks.FindIndex(x => x.Id == result.Id);
             if (existing >= 0) State.Tasks[existing] = result; // retry after a failed disk write remains idempotent
             else State.Tasks.Add(result);
+            redo.Clear();
         }
         CleanReferences(result);
         result.TimerUnread = false;
@@ -144,6 +148,7 @@ public sealed class BoardEngine(BoardState state)
         if (undo.Count == 0) return;
         var entry = undo[^1]; undo.RemoveAt(undo.Count - 1);
         var live = State.Tasks.FirstOrDefault(x => x.Id == entry.Before.Id);
+        redo.Add(new(entry, live is null ? -1 : State.Tasks.IndexOf(live))); if (redo.Count > 20) redo.RemoveAt(0);
         if (entry.After is null)
         {
             if (live is null) State.Tasks.Insert(Math.Min(entry.Index, State.Tasks.Count), Copies.Of(entry.Before));
@@ -168,7 +173,7 @@ public sealed class BoardEngine(BoardState state)
 
     private void Remember(UndoEntry entry)
     {
-        undo.Add(entry); if (undo.Count > 20) undo.RemoveAt(0);
+        redo.Clear(); undo.Add(entry); if (undo.Count > 20) undo.RemoveAt(0);
     }
 
     public void DeleteOption(Guid id, bool ai)
@@ -176,8 +181,10 @@ public sealed class BoardEngine(BoardState state)
         var options = ai ? State.AiOptions : State.PriorityOptions;
         options.RemoveAll(x => x.Id == id);
         foreach (var task in State.Tasks) CleanReferences(task);
+        foreach (var archive in State.Archives) CleanReferences(archive.Item);
         foreach (var session in State.Sessions) { CleanReferences(session.Original); CleanReferences(session.Working); }
         foreach (var entry in undo) { CleanReferences(entry.Before); if (entry.After is not null) CleanReferences(entry.After); }
+        foreach (var recovery in redo) { CleanReferences(recovery.Entry.Before); if (recovery.Entry.After is not null) CleanReferences(recovery.Entry.After); }
         Notify(State.Tasks.Select(x => x.Id).ToArray());
     }
 

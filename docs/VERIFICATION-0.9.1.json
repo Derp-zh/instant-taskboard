@@ -1,0 +1,100 @@
+{
+  "version": "0.9.1",
+  "releaseLabel": "",
+  "date": "2026-10-15T01:13:53.709759+08:00",
+  "status": "isolated rule, offscreen, desktop pixel and physical input checks passed",
+  "requirements": [
+    "U55/A73",
+    "U56/A74",
+    "U57/A75",
+    "U58/A76",
+    "U59/A77",
+    "U60/A78",
+    "U61/A79",
+    "U62/A80",
+    "U63/A81",
+    "U64/A82",
+    "U65/A83",
+    "U66/A84",
+    "U67/A85",
+    "U68/A86"
+  ],
+  "checks": {
+    "core": 114,
+    "compact": 45,
+    "integration": 17,
+    "appearance": 12,
+    "listening": 49,
+    "desktop": 77,
+    "mouse": 64,
+    "scroll": 39,
+    "startup": 3
+  },
+  "evidence": {
+    "core": "test-output/compact091-core-01/report.json",
+    "compact": "test-output/compact091-delivery-compact-03/compact-report.json",
+    "integration": "test-output/compact091-delivery-integration-02/integration-report.json",
+    "appearance": "test-output/compact091-delivery-appearance-02/appearance-report.json",
+    "listening": "test-output/compact091-delivery-listening-02/listening-report.json",
+    "desktop": "test-output/compact091-delivery-desktop-02/ui-report.json",
+    "mouse": "test-output/compact091-delivery-mouse-01/desktop-report.json",
+    "scroll": "test-output/compact091-delivery-scroll-01/scroll-report.json",
+    "motion": "test-output/compact091-delivery-desktop-02/motion-report.json",
+    "deal": "test-output/compact091-delivery-desktop-02/deal-report.json",
+    "animation-pixels": "test-output/compact091-delivery-desktop-02/animation-pixels.json",
+    "draft-host": "test-output/compact091-delivery-desktop-02/draft-host-report.json",
+    "glass": "test-output/compact091-delivery-desktop-02/glass-report.json",
+    "startup": "test-output/compact091-delivery-startup-01/startup-entry-report.json"
+  },
+  "programSHA256": {
+    "即时任务看板.exe": "B52A8CC8C322B60D1A8645339D650713F6A16A25B6562D4A3A9385E7FA8F827B",
+    "Taskboard.dll": "FC165FD267EB1D8198E6E6C74990BD48596DDC721AC54C96DA43619DB0D6DB95",
+    "Taskboard.Core.dll": "9768CF023505660AE05DDA7CF4E509C7D6C3EDEF4822293C79404DBAB4CF69A7"
+  },
+  "corePerformance": {
+    "tasks": 300,
+    "stagesPerTask": 4,
+    "drafts": 10,
+    "searchMs": 0.06637,
+    "saveMs": 27.1146,
+    "loadMs": 18.7028
+  },
+  "lastOffscreenSwapPreparationMs": 172.4427,
+  "renderArtifacts": [
+    "test-output/compact091-delivery-compact-03/formal-card.png",
+    "test-output/compact091-delivery-compact-03/quick-entry.png",
+    "test-output/compact091-delivery-compact-03/numbered-stack.png"
+  ],
+  "evidenceScopes": {
+    "core": "Task history, paths, persistence and backwards-compatible draft creation time; exact tested Core DLL matches publish output.",
+    "compact": "Real WPF offscreen layout, hit structure, compositor setup/completion, quick entry save, direct outside-click policy calls, draft numbering, deletion and reopen.",
+    "nativeObserver": "Physical external-app clicks tested: first stays visible without white flash, inside resets, second closes and retains edit buffer.",
+    "animation": "Actual desktop samples confirm two separated card spans, lift, same native host, original bounds restored and no unexpected host hides; composition remains active while UI is busy. Samples are not exhaustive 120fps measurement."
+  },
+  "boundaries": [
+    "Only isolated task/configuration data was used; running user versions were preserved and actual application notification sounds were not changed.",
+    "No Windows reboot/logout was performed; startup entry readback is separate from a login test.",
+    "Real notification sound replacement, Codex desktop live bridge and Feishu cloud sync remain separate pending work."
+  ],
+  "dealAnimation": {
+    "passed": true,
+    "durationTargetMs": 200,
+    "realDesktopSamples": 19,
+    "separated": true,
+    "lifted": true,
+    "sameBounds": true,
+    "LastContentSwapPreparationMs": 123.2231,
+    "sameNativeWindow": true,
+    "unexpectedNativeHides": 0
+  },
+  "displayRefreshHz": 165.00288755053214,
+  "desktopEvidenceRuntimeDllSHA256": "B1CD7341C49C3FED44AA7075674573A6C8A810436AAB94C1E5F9BD0FB23A369A",
+  "postDesktopVerificationChange": {
+    "files": [
+      "src/Taskboard.Desktop/CompactChecks.cs"
+    ],
+    "scope": "Offscreen timing is not displayed interaction latency; actual desktop preparation was 123.2231ms. Only a verification assertion changes; normal product code is unchanged.",
+    "normalProductSourceUnchanged": true,
+    "proof": "test-output/compact091-offscreen-assertion-provenance.json"
+  }
+}

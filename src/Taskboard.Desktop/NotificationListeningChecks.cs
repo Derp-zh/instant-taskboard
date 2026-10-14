@@ -76,6 +76,15 @@ internal static class NotificationListeningChecks
         Check(lease.RestoreAll().Length == 1 && File.ReadAllText(journalFile).Contains("app"), "恢复失败保留持久记录供重试");
         store.FailRestore = false; Check(lease.RestoreAll().Length == 0, "恢复失败可以重试");
         var wav = Path.Combine(root, "preview.wav"); CreateWav(wav);
+        var defaultRule = new NotificationSoundRule { AppName = "默认音测试" };
+        Check(defaultRule.AudioPath == NotificationSoundRule.BuiltInAudioPath, "新监听规则默认使用便携内置音频标识");
+        var builtIn = NotificationAudio.Expand(defaultRule.AudioPath);
+        Check(File.Exists(builtIn) && !builtIn.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows), StringComparison.OrdinalIgnoreCase), "默认音从程序资源释放，不依赖Windows媒体目录");
+        Check(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(builtIn))) == "7C28D771DEBC496783A1694F99A3B7E21D02047245F8F7FCE5CD4D7A84CA99F8", "内置默认音与用户指定Alarm04内容一致");
+        Check(await NotificationAudio.Validate(defaultRule.AudioPath) is null && await NotificationAudio.Validate("") is null, "内置默认音可解码且旧空音频配置自动使用默认音");
+        var defaultState = new BoardState(); defaultState.Preferences.Listening.Rules.Add(defaultRule);
+        var defaultBackup = Path.Combine(root, "default-audio-configuration.json"); ConfigurationBackup.Capture(defaultState, root).Write(defaultBackup);
+        Check(ConfigurationBackup.Read(defaultBackup).Apply(new BoardState()).Preferences.Listening.Rules[0].AudioPath == NotificationSoundRule.BuiltInAudioPath, "默认音配置备份保留便携标识，不保存临时路径");
         Check(await NotificationAudio.Validate(wav) is null, "实际Windows解码器验证WAV");
         var inputAudio = await Windows.Storage.StorageFile.GetFileFromPathAsync(wav);
         foreach (var extension in new[] { "mp3", "m4a" })
@@ -109,6 +118,7 @@ internal static class NotificationListeningChecks
         Check(controller.Engine.State.Preferences.Listening.Rules.Count == 2 && !controller.Engine.State.Preferences.Listening.Rules[1].Enabled, "添加多个应用且新条目默认不替换");
         settings.SelectSection("监听");
         settings.Root.Measure(new Size(760, 680)); settings.Root.Arrange(new Rect(0, 0, 760, 680)); settings.Root.UpdateLayout();
+        Check(controller.Engine.State.Preferences.Listening.Rules[1].AudioPath == NotificationSoundRule.BuiltInAudioPath && Find<Button>(settings.Root).Any(x => Equals(x.Content, "使用默认音")), "新增应用自带默认音且提供恢复默认入口");
         var bitmap = new RenderTargetBitmap(760, 680, 96, 96, PixelFormats.Pbgra32); bitmap.Render(settings.Root);
         using (var output = File.Create(Path.Combine(root, "listening-settings.png"))) { var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(bitmap)); png.Save(output); }
         Find<ScrollViewer>(settings.Root).First().ScrollToVerticalOffset(480); settings.Root.UpdateLayout();

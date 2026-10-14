@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -10,7 +11,26 @@ internal sealed class NotificationAudio : IDisposable
 {
     private MediaPlayer? current;
     private TaskCompletionSource<string?>? completion;
-    public static string Expand(string path) => Path.GetFullPath(Environment.ExpandEnvironmentVariables(path));
+    private static readonly Lazy<string> builtInFile = new(ExtractBuiltIn);
+    internal static bool IsBuiltIn(string path) => string.IsNullOrWhiteSpace(path) || path == Taskboard.Core.NotificationSoundRule.BuiltInAudioPath;
+    internal static string DisplayName(string path) => IsBuiltIn(path) ? "内置默认音 · Alarm04" : path;
+    public static string Expand(string path) => IsBuiltIn(path) ? builtInFile.Value : Path.GetFullPath(Environment.ExpandEnvironmentVariables(path));
+    private static string ExtractBuiltIn()
+    {
+        using var resource = typeof(NotificationAudio).Assembly.GetManifestResourceStream("Taskboard.DefaultNotification.wav")
+            ?? throw new InvalidDataException("内置通知音缺失，请重新解压完整程序");
+        using var memory = new MemoryStream(); resource.CopyTo(memory); var bytes = memory.ToArray();
+        var hash = Convert.ToHexString(SHA256.HashData(bytes));
+        var directory = Path.Combine(Path.GetTempPath(), "InstantTaskboard", "audio", hash);
+        Directory.CreateDirectory(directory); var file = Path.Combine(directory, "Alarm04.wav");
+        if (!File.Exists(file) || !CryptographicOperations.FixedTimeEquals(SHA256.HashData(File.ReadAllBytes(file)), SHA256.HashData(bytes)))
+        {
+            var temporary = Path.Combine(directory, Guid.NewGuid().ToString("N") + ".tmp");
+            try { File.WriteAllBytes(temporary, bytes); File.Move(temporary, file, true); }
+            finally { if (File.Exists(temporary)) File.Delete(temporary); }
+        }
+        return file;
+    }
     public static async Task<string?> Validate(string path)
     {
         try

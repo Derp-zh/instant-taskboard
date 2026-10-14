@@ -21,9 +21,39 @@ internal class SurfaceWindow : Window
     public readonly Grid Root = new SurfaceContentRoot();
     private bool allowClose;
     private bool animating;
-    public new void Show() {if(!animating) {Root.Opacity=1;backdrop?.SetVisible(true);} base.Show();if(!animating)Native.ShowWindow(ContentHandle,4);}
+    protected virtual bool ScrollEnabled => false;
+    private bool scrollRunning, destroyAfterScroll;
+    private double scrollFrom, scrollTo, scrollDuration;
+    private readonly Stopwatch scrollClock = new();
+    internal bool IsScrollAnimating => scrollRunning;
+    internal bool IsContentSwapping { get; private set; }
+    internal long ContentSwapCount { get; private set; }
+    internal double LastContentSwapPreparationMs { get; private set; }
+    private Rect? swapBounds;
+    internal Point SwapInputOffset { get; private set; }
+    private void RestoreSwapBounds()
+    {
+        if (swapBounds is not Rect original) return;
+        swapBounds = null; SwapInputOffset = new Point();
+        Left = original.Left; Top = original.Top; Width = original.Width; Height = original.Height;
+        Root.UpdateLayout(); UpdateGlassGeometry(); Native.ClipWindow(this, Height); imageDirty = true;
+    }
+    internal bool ShouldRestore => IsVisible && (!scrollRunning || scrollTo > 0);
+    internal double ScrollProgress => scrollRunning ? ScrollMotion.Progress(scrollFrom, scrollTo, scrollClock.Elapsed.TotalMilliseconds, scrollDuration) : IsVisible ? 1 : 0;
+    public new void Show()
+    {
+        if (destroyAfterScroll) return;
+        if (ScrollEnabled && (!IsVisible || scrollRunning)) { RevealScroll(true); return; }
+        ShowImmediately();
+    }
+    private void ShowImmediately() {if(!animating) {Root.Opacity=1;backdrop?.SetVisible(true);} base.Show();if(!animating)Native.ShowWindow(ContentHandle,4);}
     public new void Hide()
-    {motion++;animating=false;contentHost.AnimationHidden=false;animationDeadline?.Stop();CancelHandoff();backdrop?.CancelAnimation();backdrop?.SetVisible(false);Root.Opacity=0;Native.ShowWindow(ContentHandle,0);base.Hide();}
+    {
+        if (ScrollEnabled && IsVisible) { RevealScroll(false); return; }
+        HideImmediately();
+    }
+    private void HideImmediately()
+    {motion++;animating=false;scrollRunning=false;IsContentSwapping=false;contentHost.AnimationHidden=false;animationDeadline?.Stop();CancelHandoff();backdrop?.CancelAnimation();RestoreSwapBounds();backdrop?.SetVisible(false);Root.Opacity=0;Native.ShowWindow(ContentHandle,0);base.Hide();}
     public bool GlassEnabled { get; set; } = true;
     public int WindowLayer { get; set; } = 2;
     public static double Transparency { get; private set; } = 20;
@@ -94,7 +124,12 @@ internal class SurfaceWindow : Window
         }
         return IntPtr.Zero;
     }
-    public void Destroy() { allowClose = true; motion++; Close(); }
+    public void Destroy() => Destroy(true);
+    public void Destroy(bool animate)
+    {
+        if (animate && ScrollEnabled && IsVisible) { destroyAfterScroll = true; RevealScroll(false); return; }
+        HideImmediately(); allowClose = true; motion++; Close();
+    }
     public void MoveWith(UIElement header)
     {
         header.MouseLeftButtonDown += (_, e) =>
@@ -128,17 +163,60 @@ internal class SurfaceWindow : Window
         if (hwnd != IntPtr.Zero) backdrop?.Update(GlassRegions(), Native.GetDpiForWindow(hwnd) / 96.0);
     }
     internal void InvalidateAnimation() => imageDirty = true;
+    internal void SwapContent(Action change, double paneWidth, double selectedSlot)
+    {
+        if (!IsVisible || scrollRunning || backdrop is null) { change(); return; }
+        var preparation = Stopwatch.StartNew();
+        var generation = ++motion; CancelHandoff(); animationDeadline?.Stop(); backdrop.CancelAnimation();
+        RestoreSwapBounds();
+        var scale = Native.GetDpiForWindow(new WindowInteropHelper(this).Handle) / 96.0;
+        Root.Opacity = 1; WarmAnimation(); var oldWidth = imageWidth; var oldHeight = imageHeight;
+        var beforeCard = ((DraftStackSurface)this).CaptureFrontCard(scale);
+        change(); Root.Opacity = 1; WarmAnimation();
+        var afterCard = ((DraftStackSurface)this).CaptureFrontCard(scale);
+        if (oldWidth != imageWidth || oldHeight != imageHeight) { IsContentSwapping = false; animating = false; contentHost.AnimationHidden = false; Native.ShowWindow(ContentHandle, 4); return; }
+        animating = IsContentSwapping = true; ContentSwapCount++; var completed = false;
+        void Finish()
+        {
+            if (generation != motion || completed) return; completed = true; animationDeadline?.Stop(); animating = IsContentSwapping = false;
+            RestoreSwapBounds();
+            contentHost.AnimationHidden = false; Root.Opacity = 1; Native.ShowWindow(ContentHandle, 4);
+            var frames = 0; handoff = (_, _) => { if (++frames < 2) return; CancelHandoff(); if (generation == motion) backdrop?.CancelAnimation(); };
+            CompositionTarget.Rendering += handoff;
+        }
+        try
+        {
+            var padding = DraftSwitchMotion.Padding(paneWidth);
+            backdrop.AnimateSwap(new WindowInteropHelper(this).Handle, beforeCard, afterCard, animationImage!, imageWidth, imageHeight,
+                paneWidth * scale, selectedSlot * scale, padding * scale, DraftSwitchMotion.Lift * scale,
+                () => {
+                    swapBounds = new Rect(Left, Top, Width, Height); SwapInputOffset = new Point(padding, DraftSwitchMotion.Lift);
+                    contentHost.AnimationHidden = true; Root.Opacity = 0; Native.ShowWindow(ContentHandle, 0);
+                    Left -= padding; Top -= DraftSwitchMotion.Lift; Width += 2 * padding; Height += DraftSwitchMotion.Lift;
+                    Native.ClipWindow(this, Height);
+                },
+                () => Dispatcher.BeginInvoke(new Action(Finish), DispatcherPriority.Render));
+            contentHost.AnimationHidden = true; Root.Opacity = 0; Native.ShowWindow(ContentHandle, 0); UsesIndependentAnimation = true;
+            animationDeadline = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(DraftSwitchMotion.DurationMs + 60) };
+            animationDeadline.Tick += (_, _) => Finish(); animationDeadline.Start();
+        }
+        catch (Exception e) when (e is COMException or NotSupportedException or InvalidOperationException)
+        { backdrop.CancelAnimation(); UsesIndependentAnimation = false; Finish(); }
+        LastContentSwapPreparationMs = preparation.Elapsed.TotalMilliseconds;
+    }
     public WindowPosition Position() => new() { X = Left, Y = Top, Width = Width, Height = Height };
     public void Place(WindowPosition position)
     { Width = position.Width; Height = position.Height; Left = position.X; Top = position.Y; }
 
     public void Reveal(bool visible, bool animate)
     {
+        if (ScrollEnabled && animate) { RevealScroll(visible); return; }
         var generation = ++motion;
         CancelHandoff();
         animationDeadline?.Stop();
         backdrop?.CancelAnimation();
-        if (!animate) { animating = false; if (visible) Show(); else Hide(); Native.ClipWindow(this, Height); IsHitTestVisible = true; return; }
+        RestoreSwapBounds();
+        if (!animate) { animating = false; scrollRunning = false; if (visible) ShowImmediately(); else HideImmediately(); Native.ClipWindow(this, Height); IsHitTestVisible = true; return; }
         var from = IsVisible ? Height : 0;
         animating = true; UpdateGlassGeometry();
         new WindowInteropHelper(this).EnsureHandle();
@@ -151,6 +229,28 @@ internal class SurfaceWindow : Window
             Native.ClipWindow(this, Height);
             IsHitTestVisible = true;
         });
+    }
+    private void RevealScroll(bool visible)
+    {
+        if (scrollRunning && scrollTo == (visible ? 1 : 0)) return;
+        var from = ScrollProgress;
+        if (!visible && from <= 0) { HideImmediately(); if (destroyAfterScroll) Destroy(false); return; }
+        var generation = ++motion; IsContentSwapping = false;
+        CancelHandoff(); animationDeadline?.Stop(); backdrop?.CancelAnimation();
+        RestoreSwapBounds();
+        // A fresh snapshot on each new transition includes section/option changes.
+        if (!scrollRunning) imageDirty = true;
+        scrollRunning = true; animating = true;
+        scrollFrom = from; scrollTo = visible ? 1 : 0;
+        scrollDuration = Math.Max(1, ScrollMotion.DurationMs * Math.Abs(scrollTo - from));
+        UpdateGlassGeometry(); new WindowInteropHelper(this).EnsureHandle();
+        IsHitTestVisible = visible;
+        RunMotion(generation, false, from, scrollTo, () =>
+        {
+            scrollRunning = false; animating = false;
+            if (!visible) { HideImmediately(); if (destroyAfterScroll) Destroy(false); }
+            Native.ClipWindow(this, Height); IsHitTestVisible = true;
+        }, scroll: true, durationMs: scrollDuration);
     }
     private double revealedWidth = 58;
     protected void RevealToLeft(bool expanded, Action prepare, Action complete)
@@ -177,10 +277,10 @@ internal class SurfaceWindow : Window
     {
         var left=Left; var top=Top;
         Left=SystemParameters.VirtualScreenLeft-Width-100; Top=SystemParameters.VirtualScreenTop-Height-100;
-        try { contentHost.AnimationHidden=false; Show(); Root.UpdateLayout(); WarmAnimation(); Hide(); }
+        try { contentHost.AnimationHidden=false; ShowImmediately(); Root.UpdateLayout(); WarmAnimation(); HideImmediately(); }
         finally { Left=left;Top=top; }
     }
-    private void RunMotion(long generation, bool horizontal, double from, double to, Action complete)
+    private void RunMotion(long generation, bool horizontal, double from, double to, Action complete, bool scroll = false, double durationMs = 100)
     {
         var watch = Stopwatch.StartNew();
         var completed = false;
@@ -198,18 +298,24 @@ internal class SurfaceWindow : Window
         try
         {
             Root.Opacity=1; WarmAnimation(); LastSnapshotMs=watch.Elapsed.TotalMilliseconds; var hwnd = new WindowInteropHelper(this).Handle;
+            if (backdrop is null) throw new NotSupportedException("当前系统没有窗口动画合成支持");
             Native.ClipWindow(this,Height);
-            backdrop!.Animate(hwnd,animationImage!,imageWidth,imageHeight,horizontal,from*Native.GetDpiForWindow(hwnd)/96.0,to*Native.GetDpiForWindow(hwnd)/96.0,
-                () => Dispatcher.BeginInvoke(new Action(Finish),DispatcherPriority.Render));
-            contentHost.AnimationHidden = true; Root.Opacity=0; Native.ShowWindow(ContentHandle,0); var showClock=Stopwatch.StartNew(); if (!IsVisible) Show(); LastShowMs=showClock.Elapsed.TotalMilliseconds;
+            if (scroll)
+                backdrop!.AnimateScroll(hwnd, animationImage!, imageWidth, imageHeight, from, to, durationMs,
+                    () => Dispatcher.BeginInvoke(new Action(Finish), DispatcherPriority.Render));
+            else
+                backdrop!.Animate(hwnd,animationImage!,imageWidth,imageHeight,horizontal,from*Native.GetDpiForWindow(hwnd)/96.0,to*Native.GetDpiForWindow(hwnd)/96.0,
+                    () => Dispatcher.BeginInvoke(new Action(Finish),DispatcherPriority.Render));
+            contentHost.AnimationHidden = true; Root.Opacity=0; Native.ShowWindow(ContentHandle,0); var showClock=Stopwatch.StartNew(); if (!IsVisible) ShowImmediately(); LastShowMs=showClock.Elapsed.TotalMilliseconds;
+            if (scroll) scrollClock.Restart();
             UsesIndependentAnimation = true;
             // Occluded/offscreen targets can defer compositor completion events.
             // This is a single end deadline, never a frame-production timer.
-            animationDeadline = new DispatcherTimer(DispatcherPriority.Render) { Interval=TimeSpan.FromMilliseconds(100) };
+            animationDeadline = new DispatcherTimer(DispatcherPriority.Render) { Interval=TimeSpan.FromMilliseconds(durationMs + (scroll ? 60 : 0)) };
             animationDeadline.Tick += (_,_) => Finish(); animationDeadline.Start();
         }
         catch (Exception e) when (e is COMException or NotSupportedException or InvalidOperationException)
-        { backdrop?.CancelAnimation(); if (to > 0 && !IsVisible) Show(); UsesIndependentAnimation = false; Finish(); }
+        { backdrop?.CancelAnimation(); if (to > 0 && !IsVisible) ShowImmediately(); UsesIndependentAnimation = false; Finish(); }
         LastAnimationPreparationMs = watch.Elapsed.TotalMilliseconds;
     }
 }
