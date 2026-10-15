@@ -83,6 +83,18 @@
       </ControlTemplate.Triggers>
     </ControlTemplate></Setter.Value></Setter>
   </Style>
+  <Style x:Key="EditorCloseButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+      <Border x:Name="frame" CornerRadius="20" Background="{TemplateBinding Background}" BorderBrush="White" BorderThickness="{TemplateBinding BorderThickness}">
+        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <ControlTemplate.Triggers>
+        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="frame" Property="Background" Value="#D0607188" /></Trigger>
+        <Trigger Property="IsPressed" Value="True"><Setter TargetName="frame" Property="Background" Value="#D03D4B60" /></Trigger>
+        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="frame" Property="Opacity" Value="0.45" /></Trigger>
+      </ControlTemplate.Triggers>
+    </ControlTemplate></Setter.Value></Setter>
+  </Style>
   <Style TargetType="ComboBox">
     <Setter Property="Foreground" Value="{StaticResource TextBrush}" /><Setter Property="Background" Value="{StaticResource FieldBrush}" />
     <Setter Property="Padding" Value="8,5" />

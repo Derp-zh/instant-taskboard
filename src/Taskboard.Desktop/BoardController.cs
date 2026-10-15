@@ -106,7 +106,7 @@ internal sealed partial class BoardController : IDisposable
             isolated ? Path.Combine(dataDirectory, "notification-sound-restore.json") :
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InstantTaskboard", "notification-sound-restore.json"));
         Listening.Changed += () => settings?.RefreshListeningStatus();
-        SurfaceWindow.SetTransparency(Engine.State.Preferences.GlassTransparency);
+        SurfaceWindow.SetTransparency(Engine.State.Preferences.GlassTransparency, Engine.State.Preferences.FloatingTransparency);
         saveTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(750) };
         saveTimer.Tick += async (_, _) => { saveTimer.Stop(); await Flush(); };
         foreach (var definition in Engine.State.Preferences.Columns.Where(x => !x.Deleted)) Columns.Add(new ColumnSurface(this, definition));
@@ -126,10 +126,8 @@ internal sealed partial class BoardController : IDisposable
             if (handle == IntPtr.Zero || exiting) return;
             GetWindowThreadProcessId(handle, out var process);
             if (process == Environment.ProcessId) { Application.Current.Dispatcher.BeginInvoke(new Action(Native.RaiseBall)); return; }
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (Expanded && !SuppressCollapse && !Smoke && DismissibleWindow() is null && Environment.TickCount64 - lastProtectedClick > 500) SetExpanded(false);
-            }));
+            // Losing focus is also reported when a floating window closes.
+            // Only the mouse observer may collapse the workspace on an actual press.
         };
         foregroundHook = SetWinEventHook(3, 3, IntPtr.Zero, foregroundCallback, 0, 0, 0);
         if (!Smoke) outsideClicks = new OutsideClickObserver(this);
@@ -210,6 +208,7 @@ internal sealed partial class BoardController : IDisposable
             var proposal = new BoardEngine(candidate);
             var proposedSession = candidate.Sessions.FirstOrDefault(x => x.Id == session.Id) ?? frozen;
             proposedSession.Working = Copies.Of(frozen.Working);
+            proposedSession.StatusSelected = frozen.StatusSelected;
             proposal.Submit(proposedSession);
             var captured = dirtyVersion;
             await Store.SaveAsync(candidate);
@@ -228,7 +227,8 @@ internal sealed partial class BoardController : IDisposable
     {
         if (exiting || Expanded == expanded) return;
         Expanded = expanded;
-        outsideTarget = null; outsideCount = 0;
+        workspaceGeneration++;
+        outsideTarget = null;
         if (!expanded)
         {
             hiddenDialogs.Clear(); hiddenDialogs.AddRange(Native.Dialogs()); foreach (var dialog in hiddenDialogs) Native.ShowWindow(dialog, 0);
@@ -257,14 +257,28 @@ internal sealed partial class BoardController : IDisposable
         LastEditorRestoreMs=feedbackClock.Elapsed.TotalMilliseconds;
         } finally {Native.EndWorkspaceChange();}
     }
-    public EditorSurface NewTask(Lane lane, Guid? columnId = null)
+    public EditorSurface NewTask(Lane? lane = null, Guid? columnId = null)
     {
-        SetExpanded(true); var session = Engine.NewSession(lane); session.Working.ColumnId = columnId; session.Original.ColumnId = columnId;
-        var editor = EnsureEditor(session); PromoteDraft(editor); editor.Show(); editor.Activate(); Native.RaiseBall(); return editor;
+        SetExpanded(true);
+        // An untouched editor is an input surface, not another staged card.
+        layingOutDrafts = true;
+        try
+        {
+            foreach (var empty in Editors.Where(x => x.Session.TaskId is null && !x.Session.Working.HasContent).ToArray())
+            { Engine.State.Sessions.Remove(empty.Session); RemoveEditor(empty); empty.Destroy(); }
+        }
+        finally { layingOutDrafts = false; }
+        var session = Engine.NewSession(lane ?? Lane.Refining); session.StatusSelected = lane is not null;
+        session.Working.ColumnId = columnId; session.Original.ColumnId = columnId;
+        var editor = EnsureEditor(session); PromoteDraft(editor); draftStack.Activate(); Native.RaiseBall(); return editor;
     }
     public EditorSurface OpenNewEntry(Lane lane, Guid? columnId = null)
     {
-        var saved = Engine.State.Sessions.Where(x => x.TaskId is null && !x.Inline && !x.Visible && x.Working.Lane == lane && x.Working.ColumnId == columnId).ToArray();
+        var saved = Engine.State.Sessions.Where(x => x.TaskId is null && !x.Inline && x.Working.HasContent).ToArray();
+        var current = Editors.FirstOrDefault(x => x.Session.Id == ActiveDraft);
+        if (current is not null && draftStack.ShouldRestore) return NewTask(lane, columnId);
+        if (current is not null)
+        { SetExpanded(true); foreach (var session in saved) { session.Visible = true; EnsureEditor(session); } PromoteDraft(current); current.Activate(); return current; }
         if (saved.Length == 0) return NewTask(lane, columnId);
         SetExpanded(true);
         foreach (var session in saved) { session.Visible = true; EnsureEditor(session); }
@@ -273,7 +287,7 @@ internal sealed partial class BoardController : IDisposable
     public EditorSurface EditTask(Guid id)
     {
         SetExpanded(true); var session = Engine.Edit(id); var editor = EnsureEditor(session);
-        editor.Show(); editor.Activate(); Native.RaiseBall(); return editor;
+        editor.Activate(); Native.RaiseBall(); return editor;
     }
     private EditorSurface EnsureEditor(EditSession session)
     {
@@ -290,8 +304,10 @@ internal sealed partial class BoardController : IDisposable
         if (Engine.State.Preferences.Positions.TryGetValue(key, out var position)) window.Place(position);
         else
         {
-            var area = WorkArea(Ball); window.Left = area.Left + Math.Max(30, (area.Width - window.Width) / 2) + (Editors.Count(x => x.Session.TaskId is not null) - 1) * 26;
-            window.Top = area.Top + Math.Max(12, (area.Height - window.Height) / 2);
+            var area = WorkArea(Ball);
+            var previous = taskWindows.Values.Where(x => x != window && x.ShouldRestore).OrderByDescending(x => x.ActivationOrder).FirstOrDefault();
+            window.Left = previous is not null ? previous.Left + 32 : area.Left + Math.Max(30, (area.Width - window.Width) / 2);
+            window.Top = previous is not null ? previous.Top + 32 : area.Top + Math.Max(12, (area.Height - window.Height) / 2);
         }
         Clamp(window); return editor;
     }
@@ -305,11 +321,11 @@ internal sealed partial class BoardController : IDisposable
     }
     private void PromoteDraft(EditorSurface editor)
     { draftOrder.Remove(editor.Session.Id); draftOrder.Insert(0, editor.Session.Id); draftPage = 0; LayoutDrafts(); }
-    public void ShowEditor(EditorSurface editor, bool activate)
+    public void ShowEditor(EditorSurface editor, bool activate, long? pressedAt = null)
     {
         if (!Expanded) SetExpanded(true);
         if (editor.Session.TaskId is null)
-        { if (activate && ActiveDraft != editor.Session.Id) draftStack.SwapContent(() => PromoteDraft(editor), editor.Width, draftStack.SwitchDistance(editor)); else LayoutDrafts(); if (activate) draftStack.Activate(); }
+        { if (activate && (ActiveDraft != editor.Session.Id || draftStack.IsContentSwapHandoff)) draftStack.Select(editor, () => PromoteDraft(editor), pressedAt); else if (!draftStack.ShouldRestore) LayoutDrafts(); if (activate) draftStack.Activate(); }
         else if (taskWindows.TryGetValue(editor.Session.Id, out var window)) { window.Show(); if (activate) window.Activate(); }
         Native.RaiseBall();
     }
@@ -588,7 +604,7 @@ internal sealed partial class BoardController : IDisposable
         {
             await Store.SaveAsync(candidate);
             Engine.State.Preferences = candidate.Preferences; Engine.State.AiOptions = candidate.AiOptions; Engine.State.PriorityOptions = candidate.PriorityOptions;
-            SynchronizeColumns(); ColumnsChanged(false); SetGlassTransparency(candidate.Preferences.GlassTransparency); OptionsChanged(); ApplySettings(); RestorePositions();
+            SynchronizeColumns(); ColumnsChanged(false); SurfaceWindow.SetTransparency(candidate.Preferences.GlassTransparency, candidate.Preferences.FloatingTransparency); OptionsChanged(); ApplySettings(); RestorePositions();
             foreach (var editor in Editors) editor.RefreshOptionLabels();
             if (!Isolated) StartupLinks.SetAutoStart(candidate.Preferences.AutoStart);
         }
@@ -621,7 +637,7 @@ internal sealed partial class BoardController : IDisposable
             {
                 await next.SaveAsync(candidate); DataPaths.Save(pathSelectionFile, target, Store.ConfigurationDirectory);
                 ResetEditors(); DetachEngine(); Engine = new BoardEngine(candidate); AttachEngine(); Store = next; dirtyVersion++; savedVersion = dirtyVersion;
-                SynchronizeColumns(); ColumnsChanged(false); OnChanged(candidate.Tasks.Select(x => x.Id).ToArray()); ApplySettings(); SurfaceWindow.SetTransparency(candidate.Preferences.GlassTransparency); RestorePositions();
+                SynchronizeColumns(); ColumnsChanged(false); OnChanged(candidate.Tasks.Select(x => x.Id).ToArray()); ApplySettings(); SurfaceWindow.SetTransparency(candidate.Preferences.GlassTransparency, candidate.Preferences.FloatingTransparency); RestorePositions();
                 if (Expanded) { foreach (var session in Engine.State.Sessions.Where(x => x.Visible && !x.Inline).ToArray()) EnsureEditor(session).Show(); LayoutDrafts(); }
                 directoryLocks.Add(lease); retained = true;
             }
@@ -635,6 +651,8 @@ internal sealed partial class BoardController : IDisposable
     { Engine.State.Preferences.GlassTransparency = Math.Clamp(value, 0, 100); SurfaceWindow.SetTransparency(value); Engine.Touch(); }
     public void SetBallTransparency(double value)
     { Engine.State.Preferences.BallTransparency = Math.Clamp(value, 0, 100); Ball.RefreshGlass(); Engine.Touch(); }
+    public void SetFloatingTransparency(double value)
+    { Engine.State.Preferences.FloatingTransparency = Math.Clamp(value, 0, 100); SurfaceWindow.SetTransparency(Engine.State.Preferences.GlassTransparency, Engine.State.Preferences.FloatingTransparency); Engine.Touch(); }
     private void Report(string message)
     {
         Ball?.SetValue(FrameworkElement.ToolTipProperty, message);

@@ -21,7 +21,7 @@ public static class BoardColumns
 {
     public static BoardColumn For(Preferences preferences, WorkItem item) => preferences.Columns.First(x => x.Contains(item));
     public static bool IsEmpty(BoardState state, BoardColumn column) => !state.Tasks.Any(column.Contains) &&
-        !state.Sessions.Any(s => (s.Working.HasContent && column.Contains(s.Working)) || (s.TaskId is not null && column.Contains(s.Original)));
+        !state.Sessions.Any(s => (s.StatusSelected && s.Working.HasContent && column.Contains(s.Working)) || (s.TaskId is not null && column.Contains(s.Original)));
     public static void Delete(BoardState state, BoardColumn column)
     {
         if (column.Protected) throw new InvalidOperationException("灵感库、进行中和待操作可改名或隐藏，不能删除。");

@@ -50,7 +50,11 @@ internal sealed class CompositorPixels : IDisposable
         interop.BeginDraw(IntPtr.Zero,ref iid,out var raw,out var offset);
         try
         {
-            using var context = new ID2D1DeviceContext(raw); context.SetDpi(96,96); context.Clear(new Color4(0,0,0,0));
+            using var context = new ID2D1DeviceContext(raw); context.SetDpi(96,96);
+            // Composition can place several surfaces on one GPU atlas. Clear
+            // only this surface's allocation, or later uploads erase earlier cards.
+            context.PushAxisAlignedClip(new Vortice.RawRectF(offset.X, offset.Y, offset.X + width, offset.Y + height), AntialiasMode.Aliased);
+            context.Clear(new Color4(0,0,0,0));
             var pin = GCHandle.Alloc(pixels,GCHandleType.Pinned);
             try
             {
@@ -58,7 +62,7 @@ internal sealed class CompositorPixels : IDisposable
                     new BitmapProperties1(new PixelFormat(Format.B8G8R8A8_UNorm,Vortice.DCommon.AlphaMode.Premultiplied),96,96,BitmapOptions.None));
                 context.DrawBitmap(bitmap,new Vortice.RawRectF(offset.X,offset.Y,offset.X+width,offset.Y+height),1,InterpolationMode.Linear,null,null);
             }
-            finally { pin.Free(); }
+            finally { pin.Free(); context.PopAxisAlignedClip(); }
         }
         finally { interop.EndDraw(); }
         return surface;

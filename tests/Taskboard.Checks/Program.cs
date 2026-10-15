@@ -12,6 +12,25 @@ var checks = new List<string>();
 void Assert(bool value, string name) { if (!value) throw new Exception("失败：" + name); checks.Add(name); }
 void Reject(Action action, string name) { try { action(); } catch (InvalidDataException) { checks.Add(name); return; } catch (JsonException) { checks.Add(name); return; } throw new Exception("未拒绝：" + name); }
 var engine = new BoardEngine(new BoardState());
+var unassignedEngine = new BoardEngine(new BoardState());
+var unassigned = unassignedEngine.NewSession(Lane.Refining); unassigned.StatusSelected = false;
+unassigned.Working.Title = "无预选状态草稿"; unassignedEngine.StageSession(unassigned);
+Assert(unassignedEngine.State.Sessions.Count == 1 && unassignedEngine.State.Tasks.Count == 0, "未选择状态的非空内容可暂存");
+try { unassignedEngine.Submit(unassigned); throw new Exception("未选择状态仍被正式保存"); }
+catch (InvalidOperationException error) { Assert(error.Message.Contains("当前状态"), "未选择状态保存时提示先选择"); }
+var roundTrip = Copies.Of(unassigned);
+Assert(!roundTrip.StatusSelected, "未选择状态跨序列化保留");
+var unassignedColumn = unassignedEngine.State.Preferences.Columns.Single(x => x.BuiltinLane == Lane.Refining);
+Assert(BoardColumns.IsEmpty(unassignedEngine.State, unassignedColumn), "未选择状态的共享草稿不占用任何列表");
+BoardColumns.Delete(unassignedEngine.State, unassignedColumn);
+var unassignedStore = new AtomicStore(Path.Combine(root, "unassigned-column")); await unassignedStore.SaveAsync(unassignedEngine.State);
+Assert(!unassignedStore.Load().Sessions.Single().StatusSelected, "删除未占用列表后无状态草稿仍可保存并重启读取");
+var oldSessionJson = JsonSerializer.Serialize(unassigned).Replace("\"StatusSelected\":false,", "");
+Assert(JsonSerializer.Deserialize<EditSession>(oldSessionJson)!.StatusSelected, "旧草稿未含新字段时保留原已选状态");
+var prefs = new Preferences();
+Assert(prefs.FloatingTransparency == 10 && prefs.GlassTransparency == 20 && prefs.BallTransparency == 40, "悬浮窗口、多列表、球默认透明度分别为10%、20%、40%");
+prefs.FloatingTransparency = 37;
+Assert(Copies.Of(prefs).FloatingTransparency == 37 && prefs.GlassTransparency == 20, "悬浮窗口透明度独立持久化");
 var blank = engine.NewSession(Lane.Running); engine.StageSession(blank);
 Assert(engine.State.Sessions.Count == 0 && engine.State.Tasks.Count == 0, "空内容不形成草稿或任务");
 blank.Working.Stages[0].Name = "改名"; engine.AddStage(blank); engine.StageSession(blank);

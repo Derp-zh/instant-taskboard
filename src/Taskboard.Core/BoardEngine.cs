@@ -49,6 +49,7 @@ public sealed partial class BoardEngine(BoardState state)
     {
         var edited = session.Working;
         if (!edited.HasContent) throw new InvalidOperationException("请先填写名称或任务详情。");
+        if (!session.StatusSelected) throw new InvalidOperationException("请先选择当前状态，再保存任务。");
         WorkItem result;
         if (session.TaskId is Guid id)
         {

@@ -13,6 +13,7 @@ namespace Taskboard.Desktop;
 
 internal sealed class BallSurface : SurfaceWindow
 {
+    protected override bool ScrollEnabled => false;
     private readonly BoardController controller;
     private readonly Border orb;
     private readonly TextBlock badge;
@@ -104,7 +105,7 @@ internal sealed class BallSurface : SurfaceWindow
         var itemText = new FrameworkElementFactory(typeof(TextBlock)); itemText.SetBinding(TextBlock.TextProperty, new Binding(nameof(SearchEntry.Caption)));
         itemText.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis); itemText.SetValue(TextBlock.MarginProperty, new Thickness(7, 9, 7, 9));
         resultItems.ItemTemplate = new DataTemplate { VisualTree = itemText };
-        results = new SurfaceWindow(340, 330); results.Root.Children.Add(resultItems); preview = MakePopup(previewItems, 198, 340);
+        results = new SurfaceWindow(340, 330) { FloatingAnimations = false }; results.Root.Children.Add(resultItems); preview = MakePopup(previewItems, 198, 340);
         controller.RegisterAuxiliary(results);
         resultItems.SelectionChanged += (_, _) => { if (resultItems.SelectedItem is SearchEntry selected && selected.Id != Guid.Empty) { results.Hide(); controller.Locate(selected.Id); } };
         hover = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
@@ -122,16 +123,16 @@ internal sealed class BallSurface : SurfaceWindow
     }
     private static SurfaceWindow MakePopup(StackPanel children, double width, double height)
     {
-        var window = new SurfaceWindow(width, height); window.Root.Children.Add(new ScrollViewer { Content = children,
+        var window = new SurfaceWindow(width, height) { FloatingAnimations = false }; window.Root.Children.Add(new ScrollViewer { Content = children,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Padding = new Thickness(12) }); return window;
     }
     public void SetExpanded(bool expandedState)
     {
-        capsuleFill.Visibility = Visibility.Visible; orbFill.Visibility = Visibility.Collapsed;
         HidePopups(); var right = Left + Width;
-        if (!expandedState && Width <= 58) { expanded.Visibility = Visibility.Collapsed; capsuleFill.Visibility=Visibility.Collapsed; orbFill.Visibility=Visibility.Visible; return; }
+        if (!expandedState && Width <= 58 && !HasActiveMotion) { expanded.Visibility = Visibility.Collapsed; capsuleFill.Visibility=Visibility.Collapsed; orbFill.Visibility=Visibility.Visible; return; }
         RevealToLeft(expandedState, () =>
         {
+            capsuleFill.Visibility = Visibility.Visible; orbFill.Visibility = Visibility.Collapsed;
             if (expandedState) { Width = 370; Left = right - Width; expanded.Visibility = Visibility.Visible; controller.Clamp(this); }
         }, () =>
         {

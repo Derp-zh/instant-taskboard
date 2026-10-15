@@ -20,11 +20,13 @@ namespace Taskboard.Desktop;
 internal static class DesktopChecks
 {
     private static readonly List<string> checks = new();
-    private static void Assert(bool value, string text) { if (!value) throw new InvalidOperationException("UI验证失败：" + text); checks.Add(text); }
+    private static string? progressPath;
+    private static void Assert(bool value, string text) { if (!value) throw new InvalidOperationException("UI验证失败：" + text); checks.Add(text); if (progressPath is not null) File.WriteAllText(progressPath, JsonSerializer.Serialize(checks)); }
     public static async Task Run(BoardController controller)
     {
         controller.SuppressCollapse = true;
         var testDirectory = controller.Store.DirectoryPath;
+        progressPath = Path.Combine(testDirectory, "ui-progress.json");
         var output = Path.Combine(testDirectory, "ui-artifacts"); Directory.CreateDirectory(output);
         var initial = controller.Engine.State.Tasks.Count;
         if (initial == 0)
@@ -91,7 +93,7 @@ internal static class DesktopChecks
         names[1].Text = "独立修改阶段";
         Assert(single.Session.Working.Stages[1].Name == "独立修改阶段", "框内阶段胶囊仍可独立编辑");
         Capture(single.Root, Path.Combine(output, "unified-stage-input.png"));
-        var reminder = Descendants<CheckBox>(single.Root).First(x => Equals(x.Content, "定时提醒")); reminder.IsChecked = true;
+        var reminder = Descendants<CheckBox>(single.Root).Single(x => Equals(x.Tag, "ReminderToggle")); reminder.IsChecked = true;
         Descendants<ComboBox>(single.Root).First(x => x.Items.Count == 3 && Equals(x.Items[0], "一次")).SelectedIndex = 0;
         var date = Descendants<DatePicker>(single.Root).Single(); date.IsDropDownOpen = true; await Idle();
         var datePopup = (System.Windows.Controls.Primitives.Popup)date.Template.FindName("PART_Popup", date);
@@ -113,8 +115,9 @@ internal static class DesktopChecks
         await Idle();
         Assert(!Application.Current.Windows.OfType<DraftStackSurface>().Single().IsVisible, "关闭多份新建后宿主和虚线入口完全消失");
         Assert(Application.Current.Windows.OfType<DraftStackSurface>().Single().DraftCount == 0, "全部草稿关闭后释放堆叠绘制和实时背景区域");
+        var sharedDraftCount = controller.Engine.State.Sessions.Count(x => x.TaskId is null && !x.Inline && x.Working.HasContent);
         var resumed = controller.OpenNewEntry(Lane.Running); await Idle();
-        Assert(controller.Editors.Count == 4 && resumed.Session.Working.HasContent, "列末新建入口找回同列非空暂存草稿");
+        Assert(controller.Editors.Count(x => x.Session.TaskId is null) == sharedDraftCount && resumed.Session.Working.HasContent, "列末新建入口恢复所有列表的非空共享暂存草稿");
         foreach (var draft in controller.Editors.ToArray()) { Invoke(Descendants<Button>(draft.Root).First(x => Equals(x.Content, "×"))); await Until(() => !controller.Editors.Contains(draft)); }
         await Idle();
         for (var i = 0; i < 20; i++) { controller.Toggle(); await Task.Delay(12); }
@@ -193,7 +196,7 @@ internal static class DesktopChecks
         controller.Settings(); await Idle();
         var settings = Application.Current.Windows.OfType<SettingsSurface>().First(); Capture(settings.Root, Path.Combine(output, "settings.png"));
         Assert(SettingsSurface.Sections.Length == 7 && SettingsSurface.Sections.Contains("监听") && SettingsSurface.Sections.Contains("归档") && Descendants<Button>(settings.Root).All(x => !Equals(x.Content, "AI 选项") && !Equals(x.Content, "优先级选项")), "设置有七分区含监听和归档且不再管理字段选项");
-        settings.SelectSection("窗口"); await Idle(); var transparency = Descendants<Slider>(settings.Root).Single(x => Equals(x.ToolTip, "毛玻璃透明度")); transparency.Value = 60;
+        settings.SelectSection("窗口"); await Idle(); var transparency = Descendants<Slider>(settings.Root).Single(x => Equals(x.ToolTip, "多列表窗口透明度")); transparency.Value = 60;
         Assert(controller.Engine.State.Preferences.GlassTransparency == 60 && SurfaceWindow.Transparency == 60, "设置滑块实时将透明度更新为60%");
         var ballSlider = Descendants<Slider>(settings.Root).Single(x => Equals(x.ToolTip, "悬浮球透明度")); ballSlider.Value = 65;
         Assert(controller.Engine.State.Preferences.BallTransparency == 65 && controller.Ball.GlassTransparency == 65 && SurfaceWindow.Transparency == 60, "球透明度独立调节，不改变普通窗口"); ballSlider.Value = 40;
@@ -201,11 +204,11 @@ internal static class DesktopChecks
         settings.SelectSection("AI平台接入情况"); await Idle(); Capture(settings.Root, Path.Combine(output, "settings-platforms.png"));
         var scrollbars = Descendants<System.Windows.Controls.Primitives.ScrollBar>(settings.Root).Where(x => x.Orientation == Orientation.Vertical).ToArray();
         Assert(scrollbars.Length > 0 && scrollbars.All(x => x.Width == 6), "设置滚动条固定6单位细宽");
-        controller.SetExpanded(false); await Task.Delay(140);
+        controller.SetExpanded(false); await WaitWindow(settings, visible: false);
         Assert(!settings.IsVisible, "点击球收起时设置窗口随组隐藏");
-        controller.SetExpanded(true); await Task.Delay(140);
+        controller.SetExpanded(true); await WaitWindow(settings, visible: true);
         Assert(settings.IsVisible, "重新展开恢复原来的设置窗口");
-        settings.Hide();
+        settings.Hide(); await WaitWindow(settings, visible: false);
         controller.SetExpanded(false); await Task.Delay(140); controller.SetExpanded(true); await Task.Delay(140);
         Assert(!settings.IsVisible, "主动关闭的设置窗口不会在重新展开时复活");
         for (var i = 0; i < 100; i++) { var e = controller.EditTask(target.Id); e.Session.Working.Title = "循环" + i; controller.Engine.Discard(e.Session); controller.RemoveEditor(e); e.Destroy(); }
@@ -275,13 +278,14 @@ internal static class DesktopChecks
         File.WriteAllText(Path.Combine(testDirectory, "ui-report.json"), JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
         await controller.Exit();
     }
+    private static Task WaitWindow(SurfaceWindow window, bool visible) => Until(() => window.IsVisible == visible && !window.IsScrollAnimating && !window.IsContentSwapHandoff);
     private static async Task Idle()
     {
         await Until(() => !Application.Current.Windows.OfType<SurfaceWindow>().Any(x => x.IsScrollAnimating || x.IsContentSwapping));
         await Application.Current.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
     }
-    private static async Task Until(Func<bool> condition)
-    { var timer = Stopwatch.StartNew(); while (!condition()) { if (timer.Elapsed.TotalSeconds > 10) throw new TimeoutException("UI操作超时"); await Task.Delay(25); } }
+    private static async Task Until(Func<bool> condition, [System.Runtime.CompilerServices.CallerArgumentExpression(nameof(condition))] string expression = "")
+    { var timer = Stopwatch.StartNew(); while (!condition()) { if (timer.Elapsed.TotalSeconds > 10) throw new TimeoutException("UI操作超时：" + expression + "; 动画状态：" + string.Join(",", Application.Current.Windows.OfType<SurfaceWindow>().Where(x => x.IsScrollAnimating || x.IsContentSwapping).Select(x => $"{x.Title}:scroll={x.IsScrollAnimating},swap={x.IsContentSwapping},visible={x.IsVisible}"))); await Task.Delay(25); } }
     private static IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject
     {
         if (root is T result) yield return result;

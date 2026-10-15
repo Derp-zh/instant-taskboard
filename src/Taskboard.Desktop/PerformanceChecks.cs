@@ -39,7 +39,9 @@ internal static class PerformanceChecks
         controller.SetExpanded(false); await Task.Delay(180);
         var background=new SurfaceWindow(area.Width,area.Height) {GlassEnabled=false,WindowLayer=-100,Left=area.Left,Top=area.Top}; background.Root.Background=Ui.Brush("#487ADD"); background.Show();
         ball.Left=area.Left+area.Width*.75; ball.Top=area.Bottom-ball.Height-100; ball.SetExpanded(true); await Task.Delay(180); ball.SetExpanded(false); await Task.Delay(180);
-        ball.Show(); Native.RaiseBall(); await Task.Delay(100);
+        // Place the isolated sampling background above other topmost apps;
+        // internal ordering alone ignores foreign windows between our handles.
+        ball.Show(); Native.Raise(background); Native.Raise(ball); Native.RaiseBall(); await Task.Delay(100);
         var origin=ball.PointToScreen(new Point(ball.Width,ball.Height/2));
         var right=origin.X; var mid=(int)origin.Y; var scale=Native.ScreenBounds(ball).Width/58;
         var width=(int)Math.Round(370*scale); var startX=(int)right-width;
@@ -60,13 +62,15 @@ internal static class PerformanceChecks
         });
         try
         {
-            await started.Task; var begin=samplingClock.Elapsed.TotalMilliseconds; ball.SetExpanded(true);
+            await started.Task; var begin=samplingClock.Elapsed.TotalMilliseconds; var previousStart = ball.MotionDisplayStartTicks; ball.SetExpanded(true);
+            for (var wait = 0; ball.MotionDisplayStartTicks == previousStart && wait < 100; wait++) await Task.Delay(2);
             // The UI dispatcher is deliberately busy; pixels must still advance.
-            await Task.Delay(25); var blockBegin=samplingClock.Elapsed.TotalMilliseconds; Thread.Sleep(55); var blockEnd=samplingClock.Elapsed.TotalMilliseconds;
+            await Task.Delay(15); var blockBegin=samplingClock.Elapsed.TotalMilliseconds; Thread.Sleep(55); var blockEnd=samplingClock.Elapsed.TotalMilliseconds;
             await sampling; await Task.Delay(180);
             var during=frames.Where(x=>x.Ms>=blockBegin && x.Ms<=blockEnd).Select(x=>x.Width).Distinct().ToArray();
             var intermediate=frames.Where(x=>x.Width>68*scale && x.Width<360*scale).ToArray();
-            var report=new { passed=intermediate.Length>0 && during.Length>=2,refreshHz=FrameTiming.Read().Hz,beginMs=begin,blockBeginMs=blockBegin,blockEndMs=blockEnd,
+            var monotonic = frames.Zip(frames.Skip(1)).All(x => x.Second.Width >= x.First.Width - 8);
+            var report=new { passed=intermediate.Length>0 && during.Length>=2 && monotonic,monotonic,refreshHz=FrameTiming.Read().Hz,beginMs=begin,blockBeginMs=blockBegin,blockEndMs=blockEnd,
                 sampleX=startX,sampleY=mid,sampleWidth=width,ballBounds=Native.ScreenBounds(ball).ToString(),ballVisible=ball.IsVisible,independent=ball.UsesIndependentAnimation,
                 distinctIntermediatePixelWidths=intermediate.Select(x=>x.Width).Distinct().Count(),pixelWidthsWhileUiBusy=during,frames,measure="Actual screen pixels sampled on another thread; no timer ticks counted as rendered frames." };
             File.WriteAllText(Path.Combine(controller.Store.DirectoryPath,"animation-pixels.json"),JsonSerializer.Serialize(report,new JsonSerializerOptions {WriteIndented=true}));

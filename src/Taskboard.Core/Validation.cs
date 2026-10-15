@@ -40,10 +40,11 @@ public static partial class Validation
         Require(p.Columns!.All(x => !string.IsNullOrWhiteSpace(x.Name) && (x.BuiltinLane is null || Enum.IsDefined(x.BuiltinLane.Value)) && (!x.Protected || !x.Deleted)), "列表名称或角色无效");
         Require(p.Columns.Where(x => x.BuiltinLane is not null).Select(x => x.BuiltinLane).Distinct().Count() == p.Columns.Count(x => x.BuiltinLane is not null), "列表角色重复");
         Require(new[] { Lane.Inspiration,Lane.Running,Lane.Action }.All(lane => p.Columns.Any(x => x.BuiltinLane == lane && !x.Deleted)), "缺少受保护列表");
-        foreach (var item in state.Tasks.Concat(state.Sessions.SelectMany(x => x.TaskId is null ? new[] { x.Working } : new[] { x.Original,x.Working })))
+        foreach (var item in state.Tasks.Concat(state.Sessions.SelectMany(x => x.TaskId is null ? (x.StatusSelected ? new[] { x.Working } : Array.Empty<WorkItem>()) : new[] { x.Original,x.Working })))
             Require(p.Columns.Any(x => !x.Deleted && x.Contains(item)), "任务列表引用无效");
         Require(double.IsFinite(p.GlassTransparency) && p.GlassTransparency >= 0 && p.GlassTransparency <= 100, "毛玻璃透明度应为0至100%");
         Require(double.IsFinite(p.BallTransparency) && p.BallTransparency >= 0 && p.BallTransparency <= 100, "悬浮球透明度应为0至100%");
+        Require(double.IsFinite(p.FloatingTransparency) && p.FloatingTransparency >= 0 && p.FloatingTransparency <= 100, "悬浮窗口透明度应为0至100%");
         Require(p.Positions is not null && p.ConnectionConfigs is not null && p.MachineMarkers is not null, "设置缺少字段");
         foreach (var (key, pos) in p.Positions!)
             Require(!string.IsNullOrWhiteSpace(key) && pos is not null && double.IsFinite(pos.X) && double.IsFinite(pos.Y) && double.IsFinite(pos.Width) && double.IsFinite(pos.Height) && pos.Width >= 1 && pos.Height >= 1, "窗口位置尺寸无效");

@@ -1,5 +1,45 @@
 # Codebase Memory 文档索引刷新记录
 
+## 2026-10-15 0.9.5本地版：统一进度与最终错位32/32
+
+本轮先实际index_status检查taskboard ready、根目录及覆盖，再get_architecture、search_graph、trace_path和get_code_snippet定位；开始为4662节点/12563边，7个PowerShell部分解析。metadata_changed路径按指定源码读取补证，未遍历历史源码或聊天。
+
+manage_adr(set_sections)已更新当前入口、产品规则、实施、电脑端规划及交付五章，保留其他章节。完成0.9.5源码、完整运行包及验收后，full持久化返回indexed，4762节点/12775边，8个PowerShell部分解析、0不可用解析；index_status为ready，indexed_at=2026-10-15T07:46:30Z、根目录正确。回执为test-output/index-095-refresh.json、index-095-status.json与index-095-coverage.json，持久图.codebase-memory/graph.db.zst。release/test-output/preserved-data继续排除。
+
+立即覆盖核验的13条指定路径仍全部metadata_changed，不能宣称工具确认源码新鲜。新IsOutsideDismissArea、FreezeScroll、LightExpression已可在图检索；相关源码直接核实，构建清单来源及运行文件SHA256逐一匹配，476文件ZIP逐一核验。PowerShell解析缺口由脚本与实际隔离测试补证；元数据诊断现象未作为任务看板产品问题修改。
+
+当前入口为HANDOFF、INDEX、PRD29、TASKS17、IMPLEMENTATION的0.9.5段、ACCEPTANCE-0.9.5、VERIFICATION-0.9.5与BUILD-INFO-0.9.5-standard。用户最终指定编辑错位横32纵32，替换试用52/44；最终构建通过，真实鼠标报告为微调前，不能冒充32/32实测。旧0.9.4及以下为历史。普通本地修改未上传GitHub。
+
+## 2026-10-15 0.9.4本地常用版：连接恢复
+
+本轮实际调用index_status确认taskboard ready、根目录<project>，旧图indexed_at=2026-10-14T21:51:15Z、4357节点/12007边、5个PowerShell部分解析。随后get_architecture、search_graph、trace_path、get_code_snippet和check_index_coverage定位；动画/外点路径metadata_changed，相关当前源码用rg和精准读取核实。
+
+manage_adr(set_sections)已收到sections_updated回执，更新当前文档入口、已确认规则、电脑端规划、从零重写实施与交付入口五章，其余内容保留。接口章节名不带Markdown井号；一次名称格式拒绝后已按接口要求重试成功，不宣称拒绝请求已写入。
+
+交付阶段full重新索引返回indexed，4662节点/12563边，7个PowerShell部分解析、0个不可用解析，已写.codebase-memory/graph.db.zst。随后对完成记录再次刷新并实际index_status、路径覆盖核验；最终工具原始回执保存为test-output/index-094-refresh.json与test-output/index-094-coverage.json，计数及新鲜度以回执为准，不复用旧计数冒充本轮计数。release、test-output、preserved-data继续排除，PowerShell部分解析继续由指定源码和实际隔离测试补证。
+
+当前入口：HANDOFF、INDEX、PRD第28节U86至U90/A104至A108、TASKS第16节T109至T114、IMPLEMENTATION的0.9.4段、ACCEPTANCE-0.9.4、VERIFICATION-0.9.4、BUILD-INFO-0.9.4-standard。1.35倍已选为常用，普通修改未上传GitHub。下方0.9.3断连为历史记录；本轮成功回执完成其待补收尾。
+
+新鲜度限制：两次full均成功后，最终index_status为ready、indexed_at=2026-10-15T00:29:56Z，但24路径的check_index_coverage仍返回metadata_changed，不能声称工具确认所有路径新鲜。新加入的CanQueueContentSwap、IsEarlyContentSwapPress及DeliverPresses均可从图检索到，精确片段与当前源码对应；相关源码SHA256与构建清单逐一匹配，隔离运行包验收通过。图可作定位入口，引用结论仍需直接源码/哈希核实；当前元数据诊断现象未作为项目程序缺陷修改。
+
+## 2026-10-15 0.9.3本地交付：收尾连接断开，刷新未确认
+
+本轮开始及继续工作时实际调用index_status：taskboard ready，根目录<project>，4357节点、12007边，indexed_at=2026-10-14T21:51:15Z；5个PowerShell部分解析、0不可用解析。随后实际调用get_architecture、search_graph、trace_path、get_code_snippet和check_index_coverage。改变文件metadata_changed，新增DraftCardGeometry未追踪，因此用rg及指定源码、隔离实际运行核实，不把旧图作为最终源码证明。
+
+程序、两包及文档完成后，manage_adr(set_sections)返回Transport closed；再次index_status及index_repository(full,persistence=true)也返回同一错误，未取得成功回执，不能声称ADR写入或索引刷新完成。旧持久图保留；恢复连接后先核对index_status，更新当前文档入口与规则ADR并对该根目录full重新索引，检查新增几何、外点/动画和文档路径覆盖。不得把旧计数写成0.9.3的新计数。
+
+当前可靠入口：HANDOFF、INDEX、PRD第27节U79至U85/A97至A103、TASKS T101至T108、IMPLEMENTATION的0.9.3段、ACCEPTANCE-0.9.3、VERIFICATION-0.9.3及两份BUILD-INFO。程序修订与两份476文件的完整ZIP交付已完成；索引恢复属于待补收尾，普通修改未上传GitHub。release、test-output及preserved-data继续排除。
+
+## 2026-10-15 0.9.2本地修订
+
+当前入口为HANDOFF、INDEX、PRD第26节U69至U78及TASKS T91至T100；实施、验收、验证摘要和便携清单对应0.9.2。122规则、61控件、77窗口、39画卷及真实外点/重复调用、球展开、横向抽牌采样通过。运行包476文件，完整ZIP逐文件校验通过，未上传GitHub。
+
+实际调用index_status确认taskboard ready及根目录后，get_architecture、search_graph、trace_path、get_code_snippet定位，再直接核实改变的源码。manage_adr以set_sections更新当前文档入口、已确认规则、电脑端需求规划、从零重写实施与交付入口，保留其他章节。交付阶段以full模式索引<project>并持久化至.codebase-memory/graph.db.zst；节点/边及解析计数以工具实际结果为准。release、test-output、preserved-data继续排除；部分PowerShell或非追踪样式缺口由相关源码和隔离测试核实，图索引不替代实际画面验证。
+
+## 2026-10-15 新会话接手入口
+
+新增 HANDOFF.md，记录当前0.9.1交付、阅读顺序、索引调用方法、实际接入边界和独立发布克隆注意事项；AGENTS.md加入接手入口，INDEX.md的当前表格改为0.9.1/T90并澄清历史研究。该轮仅整理文档，不修改程序、不重跑桌面测试、不自动发布GitHub。接手时先调用index_status确认实际状态和覆盖，最新计数以工具结果为准。
+
 ## 2026-10-15 0.9.1完整交付
 
 PRD第25节U55至U68/A73至A86、T77至T90、使用说明、验证摘要和验收记录已同步。新增紧凑卡片、真实外点观察、草稿编号、200毫秒扑克牌动画及实机像素检查；后台仅切换、X整组关闭与恢复原前台。114规则、45本轮隔离、17迁移、12气泡、49监听、77窗口、64真实交互、39画卷和3启动回读通过。正常产品源码与实机一致，仅调整屏幕外测试性能断言，分别记录DLL哈希及源码证明。

@@ -1,0 +1,167 @@
+{
+  "Version": "0.9.3",
+  "Date": "2026-10-15",
+  "LocalOnly": true,
+  "Requirements": "PRD U79-U85 / A97-A103 / T101-T108",
+  "PreferredSpeed": "pending-user-comparison",
+  "Variants": {
+    "normal": {
+      "Entry": "release/即时任务看板-0.9.3-normal/即时任务看板.exe",
+      "BuildInfo": "docs/BUILD-INFO-0.9.3-normal.json",
+      "Archive": "release/即时任务看板-0.9.3-normal-win-x64.zip",
+      "ArchiveSHA256": "21EDE50B67048A658B984F6314CC0F846EE5C5B8A476980C6691EABA72C3B68E",
+      "EntrySHA256": "CE2F5254959DBCCFBD92BDDBE19B631A523DCCDAE8152E5303A2F7DF36247F31",
+      "RuntimeSHA256": "F2DD15693B9E0FAE7CF48C560C3E699671B1D102F2DDC7C0385D277FBA6F6941",
+      "FileCount": 476,
+      "ZipAllFilesVerified": true,
+      "Speed": 1.0,
+      "DurationMs": 360.0
+    },
+    "fast135": {
+      "Entry": "release/即时任务看板-0.9.3-fast135/即时任务看板.exe",
+      "BuildInfo": "docs/BUILD-INFO-0.9.3-fast135.json",
+      "Archive": "release/即时任务看板-0.9.3-fast135-win-x64.zip",
+      "ArchiveSHA256": "B4FB5837BF8A43CBE45467D71F16A60E841E258EC6B4A9CE3E4C57D1D8CFECEC",
+      "EntrySHA256": "CE2F5254959DBCCFBD92BDDBE19B631A523DCCDAE8152E5303A2F7DF36247F31",
+      "RuntimeSHA256": "7771E22F3DF9AE9CECC1F8395A41E145AF1E8266E32D9759C829724137EB463D",
+      "FileCount": 476,
+      "ZipAllFilesVerified": true,
+      "Speed": 1.35,
+      "DurationMs": 266.66666666666663
+    }
+  },
+  "Counts": {
+    "NormalCompact": 76,
+    "FastCompact": 76,
+    "Windows": 77,
+    "ScrollIncludingColdFirstDisplay": 45,
+    "RulesReused": 122
+  },
+  "CoreRulesReuse": {
+    "Mode": "exact-identical-Core-DLL",
+    "SHA256": "C7BAE6469C41C1A3FCE38AEA1E91710E3B92E8D5304AEA6A95DD9FF5979BC3F2",
+    "Report": {
+      "Path": "test-output/ux-092-rules-02/report.json",
+      "SHA256": "30B5632DE783661FBC184411DA8493B42EA9941FE734E6BDB58E64197C3AEF5C"
+    },
+    "ReRun": false
+  },
+  "Evidence": {
+    "NormalCompact": {
+      "Path": "test-output/ux-093-final-normal-compact-02/compact-report.json",
+      "SHA256": "28F62E0DBADD5065A438B701AE67A7BE939E34C564C977342608F8EF43CB7428"
+    },
+    "FastCompact": {
+      "Path": "test-output/ux-093-final-fast-compact-03/compact-report.json",
+      "SHA256": "B3E46445EC45C8707250E946CE7A4204B0005388EE6F7DF97168CBCCE1D515EB"
+    },
+    "Windows": {
+      "Path": "test-output/ux-093-final-windows-02/ui-report.json",
+      "SHA256": "2A37B98948DBE7AAB3F01DDF86982CCB37F2352E9C654E9791734FA5F9FA110A"
+    },
+    "Scroll": {
+      "Path": "test-output/ux-093-final-scroll-02/scroll-report.json",
+      "SHA256": "BECCC68FDA9946345CDD7208A8F88A3F9379F33C0B371EF38483DA5068A3E5E0"
+    },
+    "Outside": {
+      "Path": "test-output/outside-click-093-09/outside-click-report.json",
+      "SHA256": "72DDD7B77781A191948D2BB6B02719642F65087B1EB834C26E528501A044DE1C"
+    },
+    "NormalCard": {
+      "Path": "test-output/ux-093-final-normal-motion-02/shared-motion-report.json",
+      "SHA256": "174AFACC4A9E8FEF71451E80B6460258515EBF95DFE40B5017E50126DA8D1F1F"
+    },
+    "FastCard": {
+      "Path": "test-output/ux-093-final-fast-motion-04/shared-motion-report.json",
+      "SHA256": "6B25BBDDF988EE7037B355FA1F72F11FADC973E0E4E46DB3711C651829856FC9"
+    },
+    "NormalBall": {
+      "Path": "test-output/ux-093-final-normal-motion-02/animation-pixels.json",
+      "SHA256": "3A50C4156C5D4EB22D1F2ED53071C26515A2C5CF7C1553009A2D556A9E37940F"
+    },
+    "FastBall": {
+      "Path": "test-output/ux-093-final-fast-motion-04/animation-pixels.json",
+      "SHA256": "2FE3713FE6016B9C7292C78B7A61F37AC03E88D8F3B91F471D78979141F9BCDB"
+    }
+  },
+  "Measurements": {
+    "NormalCard": {
+      "durationMs": 360,
+      "LastContentSwapPreparationMs": 302.6622,
+      "preparationDifference": 0,
+      "sampledFrames": 53,
+      "lateFrames": 21,
+      "finalHandoffMaxColorDifference": 7,
+      "transparencyDifference": 4,
+      "upperGapFilled": true,
+      "lowerGapFilled": true
+    },
+    "FastCard": {
+      "durationMs": 266.66666666666663,
+      "LastContentSwapPreparationMs": 280.7849,
+      "preparationDifference": 7,
+      "sampledFrames": 51,
+      "lateFrames": 24,
+      "finalHandoffMaxColorDifference": 7,
+      "transparencyDifference": 4,
+      "upperGapFilled": true,
+      "lowerGapFilled": true
+    },
+    "Outside": {
+      "firstVisible": true,
+      "samples": 30,
+      "firstOutsideMaxColorDifference": 0,
+      "slowVisible": true,
+      "differentVisible": true,
+      "doubleClosed": true,
+      "sharedHost": true,
+      "newBackgroundDifference": 0,
+      "settingsSameHost": true,
+      "settingsBackgroundDifference": 0,
+      "settingsSingleVisible": true,
+      "settingsSingleDifference": 0,
+      "settingsDoubleClosed": true,
+      "draftCloseKeepsLists": true,
+      "settingsCloseKeepsLists": true,
+      "freshOutsideCollapses": true,
+      "draftExternalCollapsed": true,
+      "draftGroupRestored": true,
+      "draftRestoredValue": true,
+      "settingsExternalCollapsed": true,
+      "settingsGroupRestored": true,
+      "systemDoubleClickMs": 500,
+      "mouseMoved": true,
+      "isolated": true
+    },
+    "Idle": {
+      "idleSeconds": 60.0138625,
+      "cpuPercent": 0.01171604310587408,
+      "cpuCorePercent": 0.2343208621174816
+    }
+  },
+  "RuntimeNotes": [
+    "最终中文入口两版控件检查、原速77窗口与45画卷对应当前产物。",
+    "原速/快版像素采样在只改ScrollMotionChecks同帧采样器之前取得；正常产品代码一致，不声称全部报告的DLL字节相同。",
+    "真实鼠标09报告验证最新已确认规则；随后修正共用动画交接及测试等待，最终两版控件检查再次回归相同规则，没有再次移动鼠标。",
+    "准备时间和动作时间分别记录；有限采样不代表任意硬件/负载的恒定120帧或绝对无闪烁。"
+  ],
+  "DataSafety": {
+    "IsolatedTestData": true,
+    "FormalDataChanged": false,
+    "UserProcessesStopped": false,
+    "RealNotificationsChanged": false,
+    "StartupRegistryChanged": false,
+    "GitHubPublished": false
+  },
+  "FailedEvidence": "test-output本轮失败及无有效落点报告保留；不计为通过。",
+  "CodebaseMemory": {
+    "ConnectedAtStart": true,
+    "InitialRoot": "<project>",
+    "InitialNodes": 4357,
+    "InitialEdges": 12007,
+    "FinalADRUpdateVerified": false,
+    "FinalReindexVerified": false,
+    "Error": "Transport closed",
+    "Pending": "恢复连接后按INDEX-STATUS.md更新ADR、full重建并检查覆盖，不以旧图证明当前源码。"
+  }
+}

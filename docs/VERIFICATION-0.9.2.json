@@ -1,0 +1,92 @@
+{
+  "Version": "0.9.2",
+  "Date": "2026-10-15",
+  "LocalOnly": true,
+  "Requirements": "PRD U69-U78 / A87-A96 / T91-T100",
+  "FinalRuntimeSHA256": "C23AE14D5CC95AFA751F0F76EA55806E23F4CFE93440781E786B03C568CCBDE0",
+  "FinalRuntimeNotes": "最后的重建仅调整控件测试等待，正常产品代码与77窗口检查一致；早先球/抽牌/外点报告来自本轮修订，未声称全部报告的DLL字节相同。",
+  "Counts": {
+    "Rules": 122,
+    "Windows": 77,
+    "Scroll": 39,
+    "Compact": 61
+  },
+  "Evidence": {
+    "rules": {
+      "Path": "test-output/ux-092-rules-02/report.json",
+      "SHA256": "30B5632DE783661FBC184411DA8493B42EA9941FE734E6BDB58E64197C3AEF5C",
+      "Passed": 122
+    },
+    "compact": {
+      "Path": "test-output/ux-092-final-compact-06/compact-report.json",
+      "SHA256": "E7900C6968BF6C841EBBB121AD42B8ACCA6476FA6FEEFEC204C6ACDCF0412222",
+      "Passed": 61
+    },
+    "windows": {
+      "Path": "test-output/ux-092-final-windows-03/ui-report.json",
+      "SHA256": "60C86312FD0E815EA290D2B864DDDC5FB475FAAA676E8F0D593091B9A9BCCE06",
+      "Passed": 77
+    },
+    "scroll": {
+      "Path": "test-output/ux-092-final-scroll-02/scroll-report.json",
+      "SHA256": "44C20217885ECE51EB3DA23C31894A40AE1EA74F69E42CDA926ABFD38D36EC0E",
+      "Passed": 39
+    },
+    "card": {
+      "Path": "test-output/ux-092-final-desktop-05/shared-motion-report.json",
+      "SHA256": "E64C85DE3D8120502027A65EDCA20199B811D5102EF9CB34B868A3C0B96EB5DC",
+      "Passed": true
+    },
+    "ball": {
+      "Path": "test-output/ux-092-final-desktop-05/animation-pixels.json",
+      "SHA256": "A6F41036DF399DCD44A0AFA9C3C771AA35F65C76F6E31D387AE957311E6AE568",
+      "Passed": true
+    },
+    "outside": {
+      "Path": "test-output/ux-092-outside-after-05/outside-click-report.json",
+      "SHA256": "6C48702890C3962F088BD1AE4E32A1FB24F604D50AA2E5A342E25668BF18BF5B",
+      "Passed": true,
+      "FirstOutsideDifference": 0,
+      "NewTaskDifference": 0,
+      "RepeatedSettingsDifference": 0
+    }
+  },
+  "DraftMotion": {
+    "VerticalMovement": 0,
+    "NativeHostRestored": true,
+    "OldRightMs": [
+      150,
+      250
+    ],
+    "DurationMs": 360,
+    "NewLeftMs": [
+      190,
+      360
+    ],
+    "SampledFrames": 48,
+    "PreparedMs": 210.1205,
+    "ForegroundAtMs": 150,
+    "LateFrames": 19,
+    "HandoffColorDifference": 7,
+    "ExtractMs": [
+      0,
+      150
+    ]
+  },
+  "OutsideRules": {
+    "Settings": "outside left single-click",
+    "SlowOrDistantClicksKeepOpen": true,
+    "EditorAndNew": "Windows-threshold left double-click"
+  },
+  "IsolatedData": true,
+  "DesktopCoordinated": true,
+  "MouseRestored": true,
+  "FormalDataChanged": false,
+  "StartupChanged": false,
+  "ExistingUserProcessClosed": false,
+  "RealNotificationSettingsChanged": false,
+  "GitHubUploaded": false,
+  "SamplingLimit": "约165Hz本机有限采样，不保证所有设备与任意负载恒定120fps或绝对零闪烁。",
+  "HistoricalFailuresRetained": true,
+  "BuildInfo": "docs/BUILD-INFO-0.9.2.json"
+}

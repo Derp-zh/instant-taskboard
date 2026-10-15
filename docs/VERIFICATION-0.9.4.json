@@ -1,0 +1,89 @@
+{
+  "Version": "0.9.4",
+  "Date": "2026-10-15",
+  "LocalOnly": true,
+  "Requirements": "PRD U86-U90 / A104-A108 / T109-T114",
+  "Entry": "release/即时任务看板-0.9.4-standard/即时任务看板.exe",
+  "Archive": "release/即时任务看板-0.9.4-standard-win-x64.zip",
+  "ArchiveSHA256": "6094B56D1DEA0ADC43D34A822B9AB9903A23BC5B296B9124623509F0C463B330",
+  "FileCount": 476,
+  "ZipAllFilesVerified": true,
+  "RuntimeSHA256": "49388B787F0902852CE3DDA036DE0C235DF51A42C4F2A41D1299967A1C4260C9",
+  "DraftSwitchSpeed": 1.35,
+  "DraftSwitchDurationMs": 266.66666666666663,
+  "OtherAnimationDurationMs": 100,
+  "Compact": {
+    "Passed": 80,
+    "Report": {
+      "Path": "test-output/ux-094-compact-final-02/compact-report.json",
+      "SHA256": "F06CC40ABC6A3C065BE94888D9AF82257C6FA41C46BB04E0DBB6010AB57D0006"
+    },
+    "IncludesPhysicalTimeAndLateDelivery": true
+  },
+  "RepeatedScroll": {
+    "Passed": 66,
+    "Report": {
+      "Path": "test-output/ux-094-scroll-runtime-01/scroll-report.json",
+      "SHA256": "73DE54FD8CFA34AFF7774514FF968847D30AAE034040A7A628AC689887EA2EA7"
+    },
+    "Types": 3,
+    "CompleteCyclesPerType": 4,
+    "QuickReopensPerType": 3
+  },
+  "MultiDraftSingleFlare": {
+    "Passed": 8,
+    "Report": {
+      "Path": "test-output/ux-094-stack-runtime-01/scroll-report.json",
+      "SHA256": "7A07910E39EDC49DD517FF5DEF016BA20EAA45E79BF1B212293F76149531B895"
+    },
+    "ReproducedMultipleFlares": false,
+    "UserAllowedSkip": true,
+    "SeparateDuplicateFlareFix": false
+  },
+  "BusyOutsideClick": {
+    "Passed": 4,
+    "Report": {
+      "Path": "test-output/outside-observer-094-final-01/observer-report.json",
+      "SHA256": "ACAA4EE1DC3EA7E04787D27C04B631E5139AA2741BB65F9F75302BDE9DDEE098"
+    },
+    "BlockedUiMs": 1700,
+    "TestedFinalRuntime": true
+  },
+  "OutsidePolicy": {
+    "Report": {
+      "Path": "test-output/outside-click-094-01/outside-click-report.json",
+      "SHA256": "72DDD7B77781A191948D2BB6B02719642F65087B1EB834C26E528501A044DE1C"
+    },
+    "TestedBeforeFinalClickGateRefinement": true,
+    "PhysicalRuleImplementationUnchanged": true,
+    "MaxBackgroundDifference": 0
+  },
+  "SharedMotion": {
+    "Passed": true,
+    "Report": {
+      "Path": "test-output/ux-094-shared-runtime-01/shared-motion-report.json",
+      "SHA256": "DC3D78BF02FFBD734EC3F8302EF80F8A0192322E23B812D58631F176437C4D0D"
+    },
+    "DurationMs": 266.66666666666663
+  },
+  "CoreRules": {
+    "Passed": 122,
+    "Reused": true,
+    "Rerun": false,
+    "CoreSHA256": "C7BAE6469C41C1A3FCE38AEA1E91710E3B92E8D5304AEA6A95DD9FF5979BC3F2",
+    "PriorCoreSHA256": "C7BAE6469C41C1A3FCE38AEA1E91710E3B92E8D5304AEA6A95DD9FF5979BC3F2",
+    "Report": {
+      "Path": "test-output/ux-092-rules-02/report.json",
+      "SHA256": "30B5632DE783661FBC184411DA8493B42EA9941FE734E6BDB58E64197C3AEF5C"
+    }
+  },
+  "Boundaries": [
+    "所有测试隔离--data-dir",
+    "真实鼠标已协调并恢复",
+    "不改正式数据或启动登记",
+    "未退出用户进程",
+    "未上传GitHub",
+    "有限桌面采样不承诺任意硬件负载下零闪烁"
+  ],
+  "MemoryRecord": "docs/INDEX-STATUS.md"
+}

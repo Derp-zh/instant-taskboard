@@ -15,6 +15,7 @@ internal sealed class EditorSurface : Grid
     public SurfaceWindow? Host { get; internal set; }
     public bool IsActive => Host?.IsActive == true && (Session.TaskId is not null || controller.ActiveDraft == Session.Id);
     private readonly BoardController controller;
+    private readonly bool snapshotMode;
     public EditSession Session { get; }
     private readonly StackPanel stages = new();
     private readonly TextBlock status;
@@ -35,21 +36,25 @@ internal sealed class EditorSurface : Grid
         closeButton.Visibility = front ? Visibility.Visible : Visibility.Collapsed;
         draftNumber.Visibility = front ? Visibility.Collapsed : Visibility.Visible;
     }
-    public EditorSurface(BoardController controller, EditSession session)
+    public EditorSurface(BoardController controller, EditSession session, bool snapshotMode = false)
     {
-        this.controller = controller; Session = session;
+        this.controller = controller; Session = session; this.snapshotMode = snapshotMode;
         autosave = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(650) };
         Root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(72) });
         Root.RowDefinitions.Add(new RowDefinition()); Root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         var header = new Grid { Background = Brushes.Transparent, Cursor = System.Windows.Input.Cursors.SizeAll, Margin = new Thickness(14, 4, 10, 4) };
         header.ColumnDefinitions.Add(new ColumnDefinition()); header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.Children.Add(Ui.Label(session.TaskId is null ? "新建任务 · 自动暂存" : "编辑任务 · 保存后生效", 13));
-        var legacyClose = Ui.Button("×", () => { }); legacyClose.FontFamily = new FontFamily("Microsoft YaHei UI"); legacyClose.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        numberText = new TextBlock { FontSize = 12, Foreground = Ui.Text };
-        draftNumber = new Border { Tag = "DraftOrdinal", Width = legacyClose.DesiredSize.Width - 6, Height = legacyClose.DesiredSize.Height - 6, Margin = new Thickness(3),
-            Background = Ui.Card, BorderBrush = Ui.Line, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(20), IsHitTestVisible = false,
+        numberText = new TextBlock { FontSize = 12, Foreground = Brushes.White };
+        var legacyClose = Ui.Button("×", () => { }); legacyClose.FontFamily = new FontFamily("Microsoft YaHei UI");
+        legacyClose.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        var badgeDiameter = Math.Min(legacyClose.DesiredSize.Width, legacyClose.DesiredSize.Height) - 6;
+        draftNumber = new Border { Tag = "DraftOrdinal", Width = badgeDiameter, Height = badgeDiameter, Margin = new Thickness(3),
+            Background = Ui.Brush("#C04B5B70"), BorderBrush = Brushes.White, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(badgeDiameter / 2), IsHitTestVisible = false,
             Child = new Viewbox { Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly, Margin = new Thickness(8, 4, 8, 4), Child = numberText }, Visibility = Visibility.Collapsed };
-        closeButton = Ui.Button("×", CloseEditor); closeButton.Tag = "EditorClose"; closeButton.Width = closeButton.Height = 40; closeButton.Padding = new Thickness(0);
+        closeButton = Ui.Button("×", CloseEditor); closeButton.Tag = "EditorClose"; closeButton.Width = 48; closeButton.Height = 40; closeButton.Padding = new Thickness(0);
+        closeButton.Background = Ui.Brush("#C04B5B70"); closeButton.BorderBrush = Brushes.White; closeButton.Foreground = Brushes.White;
+        closeButton.Style = (Style)Application.Current.FindResource("EditorCloseButton");
         var closeSlot = new Grid { VerticalAlignment = VerticalAlignment.Center }; closeSlot.Children.Add(closeButton); closeSlot.Children.Add(draftNumber);
         Grid.SetColumn(closeSlot, 1); header.Children.Add(closeSlot); Root.Children.Add(header);
         header.MouseLeftButtonDown += (_, e) =>
@@ -62,12 +67,12 @@ internal sealed class EditorSurface : Grid
         var title = Ui.Input(session.Working.Title); title.TextChanged += (_, _) => { session.Working.Title = title.Text; Changed(); }; body.Children.Add(title);
         body.Children.Add(Ui.Label("任务详情", 12, Ui.Muted)); body.Children.Add(stages); RenderStages();
         var newStage = Ui.Button("＋ 新阶段", () => { controller.Engine.AddStage(session); RenderStages(); Changed(); });
-        newStage.HorizontalAlignment = HorizontalAlignment.Right; body.Children.Add(newStage);
+        newStage.Tag = "AddStage"; newStage.HorizontalAlignment = HorizontalAlignment.Left; body.Children.Add(newStage);
         var row = new Grid { Margin = new Thickness(0, 8, 0, 8) };
         for (var i = 0; i < 3; i++) row.ColumnDefinitions.Add(new ColumnDefinition());
         var statePanel = new StackPanel(); statePanel.Children.Add(Ui.Label("当前状态", 12, Ui.Muted));
-        var lane = laneSelector = new ComboBox { ItemsSource = controller.Engine.State.Preferences.Columns.Where(x => !x.Deleted).ToArray(), SelectedItem = BoardColumns.For(controller.Engine.State.Preferences,session.Working), Margin = new Thickness(0, 3, 5, 0), MinHeight = 32 };
-        lane.SelectionChanged += (_, _) => { if (lane.SelectedItem is BoardColumn definition) { definition.Assign(session.Working); Changed(); } };
+        var lane = laneSelector = new ComboBox { ItemsSource = controller.Engine.State.Preferences.Columns.Where(x => !x.Deleted).ToArray(), SelectedItem = session.StatusSelected ? BoardColumns.For(controller.Engine.State.Preferences,session.Working) : null, Margin = new Thickness(0, 3, 5, 0), MinHeight = 32, ToolTip = "请选择当前状态" };
+        lane.SelectionChanged += (_, _) => { if (lane.SelectedItem is BoardColumn definition) { definition.Assign(session.Working); session.StatusSelected = true; Changed(); } };
         statePanel.Children.Add(lane); row.Children.Add(statePanel);
         var aiPanel = new StackPanel(); aiPanel.Children.Add(Ui.Label("平台（多选）", 12, Ui.Muted));
         aiButton = Ui.Button("选择", () => ShowOptions(true)); aiPanel.Children.Add(aiButton); Grid.SetColumn(aiPanel, 1); row.Children.Add(aiPanel);
@@ -92,7 +97,12 @@ internal sealed class EditorSurface : Grid
             bindingNote.Text = id.Length>0 ? "保存后关联 · "+controller.CodexStatus : "未关联"; Changed();
         };
         codexPanel.Children.Add(threadId); codexPanel.Children.Add(browse); codexPanel.Children.Add(chats); codexPanel.Children.Add(bindingNote); body.Children.Add(codexPanel);
-        var reminderEnabled = new CheckBox { Content = "定时提醒", IsChecked = session.Working.Reminder.Enabled, Foreground = Ui.Text, Margin = new Thickness(0, 4, 0, 8) };
+        var reminderRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 8) };
+        var reminderEnabled = new CheckBox { Tag = "ReminderToggle", Width = 22, Height = 22, IsChecked = session.Working.Reminder.Enabled, Foreground = Ui.Text,
+            VerticalAlignment = VerticalAlignment.Center, Clip = new EllipseGeometry(new Point(11, 11), 11, 11) };
+        System.Windows.Automation.AutomationProperties.SetName(reminderEnabled, "定时提醒");
+        reminderRow.Children.Add(reminderEnabled);
+        reminderRow.Children.Add(new TextBlock { Text = "定时提醒", Foreground = Ui.Text, Margin = new Thickness(8, 4, 0, 4), VerticalAlignment = VerticalAlignment.Center });
         var reminderPanel = new StackPanel { Visibility = reminderEnabled.IsChecked == true ? Visibility.Visible : Visibility.Collapsed };
         var repeat = new ComboBox { ItemsSource = new[] { "一次", "每天", "每周" }, SelectedIndex = (int)session.Working.Reminder.Repeat, MinHeight = 30, Margin = new Thickness(0, 0, 0, 6) };
         var weekdays = new ComboBox { ItemsSource = new[] { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" },
@@ -121,7 +131,7 @@ internal sealed class EditorSurface : Grid
         weekdays.Visibility = repeat.SelectedIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
         reminderPanel.Children.Add(repeat); reminderPanel.Children.Add(weekdays); reminderPanel.Children.Add(Ui.Label("时间（24小时制）", 11, Ui.Muted));
         reminderPanel.Children.Add(time); reminderPanel.Children.Add(date); reminderPanel.Children.Add(error);
-        body.Children.Add(reminderEnabled); body.Children.Add(reminderPanel);
+        body.Children.Add(reminderRow); body.Children.Add(reminderPanel);
         var scroll = new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
         Grid.SetRow(scroll, 1); Root.Children.Add(scroll);
         var bottom = new Grid { Margin = new Thickness(12, 6, 12, 12) };
@@ -138,6 +148,7 @@ internal sealed class EditorSurface : Grid
         var save = Ui.Button("保存任务", async () =>
         {
             if (submitting) return;
+            if (!Session.StatusSelected) { status.Text = "请先选择当前状态，再保存任务。"; laneSelector.Focus(); laneSelector.IsDropDownOpen = true; return; }
             if (threadId.Text.Trim().Length > 0 && !Guid.TryParse(threadId.Text.Trim(),out _)) { bindingNote.Text = "请输入完整会话编号，或清空关联后保存。"; return; }
             if (reminderEnabled.IsChecked == true && error.Text.Length > 0) { Ui.Error(error.Text); return; }
             submitting = true;
@@ -150,12 +161,13 @@ internal sealed class EditorSurface : Grid
             finally { submitting = false; Root.IsEnabled = true; }
         }, true);
         Grid.SetColumn(save, 1); Grid.SetRow(save, 1); bottom.Children.Add(save); Grid.SetRow(bottom, 2); Root.Children.Add(bottom);
-        autosave.Tick += async (_, _) => { autosave.Stop(); if (await controller.Flush()) status.Text = Session.TaskId is null ? "草稿已暂存" : "修改已暂存，正式任务仍保持原值"; };
+        autosave.Tick += async (_, _) => { autosave.Stop(); if (await controller.Flush()) status.Text = Session.TaskId is null ? Session.Working.HasContent ? "草稿已暂存" : "未保存到任务列表" : "修改已暂存，正式任务仍保持原值"; };
     }
     private void Changed()
     {
+        if (snapshotMode) return;
         if (status is null) return;
-        controller.Engine.StageSession(Session); status.Text = Session.TaskId is null ? "正在暂存…" : "修改尚未提交";
+        controller.Engine.StageSession(Session); status.Text = Session.TaskId is null ? Session.Working.HasContent ? "正在暂存…" : "未保存到任务列表" : "修改尚未提交";
         autosave.Stop(); autosave.Start();
     }
     private void RenderStages()
@@ -255,7 +267,37 @@ internal sealed class EditorSurface : Grid
         optionManager.Children.Add(Ui.Button("＋ 新增选项", () => { var values = ai ? controller.Engine.State.AiOptions : controller.Engine.State.PriorityOptions; values.Add(new FieldOption { Name = "新选项" }); controller.OptionsChanged(); ShowOptionManager(ai); }));
     }
     private readonly ComboBox laneSelector;
-    public void RefreshColumns() { var selected = BoardColumns.For(controller.Engine.State.Preferences,Session.Working); laneSelector.ItemsSource = controller.Engine.State.Preferences.Columns.Where(x => !x.Deleted).ToArray(); laneSelector.SelectedItem = selected; }
+    internal EditorSurface CreateSnapshot()
+    {
+        var copy = new EditorSurface(controller, Copies.Of(Session), snapshotMode: true) { Width = Width, Height = Height };
+        copy.SetValue(System.Windows.Documents.TextElement.FontFamilyProperty, GetValue(System.Windows.Documents.TextElement.FontFamilyProperty));
+        copy.SetValue(System.Windows.Documents.TextElement.ForegroundProperty, GetValue(System.Windows.Documents.TextElement.ForegroundProperty));
+        copy.SetDraftPresentation(closeButton.Visibility == Visibility.Visible, DraftNumber); copy.status.Text = status.Text;
+        copy.Measure(new Size(Width, Height)); copy.Arrange(new Rect(0, 0, Width, Height)); copy.UpdateLayout();
+        foreach (var pair in SnapshotChildren<TextBox>(this).Zip(SnapshotChildren<TextBox>(copy))) pair.Second.Text = pair.First.Text;
+        foreach (var pair in SnapshotChildren<ScrollViewer>(this).Zip(SnapshotChildren<ScrollViewer>(copy)))
+        { pair.Second.ScrollToVerticalOffset(pair.First.VerticalOffset); pair.Second.ScrollToHorizontalOffset(pair.First.HorizontalOffset); }
+        copy.UpdateLayout();
+        foreach (var pair in SnapshotChildren<TextBox>(this).Zip(SnapshotChildren<TextBox>(copy)))
+            if (pair.First.Template.FindName("frame", pair.First) is Border sourceFrame && pair.Second.Template.FindName("frame", pair.Second) is Border copyFrame)
+                copyFrame.BorderBrush = sourceFrame.BorderBrush;
+        foreach (var pair in stages.Children.OfType<Border>().Zip(copy.stages.Children.OfType<Border>())) pair.Second.BorderBrush = pair.First.BorderBrush;
+        foreach (var pair in SnapshotChildren<Button>(this).Zip(SnapshotChildren<Button>(copy)))
+        {
+            if (!Equals(Convert.ToString(pair.First.Content), Convert.ToString(pair.Second.Content))) continue;
+            var sourceFrame = pair.First.Template.FindName("border", pair.First) as Border ?? pair.First.Template.FindName("frame", pair.First) as Border;
+            var copyFrame = pair.Second.Template.FindName("border", pair.Second) as Border ?? pair.Second.Template.FindName("frame", pair.Second) as Border;
+            if (sourceFrame is not null && copyFrame is not null) { copyFrame.BorderBrush = sourceFrame.BorderBrush; copyFrame.Background = sourceFrame.Background; }
+        }
+        return copy;
+    }
+    private static System.Collections.Generic.IEnumerable<T> SnapshotChildren<T>(DependencyObject element) where T : DependencyObject
+    {
+        if (element is T value) yield return value;
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+            foreach (var child in SnapshotChildren<T>(VisualTreeHelper.GetChild(element, i))) yield return child;
+    }
+    public void RefreshColumns() { var selected = Session.StatusSelected ? BoardColumns.For(controller.Engine.State.Preferences,Session.Working) : null; laneSelector.ItemsSource = controller.Engine.State.Preferences.Columns.Where(x => !x.Deleted).ToArray(); laneSelector.SelectedItem = selected; }
     private readonly StackPanel optionManager = new() { Visibility = Visibility.Collapsed, Margin = new Thickness(0, 8, 0, 8) };
 }
 

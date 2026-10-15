@@ -75,6 +75,8 @@ public sealed class WorkItem
 
 public sealed class EditSession
 {
+    // Older sessions already have a list; the shared host's new entry starts unassigned.
+    public bool StatusSelected { get; set; } = true;
     public DateTime? CreatedUtc { get; set; }
     [System.Text.Json.Serialization.JsonIgnore]
     public DateTime CreationTime => CreatedUtc ?? Original.UpdatedUtc;
@@ -120,6 +122,7 @@ public sealed class Preferences
     public List<BoardColumn> Columns { get; set; } = BoardColumn.Defaults();
     // Optional for backwards compatibility with 0.3/0.4 data files.
     public double GlassTransparency { get; set; } = 20;
+    public double FloatingTransparency { get; set; } = 10;
     public double BallTransparency { get; set; } = 40;
     [System.Text.Json.Serialization.JsonRequired]
     public bool ResizeCorner { get; set; }

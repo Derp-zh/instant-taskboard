@@ -16,8 +16,13 @@ internal static class Program
         var startupClock = Stopwatch.StartNew();
         var performanceVerify=false;
         var scrollVerify = false;
+        var scrollRestoreVerify = false;
+        var scrollStackVerify = false;
+        var outsideObserverVerify = false;
+        var floatingVerify = false;
         var appearanceVerify = false;
         var compactVerify = false;
+        var sharedVerify = false;
         var integrationVerify = false; var startupEntryVerify = false; var startupInvocation = false;
         var defaultData = DataPaths.DefaultDataDirectory;
         var data = defaultData; var isolated = false; var smoke = false; var startupCheck = false; var desktopVerify = false; var hasDataDirectory = false; var codexVerify = false; var animationVerify=false; var listeningVerify = false;
@@ -32,15 +37,20 @@ internal static class Program
             else if (args[i] == "--animation-verify") animationVerify=true;
             else if (args[i] == "--performance-verify") performanceVerify=true;
             else if (args[i] == "--scroll-verify") scrollVerify=true;
+            else if (args[i] == "--scroll-restore-verify") { scrollVerify = true; scrollRestoreVerify = true; }
+            else if (args[i] == "--scroll-stack-verify") { scrollVerify = true; scrollRestoreVerify = true; scrollStackVerify = true; }
+            else if (args[i] == "--outside-observer-verify") outsideObserverVerify = true;
+            else if (args[i] == "--floating-verify") { outsideObserverVerify = true; floatingVerify = true; }
             else if (args[i] == "--appearance-verify") { appearanceVerify = true; startupCheck = true; }
             else if (args[i] == "--compact-verify") { compactVerify = true; startupCheck = true; }
+            else if (args[i] == "--shared-verify") sharedVerify = true;
             else if (args[i] == "--integration-verify") { integrationVerify = true; startupCheck = true; }
             else if (args[i] == "--startup-entry-verify") { startupEntryVerify = true; startupCheck = true; }
             else if (args[i] == "--startup") startupInvocation = true;
             else if (args[i] == "--listening-verify") { listeningVerify = true; startupCheck = true; }
             else { MessageBox.Show("不支持的启动参数：" + args[i]); return 2; }
         }
-        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify) && !hasDataDirectory)
+        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify || sharedVerify || outsideObserverVerify) && !hasDataDirectory)
         { Console.Error.WriteLine("验证模式必须明确指定隔离数据目录。"); return 2; }
         if (startupEntryVerify)
         {
@@ -86,7 +96,7 @@ internal static class Program
             }
             catch (Exception e) { MessageBox.Show(e.Message, "即时任务看板"); return 1; }
         }
-        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify) && (!hasDataDirectory || string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)))
+        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify || sharedVerify || outsideObserverVerify) && (!hasDataDirectory || string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)))
         { Console.Error.WriteLine("验证模式必须明确指定非正式目录的 --data-dir。"); return 2; }
         using var mutex = DataPaths.Lock(data, out var acquired);
         if (!acquired) { MessageBox.Show("这一份任务数据已经打开，请从托盘找到即时任务看板。"); return 0; }
@@ -101,14 +111,16 @@ internal static class Program
         {
             try
             {
-                controller = new BoardController(data, isolated, smoke || startupCheck || scrollVerify); if (!listeningVerify && !appearanceVerify && !integrationVerify && !compactVerify) await controller.Start();
+                controller = new BoardController(data, isolated, smoke || startupCheck); if (!listeningVerify && !appearanceVerify && !integrationVerify && !compactVerify && !sharedVerify) await controller.Start();
                 if (startupInvocation && !isolated) File.WriteAllText(Path.Combine(DataPaths.SystemRoot, "last-startup.json"), System.Text.Json.JsonSerializer.Serialize(new { utc = DateTime.UtcNow, version = typeof(Program).Assembly.GetName().Version!.ToString(), executable = Environment.ProcessPath }));
                 startupClock.Stop();
                 if (smoke || startupCheck) File.WriteAllText(Path.Combine(data, "startup-report.json"), System.Text.Json.JsonSerializer.Serialize(new { readyMs = startupClock.Elapsed.TotalMilliseconds, tasks = controller.Engine.State.Tasks.Count, draftsAndEdits = controller.Engine.State.Sessions.Count }));
-                if (compactVerify) { await CompactChecks.Run(controller); await controller.Exit(); }
+                if (outsideObserverVerify) { if (floatingVerify) await FloatingInteractionChecks.Run(controller); else await OutsideObserverChecks.Run(controller); await controller.Exit(); }
+                else if (sharedVerify) { await SharedMotionChecks.Run(controller); await controller.Exit(); }
+                else if (compactVerify) { await CompactChecks.Run(controller); await controller.Exit(); }
                 else if (integrationVerify) { await IntegrationChecks.Run(controller); await controller.Exit(); }
                 else if (appearanceVerify) { AppearanceChecks.Run(controller); await controller.Exit(); }
-                else if (scrollVerify) { await ScrollMotionChecks.Run(controller); await controller.Exit(); }
+                else if (scrollVerify) { await ScrollMotionChecks.Run(controller, scrollRestoreVerify, scrollStackVerify); await controller.Exit(); }
                 else if (listeningVerify) { await NotificationListeningChecks.Run(controller); await controller.Exit(); }
                 else if (performanceVerify) {controller.SuppressCollapse=true; await PerformanceChecks.Run(controller); await controller.Exit();}
                 else if (animationVerify) { controller.SuppressCollapse=true; await PerformanceChecks.SampleBallAnimation(controller); await controller.Exit(); }
@@ -119,7 +131,7 @@ internal static class Program
             catch (Exception e)
             {
                 Directory.CreateDirectory(data); File.WriteAllText(Path.Combine(data, "startup-error.txt"), e.ToString());
-                if (!smoke && !startupCheck && !desktopVerify && !scrollVerify) Ui.Error("即时任务看板不能启动：" + e.Message);
+                if (!smoke && !startupCheck && !desktopVerify && !scrollVerify && !outsideObserverVerify) Ui.Error("即时任务看板不能启动：" + e.Message);
                 controller?.Dispose(); application.Shutdown(1);
             }
         };

@@ -61,16 +61,20 @@ internal sealed partial class SettingsSurface : SurfaceWindow
             panel.Children.Add(Ui.Label(StartupLinks.AutoStartStatus(), 12, Ui.Muted));
             panel.Children.Add(Ui.Button("Windows启动应用设置", () => Try(() => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("ms-settings:startupapps") { UseShellExecute = true }))));
         }
-        panel.Children.Add(Ui.Label("即时任务看板 0.9.1 · 紧凑卡片与快捷新建。", 12, Ui.Muted)); return panel;
+        panel.Children.Add(Ui.Label("即时任务看板 0.9.3 · " + DraftSwitchMotion.VariantLabel + "。", 12, Ui.Muted)); return panel;
     }
     private StackPanel WindowSettings()
     {
         var panel = new StackPanel(); panel.Children.Add(Ui.Label("窗口", 18));
         panel.Children.Add(ListSettings());
-        var caption = Ui.Label($"毛玻璃透明度 {controller.Engine.State.Preferences.GlassTransparency:0}%", 14); panel.Children.Add(caption);
+        var caption = Ui.Label($"多列表窗口透明度 {controller.Engine.State.Preferences.GlassTransparency:0}%", 14); panel.Children.Add(caption);
         panel.Children.Add(Ui.Label("数值越大越透明；0%为暗色遮罩，100%仍保留背景模糊。默认20%。", 12, Ui.Muted));
-        var slider = new Slider { Minimum = 0, Maximum = 100, Value = controller.Engine.State.Preferences.GlassTransparency, TickFrequency = 1, IsSnapToTickEnabled = true, Margin = new Thickness(6, 12, 6, 18), ToolTip = "毛玻璃透明度" };
-        slider.ValueChanged += (_, _) => { caption.Text = $"毛玻璃透明度 {slider.Value:0}%"; controller.SetGlassTransparency(slider.Value); }; panel.Children.Add(slider);
+        var slider = new Slider { Minimum = 0, Maximum = 100, Value = controller.Engine.State.Preferences.GlassTransparency, TickFrequency = 1, IsSnapToTickEnabled = true, Margin = new Thickness(6, 12, 6, 18), ToolTip = "多列表窗口透明度" };
+        slider.ValueChanged += (_, _) => { caption.Text = $"多列表窗口透明度 {slider.Value:0}%"; controller.SetGlassTransparency(slider.Value); }; panel.Children.Add(slider);
+        var floatingCaption = Ui.Label($"悬浮窗口透明度 {controller.Engine.State.Preferences.FloatingTransparency:0}%", 14); panel.Children.Add(floatingCaption);
+        panel.Children.Add(Ui.Label("新建、编辑任务、设置等悬浮窗口独立调节，默认10%；数值越大越透明，背景模糊始终保留。", 12, Ui.Muted));
+        var floatingSlider = new Slider { Minimum = 0, Maximum = 100, Value = controller.Engine.State.Preferences.FloatingTransparency, TickFrequency = 1, IsSnapToTickEnabled = true, Margin = new Thickness(6, 12, 6, 18), ToolTip = "悬浮窗口透明度" };
+        floatingSlider.ValueChanged += (_, _) => { floatingCaption.Text = $"悬浮窗口透明度 {floatingSlider.Value:0}%"; controller.SetFloatingTransparency(floatingSlider.Value); }; panel.Children.Add(floatingSlider);
         var ballCaption = Ui.Label($"悬浮球透明度 {controller.Engine.State.Preferences.BallTransparency:0}%", 14); panel.Children.Add(ballCaption);
         var ballSlider = new Slider { Minimum = 0, Maximum = 100, Value = controller.Engine.State.Preferences.BallTransparency, TickFrequency = 1, IsSnapToTickEnabled = true, Margin = new Thickness(6, 12, 6, 18), ToolTip = "悬浮球透明度" };
         ballSlider.ValueChanged += (_, _) => { ballCaption.Text = $"悬浮球透明度 {ballSlider.Value:0}%"; controller.SetBallTransparency(ballSlider.Value); }; panel.Children.Add(ballSlider);

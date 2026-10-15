@@ -19,7 +19,7 @@ namespace Taskboard.Desktop;
 
 internal static class ScrollMotionChecks
 {
-    internal static async Task Run(BoardController controller)
+    internal static async Task Run(BoardController controller, bool restorationOnly = false, bool stackOnly = false)
     {
         var directory = Path.Combine(controller.Store.DirectoryPath, "scroll-frames"); Directory.CreateDirectory(directory);
         var checks = new List<string>(); var evidence = new List<object>();
@@ -31,12 +31,46 @@ internal static class ScrollMotionChecks
         foreach (var column in controller.Columns) column.Hide(); controller.Ball.Hide();
         try
         {
+            if (stackOnly)
+            {
+                EditorSurface? top = null;
+                for (var i = 1; i <= 3; i++) { top = controller.NewTask(Lane.Running); top.Session.Working.Title = "白条验证暂存卡片" + i; }
+                var host = top!.Host!; host.WindowLayer = 100; await Task.Delay(600);
+                for (var cycle = 1; cycle <= 4; cycle++)
+                {
+                    var closing = await Capture("三张暂存-收起-" + cycle, host, () => controller.SetExpanded(false), 600);
+                    var opening = await Capture("三张暂存-展开-" + cycle, host, () => controller.SetExpanded(true), 600);
+                    evidence.Add(new { name = "三张暂存", cycle, opening, closing }); Write();
+                    Assert(opening.Any(x => x.WhiteBars == 1) && opening.All(x => x.WhiteBars <= 1), "三张暂存第" + cycle + "次展开只有一条泛光白条");
+                    Assert(closing.Any(x => x.WhiteBars == 1) && closing.All(x => x.WhiteBars <= 1), "三张暂存第" + cycle + "次收起只有一条泛光白条");
+                }
+                Write(); return;
+            }
             var draft = controller.NewTask(Lane.Running); draft.Session.Working.Title = "画卷动效实验草稿";
             var draftWindow = draft.Host!; await Task.Delay(400); draftWindow.Hide(); await Task.Delay(400);
             var created = controller.Engine.NewSession(Lane.Running); created.Working.Title = "画卷动效实验 · 编辑任务"; controller.Engine.Submit(created);
             var editor = controller.EditTask(created.Working.Id); var editWindow = editor.Host!; await Task.Delay(400); editWindow.Hide(); await Task.Delay(400);
             controller.Settings(); var settings = Application.Current.Windows.OfType<SettingsSurface>().Single(); await Task.Delay(400); settings.Hide(); await Task.Delay(400);
-            foreach (var (name, window) in new[] { ("新建", draftWindow), ("编辑", editWindow), ("设置", (SurfaceWindow)settings) })
+            // First display without warming a snapshot catches the missing
+            // initial flare that repeated/preheated open-close cycles miss.
+            if (!restorationOnly) foreach (var (name, window) in new[] {
+                ("编辑首次", (SurfaceWindow)new TaskEditorWindow(new EditorSurface(controller, Copies.Of(editor.Session), snapshotMode: true))),
+                ("设置首次", (SurfaceWindow)new SettingsSurface(controller)),
+                ("其他悬浮首次", new SurfaceWindow(360, 260)) })
+            {
+                window.Title = name; window.Left = area.Left + (area.Width - window.Width) / 2; window.Top = area.Top + (area.Height - window.Height) / 2;
+                new WindowInteropHelper(window).EnsureHandle();
+                try
+                {
+                    var opening = await Capture(name + "-展开", window, window.Show, sampleDurationMs: 1200);
+                    var closing = await Capture(name + "-收起", window, window.Hide);
+                    evidence.Add(new { name, opening, closing }); Write();
+                    Assert(opening.Any(x => x.WhiteLinePixels > window.Height * .1) && closing.Any(x => x.WhiteLinePixels > window.Height * .1), name + "未经内容/动画预热，第一次打开及关闭均有中央泛光白条");
+                    Assert(opening.Concat(closing).Any(x => x.WhiteTopMargin <= 3 && x.WhiteBottomMargin <= 3), name + "首次白条贯穿窗口上下边缘");
+                }
+                finally { window.Destroy(false); }
+            }
+            if (!restorationOnly) foreach (var (name, window) in new[] { ("新建", draftWindow), ("编辑", editWindow), ("设置", (SurfaceWindow)settings) })
             {
                 window.Left = area.Left + (area.Width - window.Width) / 2; window.Top = area.Top + (area.Height - window.Height) / 2;
                 window.WarmAnimation(); await Task.Delay(100);
@@ -69,6 +103,33 @@ internal static class ScrollMotionChecks
                 Assert(window.IsVisible && !window.IsScrollAnimating, name + "反向重开最终完整可见");
                 window.Hide(); await Task.Delay(400); Write();
             }
+            // Exercise restoration through the workspace, rather than only
+            // calling Show/Hide on a standalone floating host.
+            foreach (var (name, window) in new[] { ("新建", draftWindow), ("编辑", editWindow), ("设置", (SurfaceWindow)settings) })
+            {
+                var layer = window.WindowLayer; window.WindowLayer = 100;
+                window.Show(); await Task.Delay(400);
+                for (var cycle = 1; cycle <= 4; cycle++)
+                {
+                    var closing = await Capture(name + "-整组收起-" + cycle, window, () => controller.SetExpanded(false), 600);
+                    Assert(!window.IsVisible, name + "整组收起第" + cycle + "次隐藏原悬浮窗口");
+                    var opening = await Capture(name + "-整组展开-" + cycle, window, () => controller.SetExpanded(true), 600);
+                    Assert(window.IsVisible && !window.IsScrollAnimating, name + "整组展开第" + cycle + "次恢复原悬浮窗口");
+                    evidence.Add(new { name, cycle, workspace = true, opening, closing }); Write();
+                    Assert(opening.Any(x => x.WhiteLinePixels > window.Height * .1), name + "整组展开第" + cycle + "次仍有中央白条");
+                    Assert(closing.Any(x => x.WhiteLinePixels > window.Height * .1), name + "整组收起第" + cycle + "次仍有中央白条");
+                }
+                for (var cycle = 1; cycle <= 3; cycle++)
+                {
+                    controller.SetExpanded(false); await Task.Delay(35);
+                    var opening = await Capture(name + "-快速整组重开-" + cycle, window, () => controller.SetExpanded(true), 600);
+                    evidence.Add(new { name, cycle, quickReopen = true, opening }); Write();
+                    Assert(opening.Any(x => x.WhiteLinePixels > window.Height * .1), name + "快速重开第" + cycle + "次也重新触发白条");
+                    Assert(window.IsVisible && !window.IsScrollAnimating, name + "快速重开第" + cycle + "次完整交接");
+                }
+                window.Hide(); await Task.Delay(400); window.WindowLayer = layer;
+            }
+            if (restorationOnly) { Write(); return; }
             editor.Show(); await Task.Delay(400);
             var title = Descendants<TextBox>(editor).First(); var original = created.Working.Title; title.Text = "实验修改不应保存";
             var editClose = Descendants<Button>(editor).First(x => Equals(x.Content, "×")); Invoke(editClose);
@@ -96,31 +157,59 @@ internal static class ScrollMotionChecks
         finally { background.Destroy(false); }
         void Write() => File.WriteAllText(Path.Combine(controller.Store.DirectoryPath, "scroll-report.json"), JsonSerializer.Serialize(new { passed = checks.Count, mouseMoved = false, durationMs = ScrollMotion.DurationMs, checks, evidence }, new JsonSerializerOptions { WriteIndented = true }));
 
-        async Task<List<Frame>> Capture(string name, SurfaceWindow window, Action transition)
+        async Task<List<Frame>> Capture(string name, SurfaceWindow window, Action transition, int sampleDurationMs = 300)
         {
             var bounds = Native.ScreenBounds(window); var frames = new List<Frame>();
+            File.WriteAllText(Path.Combine(directory, name + "-bounds.json"), JsonSerializer.Serialize(new {
+                bounds, window.Left, window.Top, window.Width, window.Height, window.IsVisible,
+                virtualLeft = SystemParameters.VirtualScreenLeft, virtualTop = SystemParameters.VirtualScreenTop,
+                virtualWidth = SystemParameters.VirtualScreenWidth, virtualHeight = SystemParameters.VirtualScreenHeight }));
             // Sample the actual desktop on a worker, independent of UI preparation.
             var ready = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); using var begin = new ManualResetEventSlim();
             var worker = Task.Run(() =>
             {
+                var previousDpi = SetThreadDpiAwarenessContext(new IntPtr(-4));
                 try
                 {
                 var width = (int)bounds.Width; var height = (int)bounds.Height; var rowY = (int)(height * .53);
                 using var baseline = new Drawing.Bitmap(width, 1);
                 using (var graphics = Drawing.Graphics.FromImage(baseline)) graphics.CopyFromScreen((int)bounds.X, (int)bounds.Y + rowY, 0, 0, baseline.Size);
                 ready.TrySetResult(); begin.Wait(); var clock = Stopwatch.StartNew();
-                var samples = new List<(double Ms, Drawing.Bitmap Row, Drawing.Bitmap Column)>();
-                using var rowImage = new Drawing.Bitmap(width, 1); using var rowGraphics = Drawing.Graphics.FromImage(rowImage);
-                using var columnImage = new Drawing.Bitmap(7, height); using var columnGraphics = Drawing.Graphics.FromImage(columnImage);
-                while (clock.ElapsedMilliseconds < 300)
+                var samples = new List<(double Ms, Drawing.Bitmap Row, Drawing.Bitmap Column, int WhiteBars, Drawing.Bitmap? WhiteImage)>();
+                using var wholeImage = new Drawing.Bitmap(width, height); using var sampleGraphics = Drawing.Graphics.FromImage(wholeImage);
+                while (clock.ElapsedMilliseconds < sampleDurationMs)
                 {
-                    rowGraphics.CopyFromScreen((int)bounds.X, (int)bounds.Y + rowY, 0, 0, rowImage.Size);
-                    columnGraphics.CopyFromScreen((int)bounds.X + width / 2 - 3, (int)bounds.Y, 0, 0, columnImage.Size);
-                    samples.Add((clock.Elapsed.TotalMilliseconds, (Drawing.Bitmap)rowImage.Clone(), (Drawing.Bitmap)columnImage.Clone())); Thread.Sleep(1);
+                    // One desktop read keeps row and column in the same frame
+                    // and avoids missing a brief flare between two GDI waits.
+                    sampleGraphics.CopyFromScreen((int)bounds.X, (int)bounds.Y, 0, 0, wholeImage.Size);
+                    var hits = new int[width]; var rowBytes = new byte[width * 4];
+                    var bits = wholeImage.LockBits(new Drawing.Rectangle(0, 0, width, height), Drawing.Imaging.ImageLockMode.ReadOnly, Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    try
+                    {
+                        foreach (var fraction in new[] { .2, .3, .4, .53, .65, .8 })
+                        {
+                            System.Runtime.InteropServices.Marshal.Copy(bits.Scan0 + (int)(height * fraction) * bits.Stride, rowBytes, 0, rowBytes.Length);
+                            for (var x = 0; x < width; x++) if (rowBytes[x * 4] > 170 && rowBytes[x * 4 + 1] > 170 && rowBytes[x * 4 + 2] > 170) hits[x]++;
+                        }
+                    }
+                    finally { wholeImage.UnlockBits(bits); }
+                    var bars = 0; var previousWhite = false;
+                    for (var x = 0; x < width; x++)
+                    {
+                        var whiteHere = hits[x] >= 5;
+                        if (whiteHere && !previousWhite) bars++;
+                        previousWhite = whiteHere;
+                    }
+                    samples.Add((clock.Elapsed.TotalMilliseconds,
+                        wholeImage.Clone(new Drawing.Rectangle(0, rowY, width, 1), Drawing.Imaging.PixelFormat.Format32bppArgb),
+                        wholeImage.Clone(new Drawing.Rectangle(width / 2 - 3, 0, 7, height), Drawing.Imaging.PixelFormat.Format32bppArgb), bars,
+                        bars > 0 ? (Drawing.Bitmap)wholeImage.Clone() : null)); Thread.Sleep(1);
                 }
                 for (var i = 0; i < samples.Count; i++)
                 {
                     using var row = samples[i].Row; using var column = samples[i].Column;
+                    using var whiteImage = samples[i].WhiteImage;
+                    whiteImage?.Save(Path.Combine(directory, name + "-white-" + i.ToString("D3") + ".png"), Drawing.Imaging.ImageFormat.Png);
                     row.Save(Path.Combine(directory, name + "-" + i.ToString("D3") + "-row.png"), Drawing.Imaging.ImageFormat.Png);
                     column.Save(Path.Combine(directory, name + "-" + i.ToString("D3") + "-column.png"), Drawing.Imaging.ImageFormat.Png);
                     var left = width; var right = -1;
@@ -142,17 +231,24 @@ internal static class ScrollMotionChecks
                             if (c.R > 170 && c.G > 170 && c.B > 170) { white++; whiteTop = Math.Min(whiteTop, y); whiteBottom = y; break; }
                         }
                     }
-                    frames.Add(new Frame(samples[i].Ms, width, right >= left ? right-left+1 : 0, left, right < 0 ? width : width-1-right, white, whiteTop, whiteBottom < 0 ? height : height-1-whiteBottom));
+                    frames.Add(new Frame(samples[i].Ms, width, right >= left ? right-left+1 : 0, left, right < 0 ? width : width-1-right, white, whiteTop, whiteBottom < 0 ? height : height-1-whiteBottom, samples[i].WhiteBars));
                 }
                 return frames;
                 }
                 catch (Exception error) { ready.TrySetException(error); throw; }
+                finally { SetThreadDpiAwarenessContext(previousDpi); }
             });
             await ready.Task; begin.Set(); transition();
-            return await worker;
+            var collected = await worker;
+            File.WriteAllText(Path.Combine(directory, name + "-motion.json"), JsonSerializer.Serialize(new {
+                window.UsesIndependentAnimation, window.LastAnimationError, window.MotionDisplayStartTicks,
+                window.LastAnimationPreparationMs, window.LastSnapshotMs, window.LastShowMs, window.MotionGeneration,
+                window.IsVisible, window.ScrollProgress, window.ScrollLight }));
+            return collected;
         }
     }
-    private sealed record Frame(double Ms, int TotalWidth, int PaintedWidth, int LeftMargin, int RightMargin, int WhiteLinePixels, int WhiteTopMargin, int WhiteBottomMargin);
+    [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
+    private sealed record Frame(double Ms, int TotalWidth, int PaintedWidth, int LeftMargin, int RightMargin, int WhiteLinePixels, int WhiteTopMargin, int WhiteBottomMargin, int WhiteBars);
     private sealed class ScrollFallbackWindow : SurfaceWindow
     {
         protected override bool ScrollEnabled => true;

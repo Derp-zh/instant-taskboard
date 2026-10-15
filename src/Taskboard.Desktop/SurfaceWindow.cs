@@ -20,15 +20,26 @@ internal class SurfaceWindow : Window
 {
     public readonly Grid Root = new SurfaceContentRoot();
     private bool allowClose;
+    private bool activateWhenShown;
     private bool animating;
-    protected virtual bool ScrollEnabled => false;
+    protected bool HasActiveMotion => animating;
+    internal bool FloatingAnimations { get; set; } = true;
+    protected virtual bool ScrollEnabled => FloatingAnimations && GlassEnabled;
     private bool scrollRunning, destroyAfterScroll;
-    private double scrollFrom, scrollTo, scrollDuration;
+    private double scrollFrom, scrollTo, scrollDuration, scrollStartLight;
     private readonly Stopwatch scrollClock = new();
     internal bool IsScrollAnimating => scrollRunning;
     internal bool IsContentSwapping { get; private set; }
+    internal bool IsContentSwapHandoff => IsContentSwapping || handoff is not null || handoffCommitting;
+    internal event Action? ContentSwapCompleted;
     internal long ContentSwapCount { get; private set; }
     internal double LastContentSwapPreparationMs { get; private set; }
+    internal long ContentSwapFinishTicks { get; private set; }
+    private long contentSwapStartedAt;
+    internal bool CanQueueContentSwap(long pressedAt) =>
+        contentSwapStartedAt > 0 && pressedAt - contentSwapStartedAt >= DraftSwitchMotion.DurationMs * 2 / 3;
+    internal bool IsEarlyContentSwapPress(long pressedAt) =>
+        contentSwapStartedAt > 0 && pressedAt - contentSwapStartedAt < DraftSwitchMotion.DurationMs * 2 / 3;
     private Rect? swapBounds;
     internal Point SwapInputOffset { get; private set; }
     private void RestoreSwapBounds()
@@ -38,17 +49,23 @@ internal class SurfaceWindow : Window
         Left = original.Left; Top = original.Top; Width = original.Width; Height = original.Height;
         Root.UpdateLayout(); UpdateGlassGeometry(); Native.ClipWindow(this, Height); imageDirty = true;
     }
-    internal bool ShouldRestore => IsVisible && (!scrollRunning || scrollTo > 0);
+    internal bool ShouldRestore => scrollRunning ? scrollTo > 0 : IsVisible;
     internal double ScrollProgress => scrollRunning ? ScrollMotion.Progress(scrollFrom, scrollTo, scrollClock.Elapsed.TotalMilliseconds, scrollDuration) : IsVisible ? 1 : 0;
+    internal double ScrollLight => scrollRunning ? ScrollMotion.Light(scrollClock.Elapsed.TotalMilliseconds / Math.Max(1, scrollDuration), scrollTo == 1, scrollStartLight) : 0;
     public new void Show()
     {
         if (destroyAfterScroll) return;
+        // Calling an existing/opening window is a focus operation. Replaying
+        // its reveal or restoring input mid-animation would cause a flash.
+        if (IsVisible && (!scrollRunning || scrollTo > 0)) return;
         if (ScrollEnabled && (!IsVisible || scrollRunning)) { RevealScroll(true); return; }
         ShowImmediately();
     }
-    private void ShowImmediately() {if(!animating) {Root.Opacity=1;backdrop?.SetVisible(true);} base.Show();if(!animating)Native.ShowWindow(ContentHandle,4);}
+    private void ShowImmediately() {if(!animating) {Root.Opacity=1;contentHost.Visibility=Visibility.Visible;backdrop?.SetVisible(true);} base.Show();if(!animating)Native.ShowWindow(ContentHandle,4);if(activateWhenShown){activateWhenShown=false;base.Activate();}Native.RaiseBall();}
+    public new bool Activate() { if (!IsVisible) { activateWhenShown = true; ActivationOrder = ++activationSequence; return false; } return base.Activate(); }
     public new void Hide()
     {
+        activateWhenShown = false;
         if (ScrollEnabled && IsVisible) { RevealScroll(false); return; }
         HideImmediately();
     }
@@ -57,25 +74,42 @@ internal class SurfaceWindow : Window
     public bool GlassEnabled { get; set; } = true;
     public int WindowLayer { get; set; } = 2;
     public static double Transparency { get; private set; } = 20;
+    internal static double FloatingTransparency { get; private set; } = 10;
     public string BackdropMode { get; internal set; } = "未初始化";
     internal int NativeHideCount { get; private set; }
     public long ActivationOrder { get; private set; }
     private static long activationSequence;
     private long motion;
+    internal long MotionGeneration => motion;
     private DispatcherTimer? animationDeadline;
     private EventHandler? handoff;
-    private void CancelHandoff() { if(handoff is not null) CompositionTarget.Rendering-=handoff; handoff=null; }
+    private bool handoffCommitting;
+    private void CancelHandoff() { if(handoff is not null) CompositionTarget.Rendering-=handoff; handoff=null; handoffCommitting=false; }
+    private async void CompleteHandoff(long generation, Action? complete = null)
+    {
+        handoffCommitting = true;
+        try
+        {
+            if (backdrop is not null) await backdrop.CommitRestingFrame();
+            if (generation != motion) return;
+            Native.DwmFlush(); backdrop?.CancelAnimation(); handoffCommitting = false; complete?.Invoke();
+        }
+        catch (Exception e) when (e is COMException or ObjectDisposedException) { }
+        finally { if (generation == motion) handoffCommitting = false; }
+    }
     private byte[]? animationImage;
     private int imageWidth, imageHeight;
     private bool imageDirty = true;
     internal double LastAnimationPreparationMs { get; private set; }
     internal double LastSnapshotMs { get; private set; }
     internal double LastShowMs { get; private set; }
+    internal long MotionDisplayStartTicks { get; private set; }
     internal bool UsesIndependentAnimation { get; private set; }
+    internal string? LastAnimationError { get; private set; }
     private LiveBackdrop? backdrop;
     private readonly GlassContentHost contentHost;
     internal IntPtr ContentHandle => contentHost.ContentHandle;
-    internal virtual double GlassTransparency => Transparency;
+    internal virtual double GlassTransparency => FloatingTransparency;
     internal double GlassRadius => this is BallSurface ? Height / 2 : 20;
     internal virtual IEnumerable<GlassRegion> GlassRegions() => [new(new Rect(0, 0, Width, Height), Radius: GlassRadius)];
     public event Action? PositionChanged;
@@ -145,9 +179,10 @@ internal class SurfaceWindow : Window
             if (current is Button or TextBox or ComboBox) return true;
         return false;
     }
-    public static void SetTransparency(double value)
+    public static void SetTransparency(double value, double? floating = null)
     {
         Transparency = Math.Clamp(value, 0, 100);
+        if (floating is double floatingValue) FloatingTransparency = Math.Clamp(floatingValue, 0, 100);
         foreach (var window in Application.Current.Windows.OfType<SurfaceWindow>().ToArray()) window.RefreshGlass();
     }
     public virtual void RefreshGlass() { imageDirty = true; if (GlassEnabled && new WindowInteropHelper(this).Handle != IntPtr.Zero) Native.TryGlass(this); }
@@ -163,45 +198,53 @@ internal class SurfaceWindow : Window
         if (hwnd != IntPtr.Zero) backdrop?.Update(GlassRegions(), Native.GetDpiForWindow(hwnd) / 96.0);
     }
     internal void InvalidateAnimation() => imageDirty = true;
-    internal void SwapContent(Action change, double paneWidth, double selectedSlot)
+    internal async void SwapContent(Action change, double paneWidth, double selectedSlot)
     {
         if (!IsVisible || scrollRunning || backdrop is null) { change(); return; }
         var preparation = Stopwatch.StartNew();
         var generation = ++motion; CancelHandoff(); animationDeadline?.Stop(); backdrop.CancelAnimation();
         RestoreSwapBounds();
+        animating = IsContentSwapping = true; contentSwapStartedAt = 0; ContentSwapCount++;
         var scale = Native.GetDpiForWindow(new WindowInteropHelper(this).Handle) / 96.0;
-        Root.Opacity = 1; WarmAnimation(); var oldWidth = imageWidth; var oldHeight = imageHeight;
-        var beforeCard = ((DraftStackSurface)this).CaptureFrontCard(scale);
+        Root.Opacity = 1; InvalidateAnimation(); WarmAnimation(); var oldWidth = imageWidth; var oldHeight = imageHeight;
+        await backdrop.HoldContent(new WindowInteropHelper(this).Handle, animationImage!, imageWidth, imageHeight);
+        if (generation != motion || !IsVisible) return;
+        contentHost.AnimationHidden = true; contentHost.Visibility = Visibility.Hidden; Native.ShowWindow(ContentHandle, 0);
+        var stack = (DraftStackSurface)this; var oldFront = stack.FrontCard;
+        var beforeCard = stack.CaptureFrontCard(scale);
+        var beforeSelectedCard = stack.CaptureCard(stack.SelectedCard(selectedSlot), scale, includeTint: false);
         change(); Root.Opacity = 1; WarmAnimation();
-        var afterCard = ((DraftStackSurface)this).CaptureFrontCard(scale);
+        var afterCard = stack.CaptureFrontCard(scale); var oldAfterCard = stack.CaptureCard(oldFront, scale, includeTint: false);
         if (oldWidth != imageWidth || oldHeight != imageHeight) { IsContentSwapping = false; animating = false; contentHost.AnimationHidden = false; Native.ShowWindow(ContentHandle, 4); return; }
-        animating = IsContentSwapping = true; ContentSwapCount++; var completed = false;
+        var completed = false;
         void Finish()
         {
-            if (generation != motion || completed) return; completed = true; animationDeadline?.Stop(); animating = IsContentSwapping = false;
+            if (generation != motion || completed) return; completed = true; ContentSwapFinishTicks = Stopwatch.GetTimestamp(); animationDeadline?.Stop(); animating = IsContentSwapping = false;
             RestoreSwapBounds();
-            contentHost.AnimationHidden = false; Root.Opacity = 1; Native.ShowWindow(ContentHandle, 4);
-            var frames = 0; handoff = (_, _) => { if (++frames < 2) return; CancelHandoff(); if (generation == motion) backdrop?.CancelAnimation(); };
+            contentHost.AnimationHidden = false; contentHost.Visibility = Visibility.Visible; Root.Opacity = 1; Native.ShowWindow(ContentHandle, 4);
+            var frames = 0; handoff = (_, _) => { if (++frames < 2) return; CancelHandoff(); if (generation == motion) CompleteHandoff(generation, () => ContentSwapCompleted?.Invoke()); };
             CompositionTarget.Rendering += handoff;
         }
         try
         {
             var padding = DraftSwitchMotion.Padding(paneWidth);
-            backdrop.AnimateSwap(new WindowInteropHelper(this).Handle, beforeCard, afterCard, animationImage!, imageWidth, imageHeight,
-                paneWidth * scale, selectedSlot * scale, padding * scale, DraftSwitchMotion.Lift * scale,
+            await backdrop.AnimateSwap(new WindowInteropHelper(this).Handle, beforeCard, beforeSelectedCard, oldAfterCard, afterCard, animationImage!, imageWidth, imageHeight,
+                paneWidth * scale, selectedSlot * scale, 0, 0,
                 () => {
-                    swapBounds = new Rect(Left, Top, Width, Height); SwapInputOffset = new Point(padding, DraftSwitchMotion.Lift);
+                    swapBounds = new Rect(Left, Top, Width, Height); SwapInputOffset = new Point();
                     contentHost.AnimationHidden = true; Root.Opacity = 0; Native.ShowWindow(ContentHandle, 0);
-                    Left -= padding; Top -= DraftSwitchMotion.Lift; Width += 2 * padding; Height += DraftSwitchMotion.Lift;
+                    Width += padding;
                     Native.ClipWindow(this, Height);
                 },
-                () => Dispatcher.BeginInvoke(new Action(Finish), DispatcherPriority.Render));
+                () => Dispatcher.BeginInvoke(new Action(Finish), DispatcherPriority.Render),
+                () => contentSwapStartedAt = Environment.TickCount64);
+            if (generation != motion || completed) return;
             contentHost.AnimationHidden = true; Root.Opacity = 0; Native.ShowWindow(ContentHandle, 0); UsesIndependentAnimation = true;
             animationDeadline = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(DraftSwitchMotion.DurationMs + 60) };
             animationDeadline.Tick += (_, _) => Finish(); animationDeadline.Start();
         }
         catch (Exception e) when (e is COMException or NotSupportedException or InvalidOperationException)
-        { backdrop.CancelAnimation(); UsesIndependentAnimation = false; Finish(); }
+        { if (generation != motion || completed) return; backdrop.CancelAnimation(); UsesIndependentAnimation = false; Finish(); }
         LastContentSwapPreparationMs = preparation.Elapsed.TotalMilliseconds;
     }
     public WindowPosition Position() => new() { X = Left, Y = Top, Width = Width, Height = Height };
@@ -234,15 +277,20 @@ internal class SurfaceWindow : Window
     {
         if (scrollRunning && scrollTo == (visible ? 1 : 0)) return;
         var from = ScrollProgress;
+        var initialLight = ScrollLight;
+        if (scrollRunning) backdrop?.FreezeScroll(scrollClock.Elapsed.TotalMilliseconds / Math.Max(1, scrollDuration));
         if (!visible && from <= 0) { HideImmediately(); if (destroyAfterScroll) Destroy(false); return; }
         var generation = ++motion; IsContentSwapping = false;
-        CancelHandoff(); animationDeadline?.Stop(); backdrop?.CancelAnimation();
+        CancelHandoff(); animationDeadline?.Stop(); backdrop?.CancelAnimation(keepDisplay: true);
         RestoreSwapBounds();
         // A fresh snapshot on each new transition includes section/option changes.
         if (!scrollRunning) imageDirty = true;
         scrollRunning = true; animating = true;
-        scrollFrom = from; scrollTo = visible ? 1 : 0;
-        scrollDuration = Math.Max(1, ScrollMotion.DurationMs * Math.Abs(scrollTo - from));
+        scrollFrom = from; scrollTo = visible ? 1 : 0; scrollStartLight = initialLight; scrollClock.Reset();
+        // A reversal keeps the current aperture, but still gets the original
+        // duration and a fresh flare. Preparing a close can leave from at 1;
+        // scaling by its remaining distance made the next open nearly instant.
+        scrollDuration = ScrollMotion.DurationMs;
         UpdateGlassGeometry(); new WindowInteropHelper(this).EnsureHandle();
         IsHitTestVisible = visible;
         RunMotion(generation, false, from, scrollTo, () =>
@@ -253,10 +301,24 @@ internal class SurfaceWindow : Window
         }, scroll: true, durationMs: scrollDuration);
     }
     private double revealedWidth = 58;
-    protected void RevealToLeft(bool expanded, Action prepare, Action complete)
+    protected async void RevealToLeft(bool expanded, Action prepare, Action complete)
     {
         var generation = ++motion; CancelHandoff(); animationDeadline?.Stop(); backdrop?.CancelAnimation(); animating = true;
-        prepare(); UpdateGlassGeometry();
+        var oldWidth = Width;
+        if (backdrop is not null && IsVisible)
+        {
+            Root.Opacity = 1; InvalidateAnimation(); WarmAnimation();
+            await backdrop.HoldContent(new WindowInteropHelper(this).Handle, animationImage!, imageWidth, imageHeight, rightAnchored: true);
+            if (generation != motion || !IsVisible) return;
+        }
+        // Keep the input child visible inside the old native silhouette while
+        // preparing. It covers the resize/commit gap at the right edge.
+        // PrepareDisplay hides it only after the initial animated circle is committed.
+        Native.ClipHorizontal(this, Math.Clamp(revealedWidth, 58, Width));
+        prepare();
+        Native.ClipHorizontal(this, Math.Clamp(revealedWidth, 58, Width));
+        backdrop?.AlignAnimation((Width - oldWidth) * Native.GetDpiForWindow(new WindowInteropHelper(this).Handle) / 96.0);
+        UpdateGlassGeometry();
         var from = Math.Clamp(revealedWidth, 58, Width); var target = expanded ? Width : 58;
         RunMotion(generation,true,from,target,() =>
         { revealedWidth = target; complete(); animating = false; UpdateGlassGeometry(); Native.ClipWindow(this, Height); });
@@ -280,34 +342,43 @@ internal class SurfaceWindow : Window
         try { contentHost.AnimationHidden=false; ShowImmediately(); Root.UpdateLayout(); WarmAnimation(); HideImmediately(); }
         finally { Left=left;Top=top; }
     }
-    private void RunMotion(long generation, bool horizontal, double from, double to, Action complete, bool scroll = false, double durationMs = 100)
+    private async void RunMotion(long generation, bool horizontal, double from, double to, Action complete, bool scroll = false, double durationMs = 100)
     {
+        LastAnimationError = null;
         var watch = Stopwatch.StartNew();
         var completed = false;
         void Finish()
         {
             if (generation != motion || completed) return; completed = true; animationDeadline?.Stop();
-            var oldWidth=Width; complete(); contentHost.AnimationHidden = false;
+            var oldWidth=Width; complete(); contentHost.AnimationHidden = false; contentHost.Visibility = Visibility.Visible;
             if(!IsVisible) { Root.Opacity=0;Native.ShowWindow(ContentHandle,0);backdrop?.CancelAnimation();backdrop?.SetVisible(false);return; }
             Root.Opacity=1;Native.ShowWindow(ContentHandle,4);
             backdrop?.AlignAnimation((Width-oldWidth)*Native.GetDpiForWindow(new WindowInteropHelper(this).Handle)/96.0);
             var rendered=0;
-            handoff=(_,_) => { if(++rendered<2) return; CancelHandoff(); if(generation==motion) backdrop?.CancelAnimation(); };
+            handoff=(_,_) => { if(++rendered<2) return; CancelHandoff(); if(generation==motion) CompleteHandoff(generation); };
             CompositionTarget.Rendering+=handoff;
+        }
+        void PrepareDisplay()
+        {
+            if (generation != motion || completed) return;
+            contentHost.AnimationHidden = true; contentHost.Visibility = Visibility.Hidden; Root.Opacity = 0; Native.ShowWindow(ContentHandle, 0);
+            var showClock = Stopwatch.StartNew(); if (!IsVisible) ShowImmediately(); LastShowMs = showClock.Elapsed.TotalMilliseconds;
+            Native.ClipWindow(this, Height);
         }
         try
         {
             Root.Opacity=1; WarmAnimation(); LastSnapshotMs=watch.Elapsed.TotalMilliseconds; var hwnd = new WindowInteropHelper(this).Handle;
             if (backdrop is null) throw new NotSupportedException("当前系统没有窗口动画合成支持");
-            Native.ClipWindow(this,Height);
+            if (horizontal) Native.ClipHorizontal(this, from); else Native.ClipWindow(this,Height);
             if (scroll)
-                backdrop!.AnimateScroll(hwnd, animationImage!, imageWidth, imageHeight, from, to, durationMs,
-                    () => Dispatcher.BeginInvoke(new Action(Finish), DispatcherPriority.Render));
+                await backdrop!.AnimateScroll(hwnd, animationImage!, imageWidth, imageHeight, from, to, durationMs, scrollStartLight, PrepareDisplay,
+                    () => Dispatcher.BeginInvoke(new Action(Finish), DispatcherPriority.Render),
+                    () => { MotionDisplayStartTicks = Stopwatch.GetTimestamp(); scrollClock.Restart(); });
             else
-                backdrop!.Animate(hwnd,animationImage!,imageWidth,imageHeight,horizontal,from*Native.GetDpiForWindow(hwnd)/96.0,to*Native.GetDpiForWindow(hwnd)/96.0,
+                await backdrop!.Animate(hwnd,animationImage!,imageWidth,imageHeight,horizontal,from*Native.GetDpiForWindow(hwnd)/96.0,to*Native.GetDpiForWindow(hwnd)/96.0, PrepareDisplay,
                     () => Dispatcher.BeginInvoke(new Action(Finish),DispatcherPriority.Render));
-            contentHost.AnimationHidden = true; Root.Opacity=0; Native.ShowWindow(ContentHandle,0); var showClock=Stopwatch.StartNew(); if (!IsVisible) ShowImmediately(); LastShowMs=showClock.Elapsed.TotalMilliseconds;
-            if (scroll) scrollClock.Restart();
+            if (generation != motion || completed) return;
+            if (!scroll) MotionDisplayStartTicks = Stopwatch.GetTimestamp();
             UsesIndependentAnimation = true;
             // Occluded/offscreen targets can defer compositor completion events.
             // This is a single end deadline, never a frame-production timer.
@@ -315,7 +386,7 @@ internal class SurfaceWindow : Window
             animationDeadline.Tick += (_,_) => Finish(); animationDeadline.Start();
         }
         catch (Exception e) when (e is COMException or NotSupportedException or InvalidOperationException)
-        { backdrop?.CancelAnimation(); if (to > 0 && !IsVisible) ShowImmediately(); UsesIndependentAnimation = false; Finish(); }
+        { if (generation != motion || completed) return; LastAnimationError = e.ToString(); backdrop?.CancelAnimation(); if (to > 0 && !IsVisible) ShowImmediately(); UsesIndependentAnimation = false; Finish(); }
         LastAnimationPreparationMs = watch.Elapsed.TotalMilliseconds;
     }
 }
@@ -340,18 +411,35 @@ internal static class Native
         if (ordering || Application.Current is null) return; ordering = true;
         try
         {
-            foreach (var window in Application.Current.Windows.OfType<SurfaceWindow>().Where(x => x.IsVisible).OrderBy(x => x.WindowLayer).ThenBy(x => x.ActivationOrder)) Raise(window);
-            foreach (var dialog in Dialogs()) SetWindowPos(dialog, new IntPtr(-1), 0, 0, 0, 0, 0x13);
-            if (ball?.IsVisible == true) Raise(ball);
+            var handles = Application.Current.Windows.OfType<SurfaceWindow>().Where(x => x.IsVisible && x != ball)
+                .OrderBy(x => x.WindowLayer).ThenBy(x => x.ActivationOrder).Select(x => new WindowInteropHelper(x).Handle)
+                .Concat(Dialogs()).Concat(ball?.IsVisible == true ? new[] { new WindowInteropHelper(ball).Handle } : Array.Empty<IntPtr>())
+                .Distinct().ToArray();
+            var owned = handles.ToHashSet(); var current = new List<IntPtr>();
+            EnumWindows((handle, _) => { if (owned.Contains(handle)) current.Add(handle); return true; }, IntPtr.Zero);
+            if (current.SequenceEqual(handles.Reverse())) return;
+            // Apply the complete stack in one native transaction; sequential
+            // raises briefly put every list above its floating editors.
+            var positions = BeginDeferWindowPos(handles.Length);
+            foreach (var handle in handles)
+            {
+                if (positions == IntPtr.Zero) break;
+                positions = DeferWindowPos(positions, handle, new IntPtr(-1), 0, 0, 0, 0, 0x13);
+            }
+            if (positions != IntPtr.Zero) EndDeferWindowPos(positions);
         }
         finally { ordering = false; }
     }
     public static void Raise(Window window)
     { if (window.IsVisible) SetWindowPos(new WindowInteropHelper(window).Handle, new IntPtr(-1), 0, 0, 0, 0, 0x13); }
+    [DllImport("user32.dll")] private static extern IntPtr BeginDeferWindowPos(int count);
+    [DllImport("user32.dll")] private static extern IntPtr DeferWindowPos(IntPtr positions, IntPtr hwnd, IntPtr after, int x, int y, int width, int height, uint flags);
+    [DllImport("user32.dll")] private static extern bool EndDeferWindowPos(IntPtr positions);
     [StructLayout(LayoutKind.Sequential)] private struct Accent { public int State; public int Flags; public uint Color; public int Animation; }
     [StructLayout(LayoutKind.Sequential)] private struct Data { public int Attribute; public IntPtr DataPointer; public int Size; }
     [DllImport("user32.dll")] private static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref Data data);
     [DllImport("user32.dll")] internal static extern IntPtr GetForegroundWindow();
+    [DllImport("dwmapi.dll")] internal static extern int DwmFlush();
     private delegate bool WindowCallback(IntPtr window, IntPtr parameter);
     [DllImport("user32.dll")] private static extern bool EnumWindows(WindowCallback callback, IntPtr parameter);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);

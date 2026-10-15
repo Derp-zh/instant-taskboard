@@ -1,0 +1,90 @@
+{
+  "Version": "0.9.5",
+  "Date": "2026-10-15",
+  "LocalOnly": true,
+  "Requirements": "PRD U91-U95 / A109-A113 / T115-T120",
+  "Entry": "release/即时任务看板-0.9.5-standard/即时任务看板.exe",
+  "Archive": "release/即时任务看板-0.9.5-standard-win-x64.zip",
+  "ArchiveSHA256": "5AD4809019DDFACC75B2C23C9BD27CB769426EC3FD9832AD665EB933C0820131",
+  "FileCount": 476,
+  "ZipAllFilesVerified": true,
+  "RuntimeSHA256": "648159A249B6FC78BFE264EE528F26F61EA10B05FA3C09C726249B54D4924442",
+  "DraftSwitchSpeed": 1.35,
+  "DraftSwitchDurationMs": 266.66666666666663,
+  "OtherAnimationDurationMs": 100,
+  "FinalEditorOffset": {
+    "X": 32,
+    "Y": 32,
+    "Units": "DIP",
+    "UserSelected": true,
+    "VerifiedBy": "源码参数及最终publish构建",
+    "PhysicalFixtureEarlierX": 52,
+    "PhysicalFixtureEarlierY": 44
+  },
+  "Compact": {
+    "Passed": 82,
+    "Report": {
+      "Path": "test-output/ux-095-compact-standard-02/compact-report.json",
+      "SHA256": "274E3393CCC87804A22D9CE69B04FE1487DACCA06223E8488A83C6D0958E2C7D"
+    },
+    "Badge": {
+      "Width": 31.240000000000002,
+      "Height": 31.240000000000002,
+      "Radius": 15.620000000000001
+    }
+  },
+  "UnifiedScroll": {
+    "Passed": 111,
+    "Report": {
+      "Path": "test-output/ux-095-scroll-final-01/scroll-report.json",
+      "SHA256": "0102E92CB4A262A02D21AF2772E2DA5F99FBAD39728A7A87A359A1A8858DCCB7"
+    },
+    "RecordedScenes": 45,
+    "AnimationFallbacks": 0,
+    "AnimationErrors": 0
+  },
+  "MultiDraftSingleFlare": {
+    "Passed": 8,
+    "Report": {
+      "Path": "test-output/ux-095-stack-standard-01/scroll-report.json",
+      "SHA256": "E4367E57F0537684F88A716D2E4C0A804075A01679875AC040B9BBA0E892B9AC"
+    }
+  },
+  "FloatingGesture": {
+    "Passed": 6,
+    "Report": {
+      "Path": "test-output/floating-interaction-095-final-01/floating-report.json",
+      "SHA256": "A655839309135D8D37B09DA2D7D1CE586DA98F6D8C4548EF673D5DC945139EB1"
+    },
+    "Rules": "卡片打开/复用；空白或标题双击只关闭最上层"
+  },
+  "SharedMotion": {
+    "Passed": true,
+    "Report": {
+      "Path": "test-output/ux-095-shared-standard-01/shared-motion-report.json",
+      "SHA256": "3783BC7E9DE1D8E00B76FFFB4614E0B727E844A0FBF80F074F0C6D77CEE132D3"
+    },
+    "DurationMs": 266.66666666666663
+  },
+  "EvidenceBoundary": "桌面报告在最终32/32微调前完成；动画实现及命中策略之后未改，最后仅错位常量及对应检查变化，最终publish成功。未将旧52/44的实机几何报告称为32/32实测。",
+  "CoreRules": {
+    "Passed": 122,
+    "Reused": true,
+    "Rerun": false,
+    "CoreSHA256": "C7BAE6469C41C1A3FCE38AEA1E91710E3B92E8D5304AEA6A95DD9FF5979BC3F2",
+    "PriorCoreSHA256": "C7BAE6469C41C1A3FCE38AEA1E91710E3B92E8D5304AEA6A95DD9FF5979BC3F2",
+    "Report": {
+      "Path": "test-output/ux-092-rules-02/report.json",
+      "SHA256": "30B5632DE783661FBC184411DA8493B42EA9941FE734E6BDB58E64197C3AEF5C"
+    }
+  },
+  "Boundaries": [
+    "所有数据隔离",
+    "真实鼠标已协调并恢复",
+    "未改正式数据或启动登记",
+    "未退出用户进程",
+    "未上传GitHub",
+    "有限画面采样不承诺任意设备或负载下零闪烁"
+  ],
+  "MemoryRecord": "docs/INDEX-STATUS.md"
+}

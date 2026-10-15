@@ -13,6 +13,8 @@ namespace Taskboard.Desktop;
 
 internal sealed partial class ColumnSurface : SurfaceWindow
 {
+    protected override bool ScrollEnabled => false;
+    internal override double GlassTransparency => Transparency;
     private readonly BoardController controller;
     public BoardColumn Definition { get; private set; }
     public Lane Lane => Definition.BuiltinLane ?? Lane.Refining;
@@ -218,6 +220,15 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     }
     internal void RevealNewEntry() { list.ScrollIntoView(footer); list.UpdateLayout(); }
     internal bool NewEntryIsLast => ReferenceEquals(items.LastOrDefault(), footer) && VisualTreeHelper.GetParent(footer) is not null;
+    internal bool IsTaskCardAt(Point screenPoint) => IsVisible &&
+        Ancestor<TaskCard>(Root.InputHitTest(Root.PointFromScreen(screenPoint)) as DependencyObject) is { ArchivedPreview: false };
+    internal bool IsOutsideDismissArea(Point screenPoint)
+    {
+        if (!IsVisible) return false;
+        var hit = Root.InputHitTest(Root.PointFromScreen(screenPoint)) as DependencyObject;
+        return hit is not null && Ancestor<TaskCard>(hit) is null && !SurfaceWindow.IsInteractive(hit)
+            && Ancestor<System.Windows.Controls.Primitives.ScrollBar>(hit) is null;
+    }
     public void PrepareHide() => flushInline?.Invoke();
     private static T? Ancestor<T>(DependencyObject? source) where T : DependencyObject
     { for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current)) if (current is T value) return value; return null; }
