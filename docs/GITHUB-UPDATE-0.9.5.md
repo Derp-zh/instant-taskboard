@@ -17,4 +17,4 @@
 - SHA256：5AD4809019DDFACC75B2C23C9BD27CB769426EC3FD9832AD665EB933C0820131。
 - 校验附件：instant-taskboard-0.9.5-win-x64.zip.sha256，内容使用公开附件名。
 
-发布时核对目标提交、草稿/预发布状态、服务端附件大小与SHA256，并下载两个附件比对。最终回执补记在本页与GITHUB-RELEASES.md；准备记录不代表尚未完成的步骤已通过。
+发布核验全部完成：v0.9.5标签对应`f034bc6b61b8019e370b321c23ff8e0c3d334a4b`，正式发布且为latest，非草稿/预发布。两个附件的服务端大小及SHA256与本机一致，随后实际下载ZIP和SHA256再次比对通过。机器回执见[GITHUB-RELEASE-0.9.5.json](GITHUB-RELEASE-0.9.5.json)，汇总见GITHUB-RELEASES.md。
