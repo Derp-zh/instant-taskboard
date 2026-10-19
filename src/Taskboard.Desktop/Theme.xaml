@@ -135,23 +135,23 @@
   </ControlTemplate></Setter.Value></Setter></Style>
   <Style TargetType="Calendar"><Setter Property="Background" Value="{StaticResource CardBrush}" /><Setter Property="Foreground" Value="{StaticResource TextBrush}" /><Setter Property="BorderBrush" Value="{StaticResource LineBrush}" /><Setter Property="CalendarDayButtonStyle" Value="{StaticResource {x:Type CalendarDayButton}}" /><Setter Property="CalendarButtonStyle" Value="{StaticResource {x:Type CalendarButton}}" /><Setter Property="CalendarItemStyle" Value="{StaticResource {x:Type CalendarItem}}" /><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Calendar"><Border CornerRadius="20" Padding="3" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"><CalendarItem x:Name="PART_CalendarItem" Style="{TemplateBinding CalendarItemStyle}" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}" BorderThickness="0" /></Border></ControlTemplate></Setter.Value></Setter></Style>
   <Style TargetType="ScrollBar">
-    <Setter Property="Width" Value="6" /><Setter Property="Background" Value="Transparent" />
+    <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource Self}, Path=(local:QuickScroll.VerticalBarWidth)}" /><Setter Property="Background" Value="Transparent" />
     <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ScrollBar">
       <Grid Background="Transparent">
         <Track x:Name="PART_Track" IsDirectionReversed="True" Orientation="{TemplateBinding Orientation}" Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}" Value="{TemplateBinding Value}" ViewportSize="{TemplateBinding ViewportSize}">
           <Track.DecreaseRepeatButton><RepeatButton Command="ScrollBar.PageUpCommand" Focusable="False"><RepeatButton.Template><ControlTemplate TargetType="RepeatButton"><Border Background="Transparent" /></ControlTemplate></RepeatButton.Template></RepeatButton></Track.DecreaseRepeatButton>
-          <Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType="Thumb"><Border Margin="1" CornerRadius="3" Background="#A8D6C9" /></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+          <Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType="Thumb"><Border Margin="{Binding RelativeSource={RelativeSource Self}, Path=(local:QuickScroll.ThumbMargin)}" CornerRadius="3" Background="#A8D6C9" /></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
           <Track.IncreaseRepeatButton><RepeatButton Command="ScrollBar.PageDownCommand" Focusable="False"><RepeatButton.Template><ControlTemplate TargetType="RepeatButton"><Border Background="Transparent" /></ControlTemplate></RepeatButton.Template></RepeatButton></Track.IncreaseRepeatButton>
         </Track>
       </Grid>
       <ControlTemplate.Triggers><Trigger Property="Orientation" Value="Horizontal"><Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" /></Trigger></ControlTemplate.Triggers>
     </ControlTemplate></Setter.Value></Setter>
-    <Style.Triggers><Trigger Property="Orientation" Value="Horizontal"><Setter Property="Width" Value="Auto" /><Setter Property="Height" Value="6" /></Trigger></Style.Triggers>
+    <Style.Triggers><Trigger Property="Orientation" Value="Horizontal"><Setter Property="Width" Value="Auto" /><Setter Property="Height" Value="6" /><Setter Property="local:QuickScroll.ThumbMargin" Value="1" /></Trigger></Style.Triggers>
   </Style>
-  <Style TargetType="ScrollViewer"><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ScrollViewer">
+  <Style TargetType="ScrollViewer"><Setter Property="local:QuickScroll.Enabled" Value="True" /><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ScrollViewer">
     <Grid><Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
       <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" CanContentScroll="{TemplateBinding CanContentScroll}" />
-      <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="1" Orientation="Vertical" Width="6" MinWidth="0" Style="{StaticResource {x:Type ScrollBar}}" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+      <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="1" Orientation="Vertical" Width="{Binding RelativeSource={RelativeSource Self}, Path=(local:QuickScroll.VerticalBarWidth)}" MinWidth="0" Style="{StaticResource {x:Type ScrollBar}}" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
       <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Row="1" Orientation="Horizontal" Height="6" MinHeight="0" Style="{StaticResource {x:Type ScrollBar}}" Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" />
     </Grid>
   </ControlTemplate></Setter.Value></Setter></Style>

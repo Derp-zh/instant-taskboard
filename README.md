@@ -1,62 +1,34 @@
 # 即时任务看板
 
-Windows 桌面任务看板，通过悬浮球快速展开多个独立列表窗口，管理灵感、任务阶段、提醒和暂存编辑。
+当前版本0.9.16：修复原Codex桌面只读接入、准确当前轮次的结束补查、分层诊断、实际恢复清时间红点，以及重连后的多阶段等待优先。保留0.9.15的卡片文字循环、深蓝黑保存文字、真实控件开合及原有操作范围。
 
-当前交付版本：0.9.5。共享暂存任务、1.35倍横向抽牌切换、悬浮窗口独立透明度，以及连贯细白条开合已完成本轮修订。编辑窗口默认横向32、纵向32错位。需求入口见 [文档索引](docs/INDEX.md)，使用方法见 [使用说明](docs/USER-GUIDE.md)。
+原桌面A/B实际执行、结束、双向移列、重连与编辑保存已实测。**异步提问当前仍缺等待信号；同步Plan提问及权限等待/批准恢复尚未完成原桌面验收，完整接入不是全通过。** 见[验收与限制](docs/ACCEPTANCE-0.9.16.md)、[逐层证据](docs/VERIFICATION-0.9.16.json)和[文档入口](docs/INDEX.md)。
 
 ## 下载运行包
 
-当前Windows x64完整便携包：[即时任务看板0.9.5](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.5)。下载instant-taskboard-0.9.5-win-x64.zip，完整解压；从旧版托盘退出程序后，打开解压目录中的“即时任务看板.exe”。无需另装.NET，请保留整个目录。Release同时提供SHA256校验文件。
+[即时任务看板0.9.16完整便携包](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.16)。下载instant-taskboard-0.9.16-win-x64.zip与SHA256校验文件，完整解压；从旧版本托盘退出后，运行解压目录中的“即时任务看板.exe”。无需另装.NET，请保留整个目录。默认任务和配置保存在系统用户目录，升级时保留原目录及路径配置。
 
 ## 功能
 
-- 多列表独立窗口，可调整名称、数量、显隐及整组大小，整组缩放时最大范围居中；有任务的列表禁止删除。
-- 灵感快速录入，各列表共用新建暂存池；仅任务名称或详情有文本才暂存，阶段详情、平台与优先级可编辑。
-- 任务拖动跟随鼠标，虚线预览落点，支持跨列移动、排序和最近 20 步撤销与恢复。
-- 已完成、暂搁置任务可归档，保存最近20条完整任务，并可取消归档。
-- 紧凑列表标题区、青色任务标题及细竖条、白色阶段详情；灵感快捷录入与正式卡片共用布局。
-- 列表空白或标题双击关闭最上层悬浮窗口；卡片单击/双击打开或复用编辑。点击其他应用收起整组，恢复时保留窗口及输入。暂存任务约266.67毫秒横向抽牌，前2/3忽略连续点击，最后1/3最多登记一次后续切换。
-- 暗色实时毛玻璃、圆形悬浮球、搜索、待操作预览和设置分区。
-- 新建、编辑和设置窗口的100毫秒中央画卷开合，UI与细白芯泛光共用一个进度；悬浮窗口透明度独立调节，默认10%；通知监听可使用内置Alarm04或逐应用自选音频。
-- 每天、每周与一次提醒；配置备份和独立的数据、配置目录，默认保存在系统用户目录。
-- 自启登记使用仍存在的最新程序版本，升级后修复启动入口。
-- Codex 现有聊天关联与只读历史监听入口。
+- 六个独立列表：灵感库、完善中、进行中、待操作、暂搁置、已完成；支持调整、拖动、归档及撤销。
+- 阶段独立运行及会话关联，多运行阶段待处理优先；仅内置进行中与待操作自动流转，其他分类保留人工操作。
+- 共享新建暂存池、自动保存、灵感快捷录入、搜索、提醒、备份、独立数据和配置目录。
+- 桌面边缘右侧吸附与自动隐藏、悬浮球及托盘菜单、快捷键展开。左侧吸附待后续。
+- 列表、新建/编辑/设置和球开合使用真实控件裁切，目标100毫秒；繁忙时可能掉帧。暂存抽牌约266.67毫秒，原外点/快速重开/操作范围保持。
 
-动画支持 120Hz，实际显示流畅度受屏幕刷新率、Windows 合成器及硬件影响。Codex 桌面实时桥接仍待确认，飞书实际同步尚未接入。通知监听模块已通过隔离检查，真实应用捕获与系统通知音替换仍需专项验收。完整边界见 [实施记录](docs/IMPLEMENTATION.md)。
+飞书实际同步尚未接入；通知监听的真实应用捕获与系统通知音替换仍有专项验收边界。完整规则见[PRD](docs/PRD.md)和[使用说明](docs/USER-GUIDE.md)。
 
-## 运行与构建
+## 构建与验证
 
-便携包解压后运行 `即时任务看板.exe`，请保留整个目录。升级前退出旧程序并保留原来的数据目录与启动路径配置。默认任务与配置分别位于 `%LOCALAPPDATA%/InstantTaskboard/data` 和 `config`，可在设置中更改；首次启动会检查旧便携数据，原件保留。
-
-开发构建需要 Windows、.NET 8 SDK、PowerShell 7，以及可访问 NuGet 的网络。
+开发构建需要Windows、.NET 8 SDK、PowerShell 7及可访问NuGet的网络。Windows默认音频在构建时从本机系统目录准备，不随公开源码提供。
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File tools/Build-Portable.ps1 -Output release/portable
+pwsh -NoProfile -File tools/Build-Portable.ps1 -Output release/portable
+dotnet run --project tests/Taskboard.Checks -- --data-dir test-output/new-core-run
+dotnet run --project tools/CodexTurnTrackerChecks -c Release -- test-output/new-turn-run/report.json
+dotnet run --project tools/CodexObserverChecks -c Release -- --data-dir test-output/new-observer-run
 ```
 
-规则检查使用新的隔离目录：
+所有验证使用新的隔离目录。桌面交互会移动鼠标时先协调用户；原桌面聊天测试必须只操作明确授权的自建聊天。目录诊断--codex-verify部分完成退出3，并不表示完整接入通过。验证工具范围见各README及本轮验收说明。
 
-```powershell
-dotnet run --project tests/Taskboard.Checks -- --data-dir test-output/readme-core-check
-python -m unittest discover -s tests/codex_probe -v
-```
-
-桌面交互检查会移动鼠标，运行前请协调当前操作。不要使用正式数据目录进行测试。
-
-## 项目目录
-
-| 目录 | 内容 |
-| --- | --- |
-| `src/Taskboard.Core` | 任务、列表、提醒、撤销与配置规则 |
-| `src/Taskboard.Desktop` | 桌面窗口、输入、动画与接入模块 |
-| `tests` | 隔离规则与 Codex 模块检查 |
-| `tools` | 构建、打包、验收与 Codex 探索工具 |
-| `docs` | PRD、任务清单、设计记录与验证摘要 |
-
-正式任务数据、旧数据保留区、测试输出、本机配置和构建产物不应上传到代码仓库。第三方许可见 [第三方声明](docs/THIRD-PARTY-NOTICES.txt)。
-
-## 公开仓库资料范围
-
-本次更新为0.9.5源码及整理后的需求/验收文档。正式任务、用户配置、认证文件、原始聊天编号、历史取证附件和运行输出未发布。文档中的本机路径和会话编号已匿名化；指向历史本地运行包、旧取证及test-output的链接记录证据来源，不表示这些历史产物已经上传；当前0.9.5运行包见上方Release下载入口。验证摘要的DLL与压缩包哈希保留为原本机交付证据，不是本公开副本新构建的字节哈希。
-
-默认通知音Alarm04.wav来自Windows系统，不随公开源码发布。请在Windows上使用tools/Build-Portable.ps1构建：脚本会从本机Windows媒体目录取得音频并内置到本地程序，音频文件由.gitignore排除。程序功能与本机0.9.5一致，公开副本仅增加音频准备步骤并脱敏文档。0.9.1完整运行包已独立发布到GitHub Release，附件哈希对应原本机BUILD-INFO-0.9.1.json。
+正式任务、旧数据保留区、测试输出、本机配置及构建产物不上传源码仓库。第三方许可见[声明](docs/THIRD-PARTY-NOTICES.txt)。

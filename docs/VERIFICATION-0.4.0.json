@@ -1,0 +1,43 @@
+{
+  "Version": "0.4.0",
+  "Date": "2026-10-13",
+  "CorePassed": 44,
+  "UiPassed": 36,
+  "DesktopPassed": 19,
+  "Glass": {
+    "passed": true,
+    "mode": "窗口毛玻璃",
+    "beforeEdges": 21.6281179138322,
+    "afterEdges": 1.971606033717835,
+    "edgeRatio": 0.09115938990035283,
+    "backgroundColorSeparation": 53.454715219421104,
+    "inactiveEdgeRatio": 0.09115938990035283,
+    "inactiveColorSeparation": 53.454715219421104,
+    "mouseMoved": false
+  },
+  "Ball": {
+    "insideWorkArea": true,
+    "accessibleAboveSettings": true
+  },
+  "UiInitialLayoutMs": 2331.4631,
+  "IdleCpuPercent": 0.0013019118867268235,
+  "PackageFiles": 465,
+  "PackageSHA256": "A84DB8B2DE6885F59D27B9026C0F3AC5FD10276F96A15EAD0A239D0F15325783",
+  "AllAcceptanceItemsPassed": false,
+  "Evidence": [
+    "test-output/ux04-core/report.json",
+    "test-output/ux04-ui-final/ui-report.json",
+    "test-output/ux04-mouse-final/desktop-report.json",
+    "test-output/ux04-package-final/glass-report.json",
+    "test-output/ux04-package-final/ball-report.json"
+  ],
+  "Remaining": [
+    "首次冷启动和首次布局性能目标",
+    "多屏混合DPI",
+    "系统首次快捷方式和开机启动验收",
+    "睡眠通知和完整动效录屏",
+    "Codex及飞书等专项接入"
+  ],
+  "FormalDataModified": false,
+  "OldVersionOverwritten": false
+}

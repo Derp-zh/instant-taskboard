@@ -1,0 +1,404 @@
+{
+  "Version": "0.7.0",
+  "Date": "2026-10-14",
+  "Entry": "release/Taskboard-0.7.0/Taskboard.exe",
+  "DataScope": "仅test-output隔离目录；未操作用户运行中的0.6、正式data、配置或preserved-data",
+  "Core": {
+    "Evidence": "test-output/ux07-core-01/report.json",
+    "Performance": {
+      "tasks": 300,
+      "stagesPerTask": 4,
+      "drafts": 10,
+      "searchMs": 0.040986,
+      "saveMs": 16.6638,
+      "loadMs": 17.2101
+    },
+    "Passed": 56
+  },
+  "FinalRuntimeUi": {
+    "WarmLayoutMs": 451.4074,
+    "IdleCpuPercent": 0.08071259179785703,
+    "Evidence": "test-output/ux07-desktop-final-01/ui-report.json",
+    "Runtime": "8.0.31",
+    "Passed": 67
+  },
+  "NativeMouse": {
+    "TargetPreview": "test-output/ux07-mouse-12/actual-dashed-placeholder.png",
+    "SearchPixels": "test-output/ux07-mouse-12/actual-search-1.png",
+    "Evidence": "test-output/ux07-mouse-12/desktop-report.json",
+    "Passed": 39
+  },
+  "DesktopComposition": {
+    "GlassEvidence": "test-output/ux07-desktop-final-01/glass-report.json",
+    "Reports": [
+      {
+        "name": "列-灵感库",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-完善中",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-进行中",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-待操作",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-暂搁置",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "列-已完成",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "新建堆叠",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 187,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "已建编辑",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "设置",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "搜索结果",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "待操作预览",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "辅助提示",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "圆形悬浮球",
+        "passed": true,
+        "mode": "实时系统毛玻璃",
+        "stationaryBackgroundDifference": 189,
+        "movementFrames": 19,
+        "maximumMovementColorChange": 0,
+        "unexpectedHides": 0,
+        "nativeHideEvents": 0
+      },
+      {
+        "name": "圆外像素无底板",
+        "passed": true,
+        "outsidePoints": 96,
+        "maximumCornerDifference": 0
+      },
+      {
+        "name": "整窗同步裁剪动画",
+        "passed": true,
+        "durationTargetMs": 100,
+        "opening": {
+          "Frames": [
+            {
+              "Ms": 237.3234,
+              "ColumnHeightPixels": 1,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 292.2833,
+              "ColumnHeightPixels": 1,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 322.774,
+              "ColumnHeightPixels": 269,
+              "BallWidthPixels": 203,
+              "VisibleBallWidthPixels": 204
+            },
+            {
+              "Ms": 359.5926,
+              "ColumnHeightPixels": 537,
+              "BallWidthPixels": 320,
+              "VisibleBallWidthPixels": 321
+            },
+            {
+              "Ms": 399.8743,
+              "ColumnHeightPixels": 805,
+              "BallWidthPixels": 437,
+              "VisibleBallWidthPixels": 438
+            },
+            {
+              "Ms": 426.5233,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 457.9895,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 485.5803,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 515.7639,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 546.3444,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 575.8871,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 594.38,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 613.0952,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 644.4574,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 672.9627,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 703.6652,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 555,
+              "VisibleBallWidthPixels": 555
+            }
+          ],
+          "OutsideDifference": 0
+        },
+        "closing": {
+          "Frames": [
+            {
+              "Ms": 16.062,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 554,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 36.9183,
+              "ColumnHeightPixels": 1073,
+              "BallWidthPixels": 554,
+              "VisibleBallWidthPixels": 555
+            },
+            {
+              "Ms": 66.4025,
+              "ColumnHeightPixels": 853,
+              "BallWidthPixels": 464,
+              "VisibleBallWidthPixels": 465
+            },
+            {
+              "Ms": 98.8289,
+              "ColumnHeightPixels": 584,
+              "BallWidthPixels": 347,
+              "VisibleBallWidthPixels": 348
+            },
+            {
+              "Ms": 129.0591,
+              "ColumnHeightPixels": 316,
+              "BallWidthPixels": 230,
+              "VisibleBallWidthPixels": 231
+            },
+            {
+              "Ms": 158.1051,
+              "ColumnHeightPixels": 48,
+              "BallWidthPixels": 113,
+              "VisibleBallWidthPixels": 114
+            },
+            {
+              "Ms": 189.1936,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 113,
+              "VisibleBallWidthPixels": 114
+            },
+            {
+              "Ms": 219.4025,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 241.8533,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 272.0267,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 302.3562,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 332.4617,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 350.7807,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 382.1387,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 411.413,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            },
+            {
+              "Ms": 441.7332,
+              "ColumnHeightPixels": 0,
+              "BallWidthPixels": 86,
+              "VisibleBallWidthPixels": 87
+            }
+          ],
+          "OutsideDifference": 0
+        }
+      }
+    ],
+    "Evidence": "test-output/ux07-desktop-final-01/motion-report.json",
+    "Cases": 15,
+    "Passed": true
+  },
+  "DragPerformance": {
+    "RepeatedSameTarget": 100,
+    "Evidence": "test-output/ux07-desktop-final-01/drag-performance.json",
+    "RebuildsForRepeatedSameTarget": 0,
+    "Measurements": {
+      "SnapshotMs": 0.2799,
+      "MaxMoveMs": 1.0195,
+      "MaxPreviewMs": 1.1065,
+      "PositionUpdates": 108,
+      "PreviewUpdates": 2
+    }
+  },
+  "BuildBoundary": "39项真实操作、67项最终窗口回归和全部合成采样均运行同一最终0.7目录；之后仅修改文档与验收脚本",
+  "Limitations": [
+    "Windows 11单屏150%DPI实测；其他系统和混合DPI多屏未验收",
+    "移动逐帧采样不是逐显示刷新周期证明，不能保证所有设备永不闪烁",
+    "动画目标100ms，布局和采集负载额外计时；暖布局不是冷启动",
+    "拖动性能为当前设备300任务场景测量，不承诺全部设备",
+    "Codex、飞书及其他AI尚未接入正式面板；独立专项探索记录另见相应文档",
+    "真实中文字符及光标已验收，未覆盖所有第三方输入法组合",
+    "原始失败记录保留：脚本控件定位、滚动、气泡识别已修正；菜单真实关闭竞态已修复，最终mouse-12通过"
+  ]
+}

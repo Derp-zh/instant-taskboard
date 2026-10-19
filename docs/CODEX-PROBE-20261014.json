@@ -1,0 +1,448 @@
+{
+  "date": "2026-10-14",
+  "unitChecks": 13,
+  "liveCaseCount": 4,
+  "liveCases": [
+    {
+      "name": "completion",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "turnId": "01a136c2-962c-7652-b8a2-a8dcad7c21e6",
+      "completedBeforeTimeout": true,
+      "questionAnswered": false,
+      "approvalObservedAndDeclined": false,
+      "methods": {
+        "thread/status/changed": 2,
+        "turn/started": 1,
+        "mcpServer/startupStatus/updated": 1,
+        "item/started": 2,
+        "item/completed": 2,
+        "item/agentMessage/delta": 3,
+        "thread/tokenUsage/updated": 1,
+        "turn/completed": 1
+      },
+      "observedSnapshots": {},
+      "finalTask": {
+        "taskId": "probe-task-1",
+        "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+        "lane": "action",
+        "phase": "ready_for_review",
+        "turnId": "01a136c2-962c-7652-b8a2-a8dcad7c21e6",
+        "timerUnread": false,
+        "generation": 1,
+        "pendingRequestCount": 0
+      }
+    },
+    {
+      "name": "other_thread_while_question_waits",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "turnId": "01a136c2-c502-74f2-8aed-39b5f4554928",
+      "completedBeforeTimeout": true,
+      "questionAnswered": false,
+      "approvalObservedAndDeclined": false,
+      "methods": {
+        "thread/status/changed": 2,
+        "turn/started": 1,
+        "item/started": 2,
+        "item/completed": 2,
+        "item/agentMessage/delta": 5,
+        "thread/tokenUsage/updated": 1,
+        "turn/completed": 1
+      },
+      "observedSnapshots": {},
+      "finalTask": {
+        "taskId": "probe-task-1",
+        "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+        "lane": "action",
+        "phase": "ready_for_review",
+        "turnId": "01a136c2-c502-74f2-8aed-39b5f4554928",
+        "timerUnread": false,
+        "generation": 1,
+        "pendingRequestCount": 0
+      }
+    },
+    {
+      "name": "question_and_resume",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+      "completedBeforeTimeout": true,
+      "questionAnswered": true,
+      "approvalObservedAndDeclined": false,
+      "methods": {
+        "thread/settings/updated": 1,
+        "thread/status/changed": 4,
+        "turn/started": 1,
+        "item/started": 2,
+        "item/completed": 2,
+        "item/tool/requestUserInput": 1,
+        "serverRequest/resolved": 1,
+        "thread/tokenUsage/updated": 2,
+        "item/agentMessage/delta": 5,
+        "turn/completed": 1
+      },
+      "observedSnapshots": {
+        "lateAssociationStatus": {
+          "type": "active",
+          "activeFlags": [
+            "waitingOnUserInput"
+          ]
+        },
+        "lateAssociatedTask": {
+          "taskId": "late-associated-task",
+          "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+          "lane": "action",
+          "phase": "waiting_for_input",
+          "turnId": null,
+          "timerUnread": false,
+          "generation": 1,
+          "pendingRequestCount": 0
+        },
+        "stillWaitingAfterOtherThreadCompleted": {
+          "type": "active",
+          "activeFlags": [
+            "waitingOnUserInput"
+          ]
+        }
+      },
+      "finalTask": {
+        "taskId": "probe-task-2",
+        "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+        "lane": "action",
+        "phase": "ready_for_review",
+        "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+        "timerUnread": false,
+        "generation": 1,
+        "pendingRequestCount": 0
+      }
+    },
+    {
+      "name": "permission_request",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+      "completedBeforeTimeout": true,
+      "questionAnswered": false,
+      "approvalObservedAndDeclined": true,
+      "methods": {
+        "thread/settings/updated": 1,
+        "thread/status/changed": 4,
+        "turn/started": 1,
+        "item/started": 4,
+        "item/completed": 4,
+        "item/agentMessage/delta": 18,
+        "item/commandExecution/requestApproval": 1,
+        "serverRequest/resolved": 1,
+        "thread/tokenUsage/updated": 2,
+        "turn/completed": 1
+      },
+      "observedSnapshots": {},
+      "finalTask": {
+        "taskId": "probe-task-1",
+        "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+        "lane": "action",
+        "phase": "ready_for_review",
+        "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+        "timerUnread": false,
+        "generation": 1,
+        "pendingRequestCount": 0
+      }
+    }
+  ],
+  "eventTimeline": [
+    {
+      "sequence": 6,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "running",
+      "phase": "running",
+      "turnId": null,
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 7,
+      "method": "turn/started",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-962c-7652-b8a2-a8dcad7c21e6",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 21,
+      "method": "turn/completed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "action",
+      "phase": "ready_for_review",
+      "turnId": "01a136c2-962c-7652-b8a2-a8dcad7c21e6",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 23,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-2",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "lane": "running",
+      "phase": "running",
+      "turnId": null,
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 24,
+      "method": "turn/started",
+      "taskId": "probe-task-2",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 27,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-2",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "lane": "action",
+      "phase": "waiting_for_input",
+      "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 28,
+      "method": "item/tool/requestUserInput",
+      "taskId": "probe-task-2",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "lane": "action",
+      "phase": "waiting_for_input",
+      "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 1
+    },
+    {
+      "sequence": 29,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-962c-7652-b8a2-a8dcad7c21e6",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 30,
+      "method": "turn/started",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-c502-74f2-8aed-39b5f4554928",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 43,
+      "method": "turn/completed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "action",
+      "phase": "ready_for_review",
+      "turnId": "01a136c2-c502-74f2-8aed-39b5f4554928",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 44,
+      "method": "serverRequest/resolved",
+      "taskId": "probe-task-2",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "lane": "action",
+      "phase": "waiting_for_input",
+      "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 45,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-2",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 58,
+      "method": "turn/completed",
+      "taskId": "probe-task-2",
+      "threadId": "01a136c2-95c9-7161-adcf-423b8cdd13f3",
+      "lane": "action",
+      "phase": "ready_for_review",
+      "turnId": "01a136c2-b316-7903-b268-73f6ef8ef144",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 60,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-c502-74f2-8aed-39b5f4554928",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 61,
+      "method": "turn/started",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 79,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "action",
+      "phase": "waiting_for_approval",
+      "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 81,
+      "method": "item/commandExecution/requestApproval",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "action",
+      "phase": "waiting_for_approval",
+      "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 1
+    },
+    {
+      "sequence": 82,
+      "method": "serverRequest/resolved",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "action",
+      "phase": "waiting_for_approval",
+      "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 84,
+      "method": "thread/status/changed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "running",
+      "phase": "running",
+      "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    },
+    {
+      "sequence": 97,
+      "method": "turn/completed",
+      "taskId": "probe-task-1",
+      "threadId": "01a136c2-9513-7fd2-892b-d630a0bb6607",
+      "lane": "action",
+      "phase": "ready_for_review",
+      "turnId": "01a136c2-d8cf-7cd3-9d9b-56e836e465f2",
+      "timerUnread": false,
+      "generation": 1,
+      "pendingRequestCount": 0
+    }
+  ],
+  "cliVersion": "Codex Desktop/0.162.0-alpha.17.2 (Windows 10.0.26200; x86_64) dumb (taskboard_probe; 0.1.0)",
+  "ephemeralThreadsPersisted": 0,
+  "desktopObservation": {
+    "probe": "current_desktop_metadata",
+    "exactThread": {
+      "threadId": "01a13609-5a3f-7912-84dc-93bd8ac1fd2c",
+      "found": true,
+      "source": "vscode",
+      "historyMode": "paginated",
+      "latestTurn": {
+        "id": "01a136bf-cf28-7d72-afc0-ba213de8e430",
+        "status": "inProgress",
+        "startedAt": 1791919902,
+        "completedAt": null
+      },
+      "authoritativeLiveState": false,
+      "waitingInputSupported": false,
+      "waitingApprovalSupported": false,
+      "limitation": "persisted_history_does_not_prove_liveness_or_pending_requests"
+    },
+    "sharedProxy": {
+      "connected": false,
+      "errorType": "transport_closed"
+    },
+    "separateServer": {
+      "connected": true,
+      "serverVersion": "Codex Desktop/0.162.0-alpha.17.2 (Windows 10.0.26200; x86_64) dumb (taskboard_probe; 0.1.0)",
+      "isDesktopServer": false,
+      "exactThreadStatus": {
+        "type": "notLoaded"
+      }
+    }
+  },
+  "probeSourceSha256": {
+    "tools/codex_probe/__init__.py": "663a220de5a55c9027d80ac6079773bab068c6871645589aa6955b3d75644caf",
+    "tools/codex_probe/__main__.py": "77c72466034e25c69bcbdbc3480675b205cb16e604324bb1ab25ef2edd8a57be",
+    "tools/codex_probe/rpc.py": "817313966ec02453c94f7f053aa87439d45695531e5d08c4929f2fb71f3248bf",
+    "tools/codex_probe/state.py": "91d5d5725856302eedfa6a3fbfa5c0d522876aae6d42833a92ca28889984796f",
+    "tools/codex_probe/storage.py": "3e27363fb5dd9331288f411cf1e0e08ead8aa0d81fcb5bfef5e27d5e53bf5914"
+  },
+  "limits": [
+    "current_desktop_live_events_not_attached",
+    "no_production_task_store_changes",
+    "approval_declined_not_granted",
+    "failed_and_interrupted_covered_by_unit_checks_only",
+    "structured_questions_only",
+    "native_rpc_history_format_version_dependent"
+  ],
+  "desktopProcessInspection": {
+    "parentPid": 47920,
+    "appServerPid": 45344,
+    "appServer": true,
+    "explicitListen": false,
+    "explicitStdio": false,
+    "remote": false,
+    "interpretation": "stdio_default_in_cli_help; no_external_listen_argument_observed"
+  }
+}

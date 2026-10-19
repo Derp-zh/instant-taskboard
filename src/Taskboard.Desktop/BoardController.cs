@@ -37,6 +37,8 @@ internal sealed partial class BoardController : IDisposable
     private readonly List<Guid> draftOrder = new();
     private SurfaceWindow? previouslyActive;
     private bool layingOutDrafts;
+    private bool restoringGroup;
+    internal bool IsRestoringWorkspace => restoringGroup;
     private int draftPage;
     private Guid? lastClosedDraft;
     internal Rect[] LastDraftBounds { get; private set; } = [];
@@ -46,7 +48,8 @@ internal sealed partial class BoardController : IDisposable
     internal CodexObserver Codex { get; private set; } = new();
     internal NotificationListeningService Listening { get; }
     internal string CodexStatus => Codex.Status;
-    private void UpdateCodexWatches() => Codex.Watch(Engine.State.Tasks.Where(x => x.Codex is not null).Select(x => new CodexWatch(x.Id,x.Codex!.ThreadId,x.Codex.Generation)).ToArray());
+    private void UpdateCodexWatches() => Codex.Watch(Engine.State.Tasks.SelectMany(task => task.Stages.Where(stage => stage.Codex is not null)
+        .Select(stage => new CodexWatch(task.Id, stage.Id, stage.Codex!.BindingId, stage.Codex.ThreadId, stage.Codex.Generation))).ToArray());
     public async Task RestartCodex()
     {
         await Codex.DisposeAsync(); Codex = new CodexObserver(); AttachCodex(); UpdateCodexWatches();
@@ -60,8 +63,8 @@ internal sealed partial class BoardController : IDisposable
             if (exiting || Codex != observer) return;
             if (!observer.Authoritative)
             {
-                var changed = Engine.State.Tasks.Where(x => x.Codex is { Phase: not CodexPhase.Unknown }).ToArray();
-                foreach (var task in changed) task.Codex!.Phase = CodexPhase.Unknown;
+                var changed = Engine.State.Tasks.Where(x => x.Stages.Any(stage => stage.Codex is { Phase: not CodexPhase.Unknown })).ToArray();
+                foreach (var binding in changed.SelectMany(x => x.Stages).Select(x => x.Codex).OfType<CodexBinding>()) binding.Phase = CodexPhase.Unknown;
                 if (changed.Length > 0) Engine.Notify(changed.Select(x => x.Id).ToArray());
             }
             settings?.RefreshCodexStatus();
@@ -70,9 +73,10 @@ internal sealed partial class BoardController : IDisposable
         {
             if (exiting || Codex != observer || observer.Epoch != epoch) return;
             var task = Engine.State.Tasks.FirstOrDefault(x => x.Id == watch.TaskId);
-            if (task?.Codex?.ThreadId != watch.ThreadId) return;
+            var binding = task?.Stages.FirstOrDefault(x => x.Id == watch.StageId)?.Codex;
+            if (task is null || binding?.ThreadId != watch.ThreadId || binding.BindingId != watch.BindingId) return;
             var before = task.Lane;
-            if (CodexState.Apply(task,message,sequence,watch.Generation,epoch,authoritative))
+            if (CodexState.Apply(task,watch.StageId,message,sequence,watch.Generation,epoch,authoritative))
             { if (before != task.Lane) { Engine.State.Tasks.Remove(task); Engine.State.Tasks.Add(task); } task.UpdatedUtc = DateTime.UtcNow; Engine.Notify([task.Id]); }
         }));
     }
@@ -109,18 +113,18 @@ internal sealed partial class BoardController : IDisposable
         SurfaceWindow.SetTransparency(Engine.State.Preferences.GlassTransparency, Engine.State.Preferences.FloatingTransparency);
         saveTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(750) };
         saveTimer.Tick += async (_, _) => { saveTimer.Stop(); await Flush(); };
-        foreach (var definition in Engine.State.Preferences.Columns.Where(x => !x.Deleted)) Columns.Add(new ColumnSurface(this, definition));
-        Ball = new BallSurface(this);
+        foreach (var definition in Engine.State.Preferences.Columns.Where(x => !x.Deleted)) Columns.Add(new ColumnSurface(this, definition) { SuppressActivation = Smoke });
+        Ball = new BallSurface(this) { SuppressActivation = Smoke };
         Native.SetBall(Ball);
-        draftStack = new DraftStackSurface(this);
+        draftStack = new DraftStackSurface(this) { SuppressActivation = Smoke };
         RestorePositions();
         Ui.WindowCreated = window => { RegisterAuxiliary(window); Clamp(window); };
-        trayIcon = Brand.TrayIcon(); tray = new Forms.NotifyIcon { Icon = trayIcon, Visible = true, Text = Brand.Name };
+        trayIcon = Brand.TrayIcon(); tray = new Forms.NotifyIcon { Icon = trayIcon, Visible = !Smoke, Text = Brand.Name };
         tray.MouseClick += (_, e) => { if (e.Button == Forms.MouseButtons.Left) Toggle(); };
         tray.BalloonTipClicked += (_, _) => { SetExpanded(true); ShowNotificationTasks(); };
         tray.ContextMenuStrip = BuildTrayMenu();
         reminderTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
-        reminderTimer.Tick += async (_, _) => await CheckReminders(); reminderTimer.Start();
+        reminderTimer.Tick += async (_, _) => { await CheckReminders(); await CheckAutomaticArchives(); }; reminderTimer.Start();
         foregroundCallback = (_, _, handle, _, _, _, _) =>
         {
             if (handle == IntPtr.Zero || exiting) return;
@@ -134,6 +138,7 @@ internal sealed partial class BoardController : IDisposable
     }
     public async Task Start()
     {
+        Ball.RefreshData();
         foreach(var column in VisibleColumns) column.PrimeWindow();
         if (Engine.State.Preferences.BallVisible) Ball.Show();
         if (!Isolated)
@@ -161,13 +166,15 @@ internal sealed partial class BoardController : IDisposable
         if (Store.RecoveryMessage is not null) Report(Store.RecoveryMessage);
         if (Engine.State.Sessions.Count > 0) Ball.ToolTip = $"已恢复{Engine.State.Sessions.Count}份草稿或未提交编辑，展开后继续。";
         await CheckReminders();
-        foreach (var task in Engine.State.Tasks.Where(x => x.Codex is not null)) { task.Codex!.Phase = CodexPhase.Unknown; task.Codex.SourceEpoch = ""; }
+        await CheckAutomaticArchives(true);
+        foreach (var binding in Engine.State.Tasks.SelectMany(x => x.Stages).Select(x => x.Codex).OfType<CodexBinding>()) { binding.Phase = CodexPhase.Unknown; binding.SourceEpoch = ""; }
         if (!Isolated) await RestartCodex();
         await Listening.Apply();
+        RefreshHotkey();
         foreach (var column in VisibleColumns) column.WarmAnimation();
     }
     private void AttachEngine() { Engine.Changed += OnChanged; Engine.Dirty += OnDirty; }
-    private void DetachEngine() { Engine.Changed -= OnChanged; Engine.Dirty -= OnDirty; }
+    private void DetachEngine() { retainedStages.Clear(); Engine.Changed -= OnChanged; Engine.Dirty -= OnDirty; }
     private void OnDirty() { dirtyVersion++; if (saveTimer is not null) { saveTimer.Stop(); saveTimer.Start(); } }
     private void OnChanged(IReadOnlyCollection<Guid> ids)
     {
@@ -199,6 +206,12 @@ internal sealed partial class BoardController : IDisposable
     { if (await Flush() && success is not null) await success(); }
     public async Task<bool> SubmitSession(EditSession session)
     {
+        await humanTaskGate.WaitAsync();
+        try { await CleanupRetainedStages(); return await SubmitSessionLocked(session); }
+        finally { humanTaskGate.Release(); }
+    }
+    private async Task<bool> SubmitSessionLocked(EditSession session)
+    {
         await saveGate.WaitAsync(); explicitSave++;
         try
         {
@@ -227,8 +240,10 @@ internal sealed partial class BoardController : IDisposable
     {
         if (exiting || Expanded == expanded) return;
         Expanded = expanded;
+        restoringGroup = expanded && hiddenGroup.Count > 0;
         workspaceGeneration++;
         outsideTarget = null;
+        if (expanded) foreach (var column in Columns) column.RestartCardMarquees();
         if (!expanded)
         {
             hiddenDialogs.Clear(); hiddenDialogs.AddRange(Native.Dialogs()); foreach (var dialog in hiddenDialogs) Native.ShowWindow(dialog, 0);
@@ -255,10 +270,12 @@ internal sealed partial class BoardController : IDisposable
         }
         else { foreach (var window in taskWindows.Values) window.Hide(); Persist(); }
         LastEditorRestoreMs=feedbackClock.Elapsed.TotalMilliseconds;
-        } finally {Native.EndWorkspaceChange();}
+        } finally { restoringGroup = false; Native.EndWorkspaceChange(); }
+        if (expanded) _ = CleanupRetainedStages();
     }
     public EditorSurface NewTask(Lane? lane = null, Guid? columnId = null)
     {
+        _ = CleanupRetainedStages();
         SetExpanded(true);
         // An untouched editor is an input surface, not another staged card.
         layingOutDrafts = true;
@@ -275,21 +292,34 @@ internal sealed partial class BoardController : IDisposable
     public EditorSurface OpenNewEntry(Lane lane, Guid? columnId = null)
     {
         var saved = Engine.State.Sessions.Where(x => x.TaskId is null && !x.Inline && x.Working.HasContent).ToArray();
-        var current = Editors.FirstOrDefault(x => x.Session.Id == ActiveDraft);
-        if (current is not null && draftStack.ShouldRestore) return NewTask(lane, columnId);
-        if (current is not null)
-        { SetExpanded(true); foreach (var session in saved) { session.Visible = true; EnsureEditor(session); } PromoteDraft(current); current.Activate(); return current; }
-        if (saved.Length == 0) return NewTask(lane, columnId);
         SetExpanded(true);
         foreach (var session in saved) { session.Visible = true; EnsureEditor(session); }
-        var front = EnsureEditor(saved.FirstOrDefault(x => x.Id == lastClosedDraft) ?? saved[^1]); PromoteDraft(front); front.Activate(); Engine.Touch(); return front;
+        return NewTask(lane, columnId);
+    }
+    internal EditorSurface OpenDraft(EditSession session)
+    {
+        _ = CleanupRetainedStages();
+        session.Inline = false; session.Visible = true;
+        Engine.StageSession(session); SetExpanded(true);
+        foreach (var saved in Engine.State.Sessions.Where(x => x.TaskId is null && !x.Inline && x.Working.HasContent).ToArray())
+        { saved.Visible = true; EnsureEditor(saved); }
+        var editor = EnsureEditor(session); PromoteDraft(editor); draftStack.Activate(); Native.RaiseBall(); return editor;
+    }
+    internal void ToggleTaskEditor(Guid id)
+    {
+        var existing = Editors.FirstOrDefault(x => x.Session.TaskId == id);
+        if (existing?.Host is { } opening && !opening.CanInterruptTaskOpening) return;
+        _ = CleanupRetainedStages();
+        if (existing?.Host?.ShouldRestore == true) { existing.Suspend(); Persist(); }
+        else EditTask(id);
     }
     public EditorSurface EditTask(Guid id)
     {
+        _ = CleanupRetainedStages();
         SetExpanded(true); var session = Engine.Edit(id); var editor = EnsureEditor(session);
         editor.Activate(); Native.RaiseBall(); return editor;
     }
-    private EditorSurface EnsureEditor(EditSession session)
+    internal EditorSurface EnsureEditor(EditSession session)
     {
         var existing = Editors.FirstOrDefault(x => x.Session.Id == session.Id); if (existing is not null) return existing;
         var editor = new EditorSurface(this, session); Editors.Add(editor);
@@ -301,14 +331,9 @@ internal sealed partial class BoardController : IDisposable
         var window = new TaskEditorWindow(editor); taskWindows.Add(session.Id, window);
         window.Closed += (_, _) => { hiddenGroup.Remove(window); if (previouslyActive == window) previouslyActive = null; };
         var key = "edit-" + session.Id;
-        if (Engine.State.Preferences.Positions.TryGetValue(key, out var position)) window.Place(position);
-        else
-        {
-            var area = WorkArea(Ball);
-            var previous = taskWindows.Values.Where(x => x != window && x.ShouldRestore).OrderByDescending(x => x.ActivationOrder).FirstOrDefault();
-            window.Left = previous is not null ? previous.Left + 32 : area.Left + Math.Max(30, (area.Width - window.Width) / 2);
-            window.Top = previous is not null ? previous.Top + 32 : area.Top + Math.Max(12, (area.Height - window.Height) / 2);
-        }
+        if (Engine.State.Preferences.Positions.TryGetValue(key, out var position)) { window.Width = position.Width; window.Height = position.Height; }
+        PositionFloating(window);
+        window.BeforeOpen += () => { if (!restoringGroup) PositionFloating(window); };
         Clamp(window); return editor;
     }
     public void RemoveEditor(EditorSurface editor)
@@ -350,7 +375,8 @@ internal sealed partial class BoardController : IDisposable
             var width = Math.Min(430, Math.Max(80, (area.Width - 24) / 1.4));
             var height = Math.Min(650, Math.Max(80, area.Height - 24)); var step = width / 5;
             var left = area.Left + (area.Width - width) / 2; var top = area.Top + (area.Height - height) / 2;
-            if (Engine.State.Preferences.Positions.TryGetValue("draft-stack", out var placement))
+            var opening = !draftStack.ShouldRestore && !restoringGroup;
+            if (!opening && Engine.State.Preferences.Positions.TryGetValue("draft-stack", out var placement))
             { left = Math.Clamp(placement.X, area.Left, area.Right - width * 1.2); top = Math.Clamp(placement.Y, area.Top, area.Bottom - height); }
             var slots = Math.Max(1, (int)Math.Floor((area.Right - 12 - left - width) / step));
             var olderPerPage = Math.Max(0, slots - 1);
@@ -358,6 +384,13 @@ internal sealed partial class BoardController : IDisposable
             draftPage = Math.Clamp(draftPage, 0, totalPages - 1);
             var visible = olderPerPage > 0 ? new[] { drafts[0] }.Concat(drafts.Skip(1 + draftPage * olderPerPage).Take(olderPerPage)).ToArray() : new[] { drafts[draftPage] };
             LastDraftBounds = visible.Select((_, i) => new Rect(left + i * step, top, width, height)).Append(new Rect(left + visible.Length * step, top, width, height)).ToArray();
+            if (opening)
+            {
+                var hostWidth = LastDraftBounds[^1].Right - left - DraftCardGeometry.EntryShift(width);
+                var shift = area.Left + (area.Width - hostWidth) / 2 - left;
+                LastDraftBounds = LastDraftBounds.Select(rect => new Rect(rect.Left + shift, rect.Top, rect.Width, rect.Height)).ToArray();
+                Engine.State.Preferences.Positions["draft-stack"] = new WindowPosition { X = left + shift, Y = top, Width = hostWidth, Height = height };
+            }
             draftStack.Layout(visible, LastDraftBounds, draftPage, totalPages);
             Native.RaiseBall();
         }
@@ -365,18 +398,27 @@ internal sealed partial class BoardController : IDisposable
     }
     private void RefreshDraftStack() { if (draftStack is not null && !Editors.Any(x => x.Session.TaskId is null)) draftStack.ClearClosed(); }
     public void RegisterAuxiliary(SurfaceWindow window)
-    { auxiliary.Add(window); window.Closed += (_, _) => { auxiliary.Remove(window); hiddenGroup.Remove(window); if (previouslyActive == window) previouslyActive = null; }; }
-    public void MoveTask(Guid id, Lane lane, Guid? before, Guid? columnId = null) { Engine.Move(id, lane, before, columnId); Persist(); }
-    public void DeleteTask(Guid id) { Engine.Delete(id); Persist(); }
+    { auxiliary.Add(window); window.BeforeOpen += () => { if (!restoringGroup && window.FloatingAnimations) PositionFloating(window); }; window.Closed += (_, _) => { auxiliary.Remove(window); hiddenGroup.Remove(window); if (previouslyActive == window) previouslyActive = null; }; }
+    private void PositionFloating(SurfaceWindow window)
+    {
+        var area = WorkArea(Ball);
+        window.Width = Math.Min(window.Width, area.Width); window.Height = Math.Min(window.Height, area.Height);
+        var previous = window is TaskEditorWindow ? taskWindows.Values.Where(x => x != window && x.ShouldRestore).OrderByDescending(x => x.ActivationOrder).FirstOrDefault() : null;
+        window.Left = previous is not null ? previous.Left + 32 : area.Left + (area.Width - window.Width) / 2;
+        window.Top = previous is not null ? previous.Top + 32 : area.Top + (area.Height - window.Height) / 2;
+        Clamp(window);
+    }
+    public void MoveTask(Guid id, Lane lane, Guid? before, Guid? columnId = null) { _ = RunHumanTask(() => { if (Engine.State.Tasks.Any(x => x.Id == id)) Engine.Move(id, lane, before, columnId); Persist(); }); }
+    public void DeleteTask(Guid id) { _ = RunHumanTask(() => { if (Engine.State.Tasks.Any(x => x.Id == id)) Engine.Delete(id); Persist(); }, id); }
     internal void DeleteDraft(EditorSurface editor)
-    { Engine.State.Sessions.Remove(editor.Session); Engine.Touch(); RemoveEditor(editor); editor.Destroy(); Persist(); }
+    { _ = CleanupRetainedStages(); Engine.State.Sessions.Remove(editor.Session); Engine.Touch(); RemoveEditor(editor); editor.Destroy(); Persist(); }
     internal int DraftNumber(Guid id) => Engine.State.Sessions.Where(x => x.TaskId is null && !x.Inline)
         .Concat(Editors.Where(x => x.Session.TaskId is null).Select(x => x.Session)).DistinctBy(x => x.Id)
         .OrderBy(x => x.CreationTime).ThenBy(x => x.Id).Select((x, i) => (x.Id, Number: i + 1)).FirstOrDefault(x => x.Id == id).Number;
-    public void Undo() { Engine.Undo(); Persist(); }
-    public void Redo() { Engine.Redo(); Persist(); }
-    public void ArchiveTask(Guid id) { Engine.Archive(id); settings?.RefreshArchive(); Persist(); }
-    public void UnarchiveTask(Guid id) { Engine.Unarchive(id); ColumnsChanged(false); settings?.RefreshArchive(); Persist(); }
+    public void Undo() { _ = RunHumanTask(() => { Engine.Undo(); Persist(); }); }
+    public void Redo() { _ = RunHumanTask(() => { Engine.Redo(); Persist(); }); }
+    public void ArchiveTask(Guid id) { _ = RunHumanTask(() => { if (Engine.State.Tasks.Any(x => x.Id == id)) Engine.Archive(id); settings?.RefreshArchive(); Persist(); }, id); }
+    public void UnarchiveTask(Guid id) { _ = RunHumanTask(() => { if (Engine.State.Archives.Any(x => x.Item.Id == id)) Engine.Unarchive(id); ColumnsChanged(false); settings?.RefreshArchive(); Persist(); }); }
     public void Locate(Guid id)
     {
         var item = Engine.State.Tasks.FirstOrDefault(x => x.Id == id); if (item is null) return;
@@ -390,6 +432,11 @@ internal sealed partial class BoardController : IDisposable
         if (!Expanded) SetExpanded(true);
         if (settings is null) { settings = new SettingsSurface(this); RegisterAuxiliary(settings); var area = WorkArea(Ball); settings.Left = area.Left + (area.Width - settings.Width) / 2; settings.Top = area.Top + (area.Height - settings.Height) / 2; Clamp(settings); }
         settings.Show(); settings.Activate(); Native.RaiseBall();
+    }
+    internal void ToggleSettings()
+    {
+        if (settings?.ShouldRestore == true) settings.Hide();
+        else Settings();
     }
     public void OptionsChanged()
     {
@@ -415,11 +462,11 @@ internal sealed partial class BoardController : IDisposable
         }
         menu.PlacementTarget = target; menu.IsOpen = true;
     }
-    public void ApplySettings() { foreach (var column in Columns) column.ApplySettings(); }
+    public void ApplySettings() { foreach (var column in Columns) column.ApplySettings(); RefreshHotkey(); Ball.RefreshEdgeAutoHide(); }
     public void SavePosition(string key, SurfaceWindow window) { Engine.State.Preferences.Positions[key] = window.Position(); Engine.Touch(); }
     public void SaveBall(BallSurface window)
     {
-        Engine.State.Preferences.Positions["ball"] = new WindowPosition { X = window.Left + window.Width - 58, Y = window.Top, Width = 58, Height = 58 }; Engine.Touch();
+        Engine.State.Preferences.Positions["ball"] = new WindowPosition { X = window.VisibleBallLeft, Y = window.Top, Width = 58, Height = 58 }; Engine.Touch();
     }
     public Rect WorkArea(Window window)
     {
@@ -433,7 +480,7 @@ internal sealed partial class BoardController : IDisposable
     }
     public void Clamp(SurfaceWindow window)
     {
-        if (Smoke) { window.Left = -10000; window.Top = -10000; window.ShowActivated = false; return; }
+        if (Smoke) { window.SuppressActivation = true; window.Left = -10000; window.Top = -10000; window.ShowActivated = false; return; }
         var area = WorkArea(window);
         window.Width = Math.Min(window.Width, area.Width); window.Height = Math.Min(window.Height, area.Height);
         window.Left = Math.Clamp(window.Left, area.Left, Math.Max(area.Left, area.Right - window.Width));
@@ -443,38 +490,31 @@ internal sealed partial class BoardController : IDisposable
     {
         foreach (var column in Columns.ToArray())
         { var definition = Engine.State.Preferences.Columns.FirstOrDefault(x => x.Id == column.Definition.Id && !x.Deleted); if (definition is null) { column.PrepareHide(); column.Destroy(); Columns.Remove(column); } else column.Rebind(definition); }
-        foreach (var definition in Engine.State.Preferences.Columns.Where(x => !x.Deleted && !Columns.Any(y => y.Definition.Id == x.Id))) Columns.Add(new ColumnSurface(this,definition));
+        foreach (var definition in Engine.State.Preferences.Columns.Where(x => !x.Deleted && !Columns.Any(y => y.Definition.Id == x.Id))) Columns.Add(new ColumnSurface(this,definition) { SuppressActivation = Smoke });
         Columns.Sort((a,b) => Engine.State.Preferences.Columns.IndexOf(a.Definition).CompareTo(Engine.State.Preferences.Columns.IndexOf(b.Definition)));
     }
     public void ColumnsChanged(bool layout = true)
     {
-        SynchronizeColumns(); if (layout) { foreach (var column in Columns) Engine.State.Preferences.Positions.Remove(column.Definition.PositionKey); RestorePositions(); }
+        SynchronizeColumns(); if (layout) { foreach (var column in Columns) { Engine.State.Preferences.Positions.Remove(column.Definition.PositionKey); Engine.State.Preferences.Positions.Remove(ColumnDefaultPrefix + column.Definition.PositionKey); } RestorePositions(); }
         foreach (var column in Columns) { column.ApplySettings(); if (Expanded && column.Definition.Visible) column.Show(); else column.Hide(); }
         foreach (var editor in Editors) editor.RefreshColumns(); Engine.Touch(); Ball.RefreshData();
     }
     private void RestorePositions()
     {
+        Ball.RestoreFromEdge();
         var area = WorkArea(Ball);
-        var monitor = Forms.Screen.FromHandle(new WindowInteropHelper(Ball).Handle).Bounds;
-        var scale = 96.0 / Math.Max(96, Native.GetDpiForWindow(new WindowInteropHelper(Ball).Handle));
-        var gap = Math.Min(24, Math.Max(12, area.Width / 50));
-        var totalWidth = Math.Min(area.Width - 24, monitor.Width * scale * 7 / 8);
-        var visible = VisibleColumns; var count = Math.Max(1,visible.Length);
-        gap = Math.Min(gap, Math.Max(0,(totalWidth-count*80)/(count-1.0)));
-        if (count == 1) gap = 0;
-        var width = Math.Max(80, (totalWidth - (count-1)*gap) / count);
-        var height = Math.Max(260, (area.Height - 90) * .87);
-        var left = area.Left + (area.Width - width * count - (count-1) * gap) / 2;
-        var top = area.Top + (area.Height - height) / 2;
+        var defaults = DefaultColumnPositions(); EnsureColumnDefaults(defaults);
+        var visible = VisibleColumns;
         for (var i = 0; i < visible.Length; i++)
         {
             if (Engine.State.Preferences.Positions.TryGetValue(visible[i].Definition.PositionKey, out var position)) visible[i].Place(position);
-            else visible[i].Place(new WindowPosition { X = left + i * (width + gap), Y = top, Width = width, Height = height });
+            else visible[i].Place(Engine.State.Preferences.Positions[ColumnDefaultPrefix + visible[i].Definition.PositionKey]);
             Clamp(visible[i]);
         }
         if (Engine.State.Preferences.Positions.TryGetValue("ball", out var ball)) Ball.Place(ball);
         else Ball.Place(new WindowPosition { X = area.Right - 78, Y = area.Bottom - 76, Width = 58, Height = 58 });
         Clamp(Ball);
+        Ball.RefreshEdgeAutoHide();
         if (Expanded) Ball.SetExpanded(true);
     }
     internal Rect MaximumRange { get { var columns = VisibleColumns; return columns.Length == 0 ? Rect.Empty : new Rect(columns.Min(x => x.Left),columns.Min(x => x.Top),columns.Max(x => x.Left+x.Width)-columns.Min(x => x.Left),columns.Max(x => x.Top+x.Height)-columns.Min(x => x.Top)); } }
@@ -486,7 +526,7 @@ internal sealed partial class BoardController : IDisposable
     private double scalePointerDpi;
     private bool scalePreviousSuppression;
     public void BeginWorkspaceResize()
-    { scalePreviousSuppression = SuppressCollapse; scaleWindows = VisibleColumns; if (scaleWindows.Length == 0) return; scaleStart = scaleWindows.Select(x => x.Position()).ToArray(); scaleBounds = MaximumRange; scaleDeltaX = scaleDeltaY = 0; scalePointerStart = Forms.Cursor.Position; scalePointerDpi = Native.GetDpiForWindow(new WindowInteropHelper(Ball).Handle) / 96.0; SuppressCollapse = true; }
+    { scalePreviousSuppression = SuppressCollapse; scaleWindows = VisibleColumns; if (scaleWindows.Length == 0) return; EnsureColumnDefaults(DefaultColumnPositions()); scaleDefaultStart = scaleWindows.Select(x => Copies.Of(Engine.State.Preferences.Positions[ColumnDefaultPrefix + x.Definition.PositionKey])).ToArray(); workspaceResizeFactor = 1; scaleStart = scaleWindows.Select(x => x.Position()).ToArray(); scaleBounds = MaximumRange; scaleDeltaX = scaleDeltaY = 0; scalePointerStart = Forms.Cursor.Position; scalePointerDpi = Native.GetDpiForWindow(new WindowInteropHelper(Ball).Handle) / 96.0; SuppressCollapse = true; }
     public void ResizeWorkspaceFromPointer()
     => ResizeWorkspaceAtPointer(Forms.Cursor.Position);
     internal void ResizeWorkspaceAtPointer(System.Drawing.Point point)
@@ -500,6 +540,7 @@ internal sealed partial class BoardController : IDisposable
         var minimum = Math.Max(80 / scaleStart.Min(x => x.Width), 260 / scaleStart.Min(x => x.Height));
         var maximum = Math.Max(minimum, Math.Min(area.Width / scaleBounds.Width, area.Height / scaleBounds.Height));
         var factor = Math.Clamp(requested, minimum, maximum);
+        workspaceResizeFactor = factor;
         var left = area.Left + (area.Width - scaleBounds.Width * factor) / 2;
         var top = area.Top + (area.Height - scaleBounds.Height * factor) / 2;
         for (var i = 0; i < scaleWindows.Length; i++)
@@ -513,38 +554,51 @@ internal sealed partial class BoardController : IDisposable
     public void EndWorkspaceResize()
     {
         if (scaleStart is null) return; scaleStart = null; SuppressCollapse = scalePreviousSuppression;
-        foreach (var column in scaleWindows) Engine.State.Preferences.Positions[column.Definition.PositionKey] = column.Position(); Engine.Touch();
+        var area = WorkArea(Ball); var defaults = Bounds(scaleDefaultStart);
+        for (var i = 0; i < scaleWindows.Length; i++)
+        {
+            var column = scaleWindows[i]; Engine.State.Preferences.Positions[column.Definition.PositionKey] = column.Position();
+            Engine.State.Preferences.Positions[ColumnDefaultPrefix + column.Definition.PositionKey] = ScaledDefault(scaleDefaultStart[i], defaults, area, workspaceResizeFactor);
+        }
+        Engine.Touch();
     }
     public void RestoreDefaults()
     {
-        foreach (var key in Engine.State.Preferences.Positions.Keys.Where(x => x == "ball" || (x.StartsWith("lane-", StringComparison.Ordinal) || x.StartsWith("column-",StringComparison.Ordinal))).ToArray()) Engine.State.Preferences.Positions.Remove(key);
+        foreach (var key in Engine.State.Preferences.Positions.Keys.Where(x => x == "ball" || x.StartsWith(ColumnDefaultPrefix, StringComparison.Ordinal) || x.StartsWith("lane-", StringComparison.Ordinal) || x.StartsWith("column-",StringComparison.Ordinal)).ToArray()) Engine.State.Preferences.Positions.Remove(key);
         RestorePositions(); if (Expanded) { Ball.SetExpanded(false); Ball.SetExpanded(true); LayoutDrafts(); } Engine.Touch();
     }
     public void OrbMenu(FrameworkElement target)
     {
-        var menu = new ContextMenu();
-        Add("设置", Settings); Add("隐藏悬浮球", HideBall); Add("恢复窗口默认位置", RestoreDefaults);
-        var undo = Add("撤销", Undo); undo.IsEnabled = Engine.CanUndo;
-        var redo = Add("恢复", Redo); redo.IsEnabled = Engine.CanRedo;
-        var ai = new MenuItem { Header = "AI" }; ai.Items.Add(new MenuItem { Header = "Codex · "+CodexStatus, IsEnabled = false }); ai.Items.Add(new MenuItem { Header = "dsh / workbuddy · 未接入", IsEnabled = false }); menu.Items.Add(ai);
-        menu.PlacementTarget = target; menu.IsOpen = true;
-        MenuItem Add(string text, Action action) { var item = new MenuItem { Header = text }; item.Click += (_, _) => action(); menu.Items.Add(item); return item; }
+        ShowOrbMenu(Forms.Cursor.Position);
     }
+    internal void ShowOrbMenu(System.Drawing.Point pointer)
+    {
+        if (Ball.IsEdgeDocked)
+        {
+            var bounds = Native.ScreenBounds(Ball);
+            var gap = (int)Math.Ceiling(8 * Native.GetDpiForWindow(new WindowInteropHelper(Ball).Handle) / 96.0);
+            EntryMenu.Show(new System.Drawing.Point((int)(bounds.Right - bounds.Height) - gap, pointer.Y), Forms.ToolStripDropDownDirection.Left);
+        }
+        else EntryMenu.Show(pointer);
+    }
+    internal Forms.ContextMenuStrip EntryMenu => tray.ContextMenuStrip!;
     private Forms.ContextMenuStrip BuildTrayMenu()
     {
         var menu = new Forms.ContextMenuStrip();
-        menu.Items.Add("设置", null, (_, _) => Settings());
-        var ball = menu.Items.Add("隐藏悬浮球", null, (_, _) => { if (Engine.State.Preferences.BallVisible) HideBall(); else ShowBall(); });
-        menu.Items.Add("恢复窗口默认位置", null, (_, _) => RestoreDefaults());
+        var ball = menu.Items.Add(Engine.State.Preferences.BallVisible ? "隐藏悬浮球" : "恢复悬浮球", null, (_, _) => ToggleBallVisibility());
+        menu.Items.Add("设置", null, (_, _) => ToggleSettings());
+        menu.Items.Add("恢复窗口默认", null, (_, _) => RestoreDefaults());
         var undo = menu.Items.Add("撤销", null, (_, _) => Undo());
         var redo = menu.Items.Add("恢复", null, (_, _) => Redo());
         var ai = new Forms.ToolStripMenuItem("AI"); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("尚未接入 AI") { Enabled = false }); menu.Items.Add(ai);
         menu.Items.Add("展开 / 收起看板", null, (_, _) => Toggle());
         menu.Items.Add("退出程序", null, async (_, _) => await Exit());
-        menu.Opening += (_, _) => { ai.DropDownItems.Clear(); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("Codex · "+CodexStatus) { Enabled = false }); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("dsh / workbuddy · 未接入") { Enabled = false }); ball.Text = Engine.State.Preferences.BallVisible ? "隐藏悬浮球" : "恢复悬浮球"; undo.Enabled = Engine.CanUndo; redo.Enabled = Engine.CanRedo; Ball.HidePopups(); };
+        menu.Opening += (_, _) => { Ball.SetEdgeMenuOpen(true); ai.DropDownItems.Clear(); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("Codex · "+CodexStatus) { Enabled = false }); ai.DropDownItems.Add(new Forms.ToolStripMenuItem("dsh / workbuddy · 未接入") { Enabled = false }); ball.Text = Engine.State.Preferences.BallVisible ? "隐藏悬浮球" : "恢复悬浮球"; undo.Enabled = Engine.CanUndo; redo.Enabled = Engine.CanRedo; Ball.HidePopups(); };
+        menu.Closed += (_, _) => Ball.SetEdgeMenuOpen(false);
         return menu;
     }
     private void HideBall() { Ball.HidePopups(); Ball.Hide(); Engine.State.Preferences.BallVisible = false; Engine.Touch(); }
+    private void ToggleBallVisibility() { if (Engine.State.Preferences.BallVisible) HideBall(); else ShowBall(); }
     private void ShowBall() { Ball.Show(); Engine.State.Preferences.BallVisible = true; Engine.Touch(); }
     private async Task CheckReminders()
     {
@@ -672,6 +726,7 @@ internal sealed partial class BoardController : IDisposable
     public void Dispose()
     {
         CardDrag?.Dispose(); CardDrag = null;
+        globalHotkey?.Dispose(); globalHotkey = null;
         Listening.Dispose();
         Ui.WindowCreated = null;
         foreach (var lease in directoryLocks) { lease.ReleaseMutex(); lease.Dispose(); } directoryLocks.Clear();

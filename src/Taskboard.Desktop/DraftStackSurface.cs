@@ -23,6 +23,7 @@ internal sealed class DraftStackSurface : SurfaceWindow
     private readonly List<Border> tints = new();
     private readonly List<GlassRegion> regions = new();
     private Rect lastBounds;
+    private bool clearWhenHidden;
     internal int DraftCount { get; private set; }
     private EditorSurface[] switchViews = [];
     private EditorSurface? pendingSwitch;
@@ -77,10 +78,12 @@ internal sealed class DraftStackSurface : SurfaceWindow
             if (selected is not null && IsVisible && controller.Editors.Contains(selected)) controller.ShowEditor(selected, true);
         };
         Root.Background = Ui.Brush("#01000000"); Root.Children.Add(canvas);
+        IsVisibleChanged += (_, _) => { if (!IsVisible && clearWhenHidden) ClearHiddenContent(); };
     }
     public void Layout(IReadOnlyList<EditorSurface> visible, Rect[] bounds, int page, int pages)
     {
         if (visible.Count == 0) { Hide(); return; }
+        clearWhenHidden = false;
         var first = bounds[0]; var outline = bounds[^1];
         switchViews = visible.ToArray();
         var entryShift = DraftCardGeometry.EntryShift(first.Width);
@@ -154,9 +157,11 @@ internal sealed class DraftStackSurface : SurfaceWindow
     public override void RefreshGlass() { foreach (var tint in tints) tint.Opacity = 1 - GlassTransparency / 100; base.RefreshGlass(); }
     public void ClearClosed()
     {
-        pendingSwitch = null;
-        // Capture the last draft before removing its view, so closing can roll it up.
-        if (IsVisible && !IsScrollAnimating) WarmAnimation();
-        Hide(); canvas.Children.Clear(); tints.Clear(); regions.Clear(); switchViews = []; DraftCount = 0;
+        pendingSwitch = null; clearWhenHidden = true; switchViews = []; DraftCount = 0;
+        // The closing aperture still displays real controls. Release them only
+        // after hiding; Layout cancels this cleanup if a new draft reopens it.
+        Hide(); if (!IsVisible) ClearHiddenContent();
     }
+    private void ClearHiddenContent()
+    { clearWhenHidden = false; canvas.Children.Clear(); tints.Clear(); regions.Clear(); }
 }

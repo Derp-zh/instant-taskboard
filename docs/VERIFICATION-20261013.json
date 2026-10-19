@@ -1,0 +1,22 @@
+{
+  "Date": "2026-10-13",
+  "Version": "0.3.0",
+  "CorePassed": 44,
+  "UiPassed": 20,
+  "DesktopPassed": 10,
+  "RuleSearchMs": 0.060015,
+  "UiInitialLayoutMs": 423.8661,
+  "IdleCpuPercent": 0.10544631243066557,
+  "PackageFiles": 465,
+  "PackageSHA256": "1C0CAD408191CF821C31CDB291BC6AC545E8462311B6B765AB01ACB6585B6ECF",
+  "RuntimeFolderMB": 160.09,
+  "OldDataFilesUnchanged": 4,
+  "AllAcceptanceItemsPassed": false,
+  "Remaining": [
+    "首次冷启动2秒目标",
+    "多屏混合缩放",
+    "首次快捷方式和开机启动系统验收",
+    "睡眠系统通知和完整动效录屏",
+    "Codex及飞书等专项接入"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "Version": "0.9.7",
+  "Date": "2026-10-17",
+  "LocalOnly": true,
+  "ProductionDataChanged": false,
+  "UserProcessesStopped": false,
+  "StartupConfigurationChanged": false,
+  "Entry": "release/即时任务看板-0.9.7-final/即时任务看板.exe",
+  "PortableManifest": "docs/BUILD-INFO-0.9.7-local.json",
+  "DraftSwitchSpeed": 1.35,
+  "OtherAnimationDurationMs": 100,
+  "MinimumRunningStages": 1,
+  "Passed": 281.0,
+  "Reports": [
+    {
+      "Kind": "core",
+      "SHA256": "56A80758E675990F4AD3405A59041E0D0B6CDACC0DC9E9CA4F8955D8BC3FBA71",
+      "Report": "test-output/ux097-delivery-rules-final/report.json",
+      "Passed": 151
+    },
+    {
+      "Kind": "stage-ui",
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765",
+      "Report": "test-output/ux097-delivery-stage-final/stage-report.json",
+      "Passed": 31
+    },
+    {
+      "Kind": "compact-ui",
+      "SHA256": "2371C8BFDB5EE9EAF4C115664E66610CFAAB2D4650EBAD0A4975DEFE34B225E1",
+      "Report": "test-output/ux097-delivery-compact-final/compact-report.json",
+      "Passed": 82
+    },
+    {
+      "Kind": "migration-settings",
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9",
+      "Report": "test-output/ux097-delivery-integration-final/integration-report.json",
+      "Passed": 17
+    }
+  ],
+  "RuntimeHashes": [
+    {
+      "SHA256": "B2E4AB4968638FD0FAF368D9C1D089A456AC08CC0E946F8D1318513587414883",
+      "Path": "Taskboard.dll"
+    },
+    {
+      "SHA256": "EE42BE7E02EF567A66F764E63940D26D15A2BFAA61884553B55D528D377E0417",
+      "Path": "Taskboard.Core.dll"
+    },
+    {
+      "SHA256": "D96DD131A308D9807BFAA38578E017AAC6E226AAF4CED9BE22F3F8A996A8E7B1",
+      "Path": "即时任务看板.exe"
+    }
+  ],
+  "CoreTestUsesPublishedCore": true,
+  "OffscreenUI": {
+    "KeyboardInjected": false,
+    "LastRunningStageHintsRequested": 2,
+    "RealHintPopupShown": false,
+    "MouseMoved": false,
+    "ForegroundActivationSuppressed": true
+  },
+  "NativeHotkeyLifecycle": {
+    "InputInjected": false,
+    "ConflictPreservesPrevious": true,
+    "DisableReleases": true,
+    "ReplacementReleasesPrevious": true,
+    "DisposeReleases": true
+  },
+  "DesktopAttempt": {
+    "Reason": "隔离输入窗口未取得实际前台，前提断言失败。并非功能断言失败；不能据此认定实际快捷键、中文输入法或真实点击通过。",
+    "DefaultCtrlTildeRegistered": true,
+    "TestProcessesExited": true,
+    "ForegroundPreconditionPassed": false,
+    "EnglishHotkeyTriggered": false,
+    "KeyboardInputReached": false,
+    "ChineseIMETriggered": false,
+    "Directory": "test-output/ux097-desktop-input-07",
+    "ReceiptCaveat": "开发尝试报表旧keyboardInjected/mouseMoved字段为预设能力标识；执行在PressHotkey之前中止，未注入快捷键。最终测试代码已改为实际调用追踪，未再占用用户桌面重跑。",
+    "UserToldToResume": true,
+    "ActualHintVisualVerified": false,
+    "ActualClickAssertionsReached": false,
+    "MouseFocusAttempted": true,
+    "UserAuthorized": true,
+    "Accepted": false
+  },
+  "Boundaries": [
+    "未操作第五人格或崩坏三；旧版全屏模拟、Alt+Tab结果未冒充本轮重测。",
+    "未新建Codex聊天、发送消息或批准；现有桌面聊天实时桥接仍待专项确认。",
+    "未修改正式任务、配置、自启入口或停止用户旧版程序。",
+    "普通本地修改未上传GitHub。"
+  ],
+  "Index": {
+    "Coverage": "test-output/index-097-final-coverage.json",
+    "FreshnessCaveat": "metadata_changed；指定源码读取及便携构建来源SHA256补证，不宣称图确认源码新鲜。",
+    "Project": "taskboard",
+    "Receipt": "test-output/index-097-final-status.json"
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "Version": "0.9.14",
+  "Date": "2026-10-19",
+  "LocalOnly": true,
+  "Entry": "release/即时任务看板-0.9.14-final/即时任务看板.exe",
+  "Passed": 487,
+  "FinalPortablePassed": 461,
+  "DesktopPassed": 26,
+  "Reports": [
+    {
+      "Kind": "ux099",
+      "Report": "test-output/ux0914-final2-ux099/ux099-report.json",
+      "Passed": 30,
+      "SHA256": "5FFA36BABF148FC189885A731D139A03818326C6BAA50075C9C25970EFC51672"
+    },
+    {
+      "Kind": "ux0914",
+      "Report": "test-output/ux0914-final2-ux0914/ux0914-report.json",
+      "Passed": 30,
+      "SHA256": "45C2425DCC0C45A1267134240516426A980D892362287C8479C757504A2ACAA9"
+    },
+    {
+      "Kind": "ux0913",
+      "Report": "test-output/ux0914-final2-ux0913/ux0913-report.json",
+      "Passed": 31,
+      "SHA256": "CED5692E8F2284388E011EFBBA9BAC4093730F442B48B510268C63AC6FE0AF78"
+    },
+    {
+      "Kind": "ux0911",
+      "Report": "test-output/ux0914-final2-ux0911/ux0911-report.json",
+      "Passed": 37,
+      "SHA256": "F7C7893516774488B60466F654E771B580B214B5E9BF5EB6ADF70B183213CE90"
+    },
+    {
+      "Kind": "ux0912",
+      "Report": "test-output/ux0914-final2-ux0912/ux0912-report.json",
+      "Passed": 23,
+      "SHA256": "3D5026AC1560AD265A62A0DF64F456BAD04D68FE22EA3C5BE7BB9CBC6520367D"
+    },
+    {
+      "Kind": "ux0910",
+      "Report": "test-output/ux0914-final2-ux0910/ux0910-report.json",
+      "Passed": 15,
+      "SHA256": "12FC6BF9F2C527D9EEB3A57BFD7BA9D41C140AFC3B3642EE12C0A1DE95EDD717"
+    },
+    {
+      "Kind": "stage",
+      "Report": "test-output/ux0914-final2-stage/stage-report.json",
+      "Passed": 31,
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765"
+    },
+    {
+      "Kind": "integration",
+      "Report": "test-output/ux0914-final2-integration/integration-report.json",
+      "Passed": 17,
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9"
+    },
+    {
+      "Kind": "ux0913-render",
+      "Report": "test-output/ux0914-final2-ux0913-render/ux0913-render-report.json",
+      "Passed": 16,
+      "SHA256": "3EBFDA83BCB0A0BD65D16A2A95706CA25E61A0DF8742D2D12C7F65732A619B5B"
+    },
+    {
+      "Kind": "ux0913-render",
+      "Report": "test-output/ux0914-final2-ux0913-render/ux0914-closing-report.json",
+      "Passed": 6,
+      "SHA256": "B698ACFF34028813771DDAFC921EC9977D853E1169A4043A6D9B2A9C8DB863AD"
+    },
+    {
+      "Kind": "ux0912-render",
+      "Report": "test-output/ux0914-final2-ux0912-render/render-report.json",
+      "Passed": 54,
+      "SHA256": "D3A80AFFA62BC17830917EC5BE79983706B8B136FFE7E518029D50647BC437EA"
+    },
+    {
+      "Kind": "core",
+      "Report": "test-output/ux0914-final-core/report.json",
+      "Passed": 171,
+      "SHA256": "4EAAF1AC2FE43D5B612EEFD685EEA267C74463A183BC6A253BB855BE1502D018"
+    }
+  ],
+  "DesktopVerification": {
+    "Report": "test-output/ux0914-desktop-dev2/ux0914-desktop-report.json",
+    "SHA256": "231314C57361A5758601C142FD6CB08BD1E0B5CF91A2D9C38AC9A47B0AE631FB",
+    "TestedBuildVersion": "0.9.13",
+    "TestedAssemblySHA256": "378E37D2B54CA208A58F5F548ADC1EE083412D1F640901407133F21AA72366CE",
+    "SourceReceipt": "test-output/ux0914-desktop-tested-source.json",
+    "SourceReceiptSHA256": "9F88A9F82C7507BDA4FB32B8BB522503C29AB7FCD1D09423ADEE00FFCF814F25",
+    "CriticalSourcesUnchanged": [
+      {
+        "Path": "src/Taskboard.Desktop/BallSurface.EdgeHide.cs",
+        "SHA256": "4C11024318ECC152D05048F7A709E07CFDDA05811C29ED8073F720ADAB34704A"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/BallSurface.cs",
+        "SHA256": "BD34B4B3165CF3A73B8C8BFB18B440D39FF44B50EDF56E515B7D83E3CF0BB64F"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/BoardController.OutsideClicks.cs",
+        "SHA256": "7D8331E4778E66EEC2D140F20A51A751748EBD6CF49C407CE500316C074F3474"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/BoardController.cs",
+        "SHA256": "95C5E5ECCE912A80203A5D6DD3DBC676C208CB47B7047D1EBF64FAD0E4B7199D"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/ColumnSurface.Inline.cs",
+        "SHA256": "81499A16F154F2CFCC3D65CEDD86FFCB667D6C3B05D9FDE3779AA10156E1C68E"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/ColumnSurface.cs",
+        "SHA256": "C7427F65D04EA2D116AE7063BC3C660CFE4939C1801388B7483169892BDDF15C"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/EditorSurface.cs",
+        "SHA256": "F890CD908CE78E06A0DBC1EF09F27F815A75AE88A04AE18290413A7C4A8048A7"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/LiveBackdrop.cs",
+        "SHA256": "1208077A220F5867AB9C87BE5F0BFF9AD4192FE235A8CD6354AA38D223759A8A"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/SurfaceWindow.cs",
+        "SHA256": "346D1DAF0E165E9F00D45209F68F5630750A9658B388845D145D08F3817DDAC5"
+      },
+      {
+        "Path": "src/Taskboard.Desktop/Ui.cs",
+        "SHA256": "0884664EAA5192F978269822AE7710AD74EFA5AD17B6AD42BDD40ECF1CDDE741"
+      }
+    ],
+    "SameBinaryAsPortable": false,
+    "Note": "真实鼠标使用同功能开发构建，最终包另做461项隔离及实屏检查；命中、菜单、保存与模板10条源码相同。之后滚轮反向修订及检查程序调整不冒充已做真实鼠标滚轮验收。"
+  },
+  "Performance": {
+    "Report": "test-output/ux0914-final2-performance/performance-report.json",
+    "SHA256": "AC0CF78CD819F3928C446CCF08848129F6B7CD3D14D17EB7694C9B974B95AA54",
+    "Passed": true
+  },
+  "CoreTestUsesPublishedCore": true,
+  "RuntimeHashes": [
+    {
+      "Path": "Taskboard.dll",
+      "SHA256": "962159F40D67A4CE68FFD08EA1ED3D8073EFED87B96D228BEDB8B8EF66380794"
+    },
+    {
+      "Path": "Taskboard.Core.dll",
+      "SHA256": "6BE95695CDC0EA69046A01081102DCF5EDAE4F2F1D5521383E09702F8CEBE6E7"
+    },
+    {
+      "Path": "即时任务看板.exe",
+      "SHA256": "9203629678476676F93A0E5A74B3E377DA13DA85A90D17967F6AC6D282D94746"
+    }
+  ],
+  "ClosingPixelSampling": {
+    "Variants": [
+      "普通编辑修改后关闭",
+      "关联区域展开后外部双击关闭"
+    ],
+    "MaxBeforeClosingDifference": 0.03703703703703809,
+    "IndependentSampler": true,
+    "Report": "test-output/ux0914-final2-ux0913-render/ux0914-closing-report.json"
+  },
+  "Scroll": {
+    "TargetMs": 90,
+    "MeasuredIsolatedMs": 93,
+    "FloatingTrackWidth": 8.04,
+    "FloatingVisibleThumbWidth": 5.36,
+    "ColumnTrackWidth": 6,
+    "ColumnVisibleThumbWidth": 4,
+    "Note": "隔离滚轮事件、实际中间偏移/反向/打断及虚拟化检查；未声称真实鼠标滚轮专项已完成"
+  },
+  "ColumnPixelSampling": {
+    "Cycles": 3,
+    "Columns": 6,
+    "MaxLateDifference": 5.684341886080802e-14
+  },
+  "MouseMoved": true,
+  "CursorRestored": true,
+  "KeyboardInjected": false,
+  "ProductionDataChanged": false,
+  "StartupConfigurationChanged": false,
+  "UserProcessesStopped": false,
+  "CodebaseMemory": {
+    "Project": "Instant-taskboard",
+    "Connected": true,
+    "Persisted": true,
+    "Details": "docs/INDEX-STATUS.md",
+    "Freshness": "C# metadata_changed; XAML not_tracked; direct source and hashes supplement"
+  },
+  "Boundaries": [
+    "用户本轮明确同意后才移动鼠标；仅隔离进程窗口，目标属于其他进程即停止输入，完成恢复原鼠标和前台。正式任务、自启和用户进程未操作。",
+    "实际26项覆盖六列空白菜单、标题/两种缩放、新建空白点击、修改后双击保存关闭、卡片、球矩形左右键/拖动和菜单位置。滚轮衔接使用隔离路由事件与实际偏移测量，不冒充真实鼠标滚轮检查。",
+    "关闭前实屏采样覆盖第二外点后的保存等待至关闭开始；既定中央白条和裁切保留。不能保证所有显卡及负载无帧问题，不宣称完整复现用户所有历史闪烁。",
+    "列表真实裁切和滚轮帧推进依赖UI线程，不保证120FPS；混合DPI多屏、热插拔、所有负载和外部接入原边界保持。",
+    "左侧吸附T184仍待实现；本轮普通修改未上传GitHub。"
+  ]
+}

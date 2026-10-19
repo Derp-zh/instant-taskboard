@@ -1,0 +1,111 @@
+{
+  "Version": "0.9.12",
+  "Date": "2026-10-19",
+  "LocalOnly": true,
+  "Entry": "release/即时任务看板-0.9.12-final/即时任务看板.exe",
+  "Passed": 378,
+  "Reports": [
+    {
+      "Kind": "core",
+      "Report": "test-output/ux0912-final2-core/report.json",
+      "Passed": 171,
+      "SHA256": "072914639D6E3366C398549ECD4F1EEFB7FD9A2D5B1C8C4D0553EFFB9F66D9C3"
+    },
+    {
+      "Kind": "ux0912",
+      "Report": "test-output/ux0912-final2-ux0912/ux0912-report.json",
+      "Passed": 23,
+      "SHA256": "B871BE283F6395BE8F773E26DA0B3064E2D7FF1B9880FF68A7103D00A779BE6A"
+    },
+    {
+      "Kind": "render",
+      "Report": "test-output/ux0912-final2-render/render-report.json",
+      "Passed": 54,
+      "SHA256": "CAD4B7C70DE297E40526FAFE4A14F6DBBDA2B48C9BCA8D7AD372FCDF2254411D"
+    },
+    {
+      "Kind": "ux099",
+      "Report": "test-output/ux0912-final2-ux099/ux099-report.json",
+      "Passed": 30,
+      "SHA256": "28937EE85E8EBF2293A86A836F53AF3987CFB5E5DA33B085762311A478F4FB89"
+    },
+    {
+      "Kind": "ux0911",
+      "Report": "test-output/ux0912-final2-ux0911/ux0911-report.json",
+      "Passed": 37,
+      "SHA256": "75C464E914AB5716BF1BDC88606ACA9C350156D1205D4A255B97C6F5C7B98634"
+    },
+    {
+      "Kind": "ux0910",
+      "Report": "test-output/ux0912-final2-ux0910/ux0910-report.json",
+      "Passed": 15,
+      "SHA256": "12FC6BF9F2C527D9EEB3A57BFD7BA9D41C140AFC3B3642EE12C0A1DE95EDD717"
+    },
+    {
+      "Kind": "stage",
+      "Report": "test-output/ux0912-final2-stage/stage-report.json",
+      "Passed": 31,
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765"
+    },
+    {
+      "Kind": "integration",
+      "Report": "test-output/ux0912-final2-integration/integration-report.json",
+      "Passed": 17,
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9"
+    }
+  ],
+  "Performance": {
+    "Report": "test-output/ux0912-final2-performance/performance-report.json",
+    "SHA256": "E721D44A35425791BDE70006235AF7A13FBA4550A7BD5ED9EF93D4153B156C35",
+    "Passed": true
+  },
+  "CoreTestUsesPublishedCore": true,
+  "RuntimeHashes": [
+    {
+      "Path": "Taskboard.dll",
+      "SHA256": "EC5AB67C3D5F1118511E84EDF473CAD120F26B2690CDABE8C3A93BA2198BDBC3"
+    },
+    {
+      "Path": "Taskboard.Core.dll",
+      "SHA256": "E6F38775A32F03C4CF338FED823538D2C9BCD5BC0CAFBCA2E1B24309205B19EB"
+    },
+    {
+      "Path": "即时任务看板.exe",
+      "SHA256": "EBD99123EFE1969C76DE5CAF09B700789DCE1698EE3CC9D209B6EA5F061A0337"
+    }
+  ],
+  "PixelSampling": {
+    "Cycles": 3,
+    "Columns": 6,
+    "Regions": [
+      "背景",
+      "卡片正文",
+      "标题"
+    ],
+    "MaxLateDifference": 5.684341886080802e-14,
+    "IndependentSampler": true
+  },
+  "Observed": {
+    "EarlyOpeningMs": 0.2812,
+    "AcceptedOpeningMs": 53.2928,
+    "HideDelayMs": 2090,
+    "EdgeRevealMs": 108
+  },
+  "MouseMoved": false,
+  "KeyboardInjected": false,
+  "ProductionDataChanged": false,
+  "StartupConfigurationChanged": false,
+  "UserProcessesStopped": false,
+  "CodebaseMemory": {
+    "Project": "Instant-taskboard",
+    "Connected": true,
+    "Details": "docs/INDEX-STATUS.md"
+  },
+  "Boundaries": [
+    "实际显示隔离六列并读取自身区域像素；没有移动鼠标或注入按键。鼠标移入和点击由路由事件/同一业务入口验证。",
+    "旧实现实际测出截图/真实控件文字边缘亮度变化；没有声称稳定复现用户所有真实数据下的同一六列闪烁。",
+    "列表改为真实控件按呈现帧裁切；100ms目标不变，但忙碌UI线程可能掉帧，不再宣称列表完全独立于UI线程或保证120FPS。",
+    "未做多屏混合DPI、热插拔和所有显卡/负载组合验收；Codex、飞书等原接入边界保持。",
+    "普通本地修改未上传GitHub，上一公开0.9.5；正式数据、自启及用户进程和旧包保留。"
+  ]
+}

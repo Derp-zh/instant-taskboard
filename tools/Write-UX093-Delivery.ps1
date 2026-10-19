@@ -46,7 +46,7 @@ $report = [ordered]@{
     RuntimeNotes=@('最终中文入口两版控件检查、原速77窗口与45画卷对应当前产物。','原速/快版像素采样在只改ScrollMotionChecks同帧采样器之前取得；正常产品代码一致，不声称全部报告的DLL字节相同。','真实鼠标09报告验证最新已确认规则；随后修正共用动画交接及测试等待，最终两版控件检查再次回归相同规则，没有再次移动鼠标。','准备时间和动作时间分别记录；有限采样不代表任意硬件/负载的恒定120帧或绝对无闪烁。')
     DataSafety=[ordered]@{ IsolatedTestData=$true; FormalDataChanged=$false; UserProcessesStopped=$false; RealNotificationsChanged=$false; StartupRegistryChanged=$false; GitHubPublished=$false }
     FailedEvidence='test-output本轮失败及无有效落点报告保留；不计为通过。'
-    CodebaseMemory=[ordered]@{ ConnectedAtStart=$true; InitialRoot=$repository; InitialNodes=4357; InitialEdges=12007; FinalADRUpdateVerified=$false; FinalReindexVerified=$false; Error='Transport closed'; Pending='恢复连接后按INDEX-STATUS.md更新ADR、full重建并检查覆盖，不以旧图证明当前源码。' }
+    CodebaseMemory=[ordered]@{ ConnectedAtStart=$true; InitialRoot='D:/Derp/Documents/0renwumianban'; InitialNodes=4357; InitialEdges=12007; FinalADRUpdateVerified=$false; FinalReindexVerified=$false; Error='Transport closed'; Pending='恢复连接后按INDEX-STATUS.md更新ADR、full重建并检查覆盖，不以旧图证明当前源码。' }
 }
 $report | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $repository 'docs/VERIFICATION-0.9.3.json') -Encoding utf8
 [ordered]@{ Verification='docs/VERIFICATION-0.9.3.json'; Counts=$report.Counts; CoreRulesReuse=$report.CoreRulesReuse.Mode; Variants=$variants.Keys } | ConvertTo-Json -Depth 3

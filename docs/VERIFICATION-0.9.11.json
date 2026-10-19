@@ -1,0 +1,100 @@
+{
+  "Version": "0.9.11",
+  "Date": "2026-10-18",
+  "LocalOnly": true,
+  "Entry": "release/即时任务看板-0.9.11-final/即时任务看板.exe",
+  "Passed": 301,
+  "Reports": [
+    {
+      "Kind": "core",
+      "Report": "test-output/ux0911-final-core/report.json",
+      "Passed": 171,
+      "SHA256": "5B88E7E5CE42F98FAC089DD84A23B2F30E3CE95DAE886A6443C592C979DAACBF"
+    },
+    {
+      "Kind": "ux0911",
+      "Report": "test-output/ux0911-final-ux0911/ux0911-report.json",
+      "Passed": 37,
+      "SHA256": "1A63D1E578F107A25F99B43141540EC927EC6162D4D16238C8838DDEF603A889"
+    },
+    {
+      "Kind": "ux099",
+      "Report": "test-output/ux0911-final-ux099/ux099-report.json",
+      "Passed": 30,
+      "SHA256": "1E0FDAF53797FE21344184B71A4A30F9EC7F5F1979CA7551808A1B2EF21E5E04"
+    },
+    {
+      "Kind": "ux0910",
+      "Report": "test-output/ux0911-final-ux0910/ux0910-report.json",
+      "Passed": 15,
+      "SHA256": "12FC6BF9F2C527D9EEB3A57BFD7BA9D41C140AFC3B3642EE12C0A1DE95EDD717"
+    },
+    {
+      "Kind": "stage",
+      "Report": "test-output/ux0911-final-stage/stage-report.json",
+      "Passed": 31,
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765"
+    },
+    {
+      "Kind": "integration",
+      "Report": "test-output/ux0911-final-integration/integration-report.json",
+      "Passed": 17,
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9"
+    }
+  ],
+  "CoreTestUsesPublishedCore": true,
+  "RuntimeHashes": [
+    {
+      "Path": "Taskboard.dll",
+      "SHA256": "DF46FC267EFBDFB184D20659A3684446D8FF8A1D76C996ADDC147986EB30769B"
+    },
+    {
+      "Path": "Taskboard.Core.dll",
+      "SHA256": "84E50769F908961C4B2708D59E844848F44C34358763967B354A1EBDA81BDE02"
+    },
+    {
+      "Path": "即时任务看板.exe",
+      "SHA256": "47E1AD71FB05D6ACD2C8569824AB4AE8204915C9BE21E60FB432637C34E46FA7"
+    }
+  ],
+  "EdgeAutoHide": {
+    "Default": false,
+    "IdleSeconds": 4,
+    "ObservedDelayMs": 4106,
+    "ExposedWidthFraction": 0.25,
+    "Restore": "鼠标移入露出部分恢复完整球；单击打开面板",
+    "BackgroundReminderVerified": true,
+    "NativeClippingVerified": true
+  },
+  "ButtonSize": {
+    "CancelWidth": 74,
+    "SaveWidth": 74,
+    "Height": 40
+  },
+  "Screenshots": [
+    "test-output/ux0911-final-ux0911/edit-buttons.png",
+    "test-output/ux0911-final-ux0911/single-stage.png",
+    "test-output/ux0911-final-ux0911/edge-left.png",
+    "test-output/ux0911-final-ux0911/edge-right.png"
+  ],
+  "MouseMoved": false,
+  "KeyboardInjected": false,
+  "ProductionDataChanged": false,
+  "StartupConfigurationChanged": false,
+  "UserProcessesStopped": false,
+  "Boundaries": [
+    "测试窗口均在屏幕外；鼠标移入用路由事件验证，无真实鼠标或键盘输入。",
+    "原生裁形与150%DPI取整已检查，未做多屏混合DPI、拔插显示器或真实桌面悬停实机验收。",
+    "后台提醒通过实际CheckReminders路径验证，Codex现有接入边界保持，未声称新接通外部AI。",
+    "普通本地修改未上传GitHub，上一公开0.9.5；正式数据、自启及旧包保留。"
+  ],
+  "CodebaseMemory": {
+    "Connected": true,
+    "Project": "Instant-taskboard",
+    "Root": "D:/Derp/Documents/0renwumianban",
+    "FullPersistentRefreshSucceeded": true,
+    "ExactPathsWithNoRecordedIssue": 7,
+    "FreshnessSignal": "metadata_changed even after refresh; direct source and package source hashes used as supplement",
+    "Details": "docs/INDEX-STATUS.md"
+  }
+}

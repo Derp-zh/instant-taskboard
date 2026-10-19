@@ -18,25 +18,26 @@ internal static class IntegrationRules
         var column = engine.State.Preferences.Columns.Single(x => x.BuiltinLane == Lane.Paused); column.Deleted = true;
         var restored = engine.Unarchive(id); check(restored.Id == id && restored.Stages.Count == 2 && !column.Deleted && column.Visible, "取消归档恢复原身份、阶段及已删除原列表");
         engine.Archive(id); var oldest = id;
-        for (var i = 0; i < 20; i++) engine.Archive(Add("归档" + i, Lane.Done).Id);
-        check(engine.State.Archives.Count == 20 && engine.State.Archives.All(x => x.Item.Id != oldest), "第21条归档永久移除最早记录且维持20条");
+        engine.State.Preferences.AutoDeleteArchives = true;
+        for (var i = 0; i < 40; i++) engine.Archive(Add("归档" + i, Lane.Done).Id);
+        check(engine.State.Archives.Count == 40 && engine.State.Archives.All(x => x.Item.Id != oldest), "开启自动删除后第41条归档永久移除最早记录且维持40条");
         var running = engine.State.Tasks.Single(x => x.Lane == Lane.Running);
         try { engine.Archive(running.Id); throw new Exception("未拒绝非法归档"); } catch (InvalidOperationException) { check(true, "进行中任务不能归档"); }
         var archiveStore = new AtomicStore(Path.Combine(root, "archive-store")); await archiveStore.SaveAsync(Copies.Of(engine.State));
-        check(archiveStore.Load().Archives.Count == 20, "归档历史独立持久保存并在重启恢复");
+        check(archiveStore.Load().Archives.Count == 40, "归档历史独立持久保存并在重启恢复");
         var configuration = ConfigurationBackup.Capture(engine.State, root); var backupFile = Path.Combine(root, "archive-safe-config.json"); configuration.Write(backupFile);
         check(!File.ReadAllText(backupFile).Contains("归档19") && !File.ReadAllText(backupFile).Contains("另一阶段"), "配置备份不含历史归档任务或阶段正文");
         var unrelatedConfiguration = ConfigurationBackup.Capture(new BoardState(), root);
         check(unrelatedConfiguration.Apply(engine.State).Tasks.Count == engine.State.Tasks.Count, "不同默认列表编号的配置导入仍保留任务且不重复内置角色");
         var split = new AtomicStore(Path.Combine(root, "split-data"), Path.Combine(root, "split-config")); await split.SaveAsync(Copies.Of(engine.State));
         check(File.Exists(split.MainPath) && File.Exists(split.ConfigurationPath) && !File.ReadAllText(split.ConfigurationPath!).Contains("归档19"), "任务与配置分开保存且配置不含历史任务");
-        check(split.Load().Archives.Count == 20 && split.Load().Tasks.Count == engine.State.Tasks.Count, "分离配置读取后活动任务和历史仍完整");
+        check(split.Load().Archives.Count == 40 && split.Load().Tasks.Count == engine.State.Tasks.Count, "分离配置读取后活动任务和历史仍完整");
         var saved = ConfigurationBackup.Read(split.ConfigurationPath!); saved.PersistenceRevision = Guid.NewGuid(); saved.Preferences.GlassTransparency = 88; saved.Write(split.ConfigurationPath!);
         check(split.Load().Preferences.GlassTransparency == engine.State.Preferences.GlassTransparency && split.RecoveryMessage is not null, "中断两文件保存时优先任务内恢复配置不丢任务");
         await split.SaveAsync(Copies.Of(engine.State)); await split.SaveAsync(Copies.Of(engine.State)); File.WriteAllText(split.ConfigurationPath!, "corrupt");
-        check(split.Load().Archives.Count == 20 && split.RecoveryMessage!.Contains("备份"), "配置损坏从配置备份恢复且历史任务不丢失");
+        check(split.Load().Archives.Count == 40 && split.RecoveryMessage!.Contains("备份"), "配置损坏从配置备份恢复且历史任务不丢失");
         File.WriteAllText(split.ConfigurationPath!, "bad"); File.WriteAllText(split.ConfigurationPath! + ".bak", "bad backup");
-        check(split.Load().Archives.Count == 20 && split.RecoveryMessage!.Contains("任务文件"), "两份配置都损坏时从完整任务副本恢复设置");
+        check(split.Load().Archives.Count == 40 && split.RecoveryMessage!.Contains("任务文件"), "两份配置都损坏时从完整任务副本恢复设置");
         var missing = new AtomicStore(Path.Combine(root, "missing-task"), Path.Combine(root, "missing-task-config")); await missing.SaveAsync(Copies.Of(engine.State)); File.Delete(missing.MainPath);
         try { _ = missing.Load(); throw new Exception("未阻止空任务替代"); } catch (InvalidDataException) { check(true, "已保存目录的任务和备份缺失时拒绝创建空数据替代"); }
         var rows = new List<StartupInstallation>(); var when = DateTime.UtcNow;

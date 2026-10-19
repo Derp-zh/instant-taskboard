@@ -1,0 +1,118 @@
+{
+  "Version": "0.9.6",
+  "Date": "2026-10-16",
+  "Status": "local-desktop-verified",
+  "LocalOnly": true,
+  "GitHubPublished": false,
+  "PriorGitHubVersion": "0.9.5",
+  "Requirements": "PRD30 U96-U101 / A114-A119 / TASKS18 T121-T127",
+  "Entry": "release/即时任务看板-0.9.6-verified/即时任务看板.exe",
+  "Archive": "release/即时任务看板-0.9.6-verified-win-x64.zip",
+  "ArchiveSHA256": "3350C6CF1AFC56ACC5CB60464CE975F967EB3BF979D34AD193B08F7A4136E5B1",
+  "FileCount": 476,
+  "ZipAllFilesVerified": true,
+  "RuntimeSHA256": "D606F226D50A241F804BBC4300294CB522BBCAD647BC736238DF63647DA1A32F",
+  "PriorLocalBuildRuntimeSHA256": "9A51F2044AF3F9983774DF795DED908B4AD49B4832AE60672CCD53CB3FB4FD07",
+  "Geometry": {
+    "Passed": 16,
+    "Report": "test-output/ux-096-geometry-final-02/workspace-geometry-report.json",
+    "ShownWindows": 0,
+    "MouseMoved": false,
+    "RawInputRegistered": true,
+    "RawError": 0,
+    "PhysicalRawPressesObserved": 0,
+    "IncludesNativeToolWindowStyles": true,
+    "IncludesInitialEditorCenter": true,
+    "IncludesColumnAndGroupReset": true,
+    "IncludesPersistedScaledBaseline": true
+  },
+  "Compact": {
+    "Passed": 82,
+    "Report": "test-output/ux-096-compact-final-02/compact-report.json",
+    "MouseMoved": false
+  },
+  "Workspace": {
+    "Passed": 22,
+    "Report": "test-output/ux-096-workspace-desktop-01/workspace-report.json",
+    "IncludesActualGroupAndColdReopen": true,
+    "VisibleWindows": 11,
+    "Build": "local-before-test-only-entry-addition"
+  },
+  "Outside": {
+    "Passed": 4,
+    "Report": "test-output/outside-observer-096-desktop-01/observer-report.json",
+    "RawPresses": 2,
+    "HookPresses": 2,
+    "BlockedUiMs": 1700,
+    "Build": "local-before-test-only-entry-addition"
+  },
+  "FullscreenSimulation": {
+    "Passed": 5,
+    "Report": "test-output/fullscreen-input-096-desktop-03/observer-report.json",
+    "ContextReport": "test-output/fullscreen-input-096-desktop-03/game-before-click.json",
+    "Fullscreen": true,
+    "NoLegacyMouseMessages": true,
+    "HiddenCursor": true,
+    "Captured": true,
+    "ForegroundVerified": true,
+    "CursorHitIsolatedBoard": true,
+    "RawOnly": true,
+    "RawPresses": 2,
+    "HookPresses": 0,
+    "BlockedUiMs": 1700,
+    "SameWindowAndInputRestored": true,
+    "FinalVerifiedBuild": true,
+    "Events": "controlled-mouse_event-desktop-input",
+    "ActualGame": false
+  },
+  "FloatingGesture": {
+    "Passed": 6,
+    "Report": "test-output/task-switcher-096-desktop-04/floating-report.json",
+    "OffsetX": 32,
+    "OffsetY": 32,
+    "FinalVerifiedBuild": true
+  },
+  "TaskSwitcher": {
+    "Passed": true,
+    "PhysicalAltTabOpened": true,
+    "AutomationNamedElements": 0,
+    "AutomationAloneNotSuccess": true,
+    "Method": "actual-screen-visual-review",
+    "Review": "test-output/task-switcher-096-desktop-04/visual-review.json",
+    "Screenshot": "test-output/task-switcher-096-desktop-04/task-switcher.png",
+    "ContainsDesktopContent": true,
+    "ExcludedFromPublic": true,
+    "IsolatedBoardEntriesVisible": false
+  },
+  "Desktop": {
+    "CoordinationRequested": true,
+    "ReplyReceived": true,
+    "MouseMoved": true,
+    "PointerAndForegroundRestored": true,
+    "AltReleased": true,
+    "OnlyOwnTestProcessesStopped": true,
+    "RealGamesVerified": [],
+    "RealGamesPending": [
+      "第五人格PC",
+      "崩坏三PC"
+    ]
+  },
+  "BuildBoundary": "最后新增内容仅隔离验证入口、诊断和工具，正常输入/布局/样式代码未改。16/82/22/4报告来自先前local构建；5项全屏模拟及6项手势和实际Alt+Tab来自最终verified构建，不冒充全部报告DLL字节相同。",
+  "Implemented": [
+    "后台原始鼠标按下与既有钩子去重",
+    "全屏隐藏指针/外部捕获时按输入归属识别",
+    "球/列表/悬浮WS_EX_TOOLWINDOW且去除WS_EX_APPWINDOW",
+    "首个居中、后续编辑32/32、重复调用不跳位、整组恢复保留位置",
+    "单列恢复当前整组缩放默认基准",
+    "整组恢复原始默认尺寸和位置"
+  ],
+  "Boundaries": [
+    "全部隔离--data-dir",
+    "未操作正式任务数据、用户旧进程或实际游戏",
+    "本轮桌面已协调并恢复",
+    "未上传GitHub",
+    "全屏输入模拟不能替代两款实际游戏实测",
+    "旧配置没有精确历史基准时按共同尺寸比例估计",
+    "系统切换截图和测试输出不公开"
+  ]
+}

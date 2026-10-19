@@ -1,0 +1,36 @@
+{
+  "Version": "0.8.1",
+  "Date": "2026-10-14",
+  "Build": {
+    "Warnings": 0,
+    "Errors": 0,
+    "SelfContained": true
+  },
+  "CoreChecks": {
+    "Passed": 87,
+    "Evidence": "test-output/listening-core-02/report.json"
+  },
+  "ListeningChecks": {
+    "Passed": 43,
+    "Evidence": "test-output/listening-package-02/listening-report.json",
+    "FinalPublishedFiles": true
+  },
+  "FormatsTested": [
+    "WAV",
+    "MP3",
+    "M4A"
+  ],
+  "Safety": {
+    "FormalTaskDataTouched": false,
+    "RealApplicationNotificationSettingsModified": false,
+    "MouseMoved": false,
+    "SoundRecoveryStore": "fake"
+  },
+  "Pending": [
+    "两个真实应用通知捕获和不同音频",
+    "Windows原通知音消除且横幅和应用自身声音保留",
+    "真实系统设置关闭及重启恢复",
+    "勿扰、锁屏和睡眠场景"
+  ],
+  "Entry": "release/Taskboard-0.8.1-listening/即时任务看板.exe"
+}

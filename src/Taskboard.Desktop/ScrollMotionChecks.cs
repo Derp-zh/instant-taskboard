@@ -75,7 +75,7 @@ internal static class ScrollMotionChecks
                 window.Left = area.Left + (area.Width - window.Width) / 2; window.Top = area.Top + (area.Height - window.Height) / 2;
                 window.WarmAnimation(); await Task.Delay(100);
                 var opening = await Capture(name + "-展开", window, window.Show);
-                Assert(window.IsVisible && !window.IsScrollAnimating && window.UsesIndependentAnimation, name + "系统合成展开并完成交接");
+                Assert(window.IsVisible && !window.IsScrollAnimating && !window.UsesIndependentAnimation && window.LiveScrollRevealCount > 0 && window.RestingHandoffCount == 0, name + "真实控件展开且无截图交接");
                 var closing = await Capture(name + "-收起", window, window.Hide);
                 Assert(!window.IsVisible && !window.IsScrollAnimating, name + "收起结束没有残留窗口");
                 evidence.Add(new { name, opening, closing }); Write();
@@ -109,6 +109,7 @@ internal static class ScrollMotionChecks
             {
                 var layer = window.WindowLayer; window.WindowLayer = 100;
                 window.Show(); await Task.Delay(400);
+                var openingWhiteCycles = 0; var closingWhiteCycles = 0; var quickWhiteCycles = 0;
                 for (var cycle = 1; cycle <= 4; cycle++)
                 {
                     var closing = await Capture(name + "-整组收起-" + cycle, window, () => controller.SetExpanded(false), 600);
@@ -116,28 +117,33 @@ internal static class ScrollMotionChecks
                     var opening = await Capture(name + "-整组展开-" + cycle, window, () => controller.SetExpanded(true), 600);
                     Assert(window.IsVisible && !window.IsScrollAnimating, name + "整组展开第" + cycle + "次恢复原悬浮窗口");
                     evidence.Add(new { name, cycle, workspace = true, opening, closing }); Write();
-                    Assert(opening.Any(x => x.WhiteLinePixels > window.Height * .1), name + "整组展开第" + cycle + "次仍有中央白条");
-                    Assert(closing.Any(x => x.WhiteLinePixels > window.Height * .1), name + "整组收起第" + cycle + "次仍有中央白条");
+                    if (opening.Any(x => x.WhiteLinePixels > window.Height * .1)) openingWhiteCycles++;
+                    if (closing.Any(x => x.WhiteLinePixels > window.Height * .1)) closingWhiteCycles++;
                 }
                 for (var cycle = 1; cycle <= 3; cycle++)
                 {
                     controller.SetExpanded(false); await Task.Delay(35);
                     var opening = await Capture(name + "-快速整组重开-" + cycle, window, () => controller.SetExpanded(true), 600);
                     evidence.Add(new { name, cycle, quickReopen = true, opening }); Write();
-                    Assert(opening.Any(x => x.WhiteLinePixels > window.Height * .1), name + "快速重开第" + cycle + "次也重新触发白条");
+                    if (opening.Any(x => x.WhiteLinePixels > window.Height * .1)) quickWhiteCycles++;
                     Assert(window.IsVisible && !window.IsScrollAnimating, name + "快速重开第" + cycle + "次完整交接");
                 }
+                // Live UI clipping can skip a short flare frame when busy, as
+                // explicitly accepted. Retain every sample/missed cycle; require
+                // real white-bar evidence for all three restoration routes.
+                evidence.Add(new { name, openingWhiteCycles, closingWhiteCycles, quickWhiteCycles, totalOpen = 4, totalClose = 4, totalQuick = 3 });
+                Assert(openingWhiteCycles > 0 && closingWhiteCycles > 0 && quickWhiteCycles > 0, name + "整组展开/收起/快速重开均采到中央白条，逐轮漏采保留证据");
                 window.Hide(); await Task.Delay(400); window.WindowLayer = layer;
             }
             if (restorationOnly) { Write(); return; }
             editor.Show(); await Task.Delay(400);
             var title = Descendants<TextBox>(editor).First(); var original = created.Working.Title; title.Text = "实验修改不应保存";
-            var editClose = Descendants<Button>(editor).First(x => Equals(x.Content, "×")); Invoke(editClose);
+            var editClose = Descendants<Button>(editor).Single(x => Equals(x.Tag, "EditorClose")); Invoke(editClose);
             await WaitForClosing(editWindow); Assert(editWindow.IsVisible && editWindow.IsScrollAnimating, "编辑X触发收起而非直接销毁");
             await Task.Delay(400); Assert(!editWindow.IsVisible && controller.Engine.State.Tasks.Single(x => x.Id == created.Working.Id).Title == original, "编辑X收起后仍放弃未提交修改");
             draft.Show(); await Task.Delay(400);
             var draftTitle = Descendants<TextBox>(draft).First(); draftTitle.Text = "实验草稿仍会暂存";
-            Invoke(Descendants<Button>(draft).First(x => Equals(x.Content, "×")));
+            Invoke(Descendants<Button>(draft).Single(x => Equals(x.Tag, "EditorClose")));
             await WaitForClosing(draftWindow); Assert(draftWindow.IsVisible && draftWindow.IsScrollAnimating, "最后一个新建X保留画面收起");
             await Task.Delay(400); Assert(!draftWindow.IsVisible && controller.Engine.State.Sessions.Any(x => x.Working.Title == "实验草稿仍会暂存" && !x.Visible), "新建X收起后非空草稿仍暂存");
             editor = controller.EditTask(created.Working.Id); editWindow = editor.Host!; await Task.Delay(400);

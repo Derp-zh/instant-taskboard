@@ -1,0 +1,74 @@
+{
+  "Version": "0.5.0",
+  "Date": "2026-10-13",
+  "CorePassed": 53,
+  "FinalPackageUiPassed": 48,
+  "DesktopPassed": 23,
+  "Transparency": {
+    "passed": true,
+    "samples": [
+      {
+        "transparency": 0,
+        "colorSeparation": 0,
+        "edgeRatio": 0
+      },
+      {
+        "transparency": 20,
+        "colorSeparation": 32.45611577964519,
+        "edgeRatio": 0.01573568426522742
+      },
+      {
+        "transparency": 60,
+        "colorSeparation": 95.53641456582633,
+        "edgeRatio": 0.0665803604802757
+      },
+      {
+        "transparency": 100,
+        "colorSeparation": 159.94584500466854,
+        "edgeRatio": 0.11727916708452232
+      }
+    ]
+  },
+  "DraftHost": {
+    "singleNativeWindow": true,
+    "clearOutlineInterior": true,
+    "colorDifference": 6
+  },
+  "Glass": {
+    "passed": true,
+    "mode": "窗口毛玻璃",
+    "beforeEdges": 21.6281179138322,
+    "afterEdges": 0.3403332347431726,
+    "edgeRatio": 0.01573568426522742,
+    "backgroundColorSeparation": 32.45611577964519,
+    "inactiveEdgeRatio": 0.01573568426522742,
+    "inactiveColorSeparation": 32.45611577964519,
+    "mouseMoved": false
+  },
+  "Ball": {
+    "insideWorkArea": true,
+    "accessibleAboveSettings": true
+  },
+  "CpuIdlePercent": 0.020829175586879144,
+  "InitialLayoutMs": 2295.8836,
+  "PackageFiles": 465,
+  "ArchiveSHA256": "78F73F2D5D8ABBB39A0EC33F355D3DF84B607C480A5E25C0FFD68980796ECFFC",
+  "AllZipFilesVerified": true,
+  "FormalDataModified": false,
+  "OldProgramsOverwritten": false,
+  "AllAcceptanceItemsPassed": false,
+  "Remaining": [
+    "飞书实际拉取及AI实际接入（用户确认留专项）",
+    "多屏混合DPI",
+    "系统启动入口和睡眠通知",
+    "完整动效录屏",
+    "首次冷启动及首次展开性能目标"
+  ],
+  "Evidence": [
+    "test-output/ux05-core-01/report.json",
+    "test-output/ux05-ui-final-02/ui-report.json",
+    "test-output/ux05-mouse-01/desktop-report.json",
+    "test-output/ux05-desktop-02/transparency-report.json",
+    "test-output/ux05-desktop-02/draft-host-report.json"
+  ]
+}

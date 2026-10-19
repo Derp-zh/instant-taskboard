@@ -1,0 +1,106 @@
+{
+  "Version": "0.9.10",
+  "Date": "2026-10-18",
+  "LocalOnly": true,
+  "Entry": "release/即时任务看板-0.9.10-final/即时任务看板.exe",
+  "Passed": 381.0,
+  "Reports": [
+    {
+      "Report": "test-output/ux0910-final-core/report.json",
+      "Kind": "core",
+      "Passed": 171,
+      "SHA256": "465401A3B7AF23492FDC30EE4EC49FC6E89C586E06D4382FDA81D7525CB207BA"
+    },
+    {
+      "Report": "test-output/ux0910-final-ux0910/ux0910-report.json",
+      "Kind": "hint-layout",
+      "Passed": 18,
+      "SHA256": "CBAFB899885045D24C291448DDCF11139AB797A00341490023DBBC55F4C55CA7"
+    },
+    {
+      "Report": "test-output/ux0910-final-ux099/ux099-report.json",
+      "Kind": "ux099",
+      "Passed": 30,
+      "SHA256": "29006F22B18514A17DD4C59D5CF49620DF86261361545D6D3A215C1EFCED74F9"
+    },
+    {
+      "Report": "test-output/ux0910-final-ux098/ux098-report.json",
+      "Kind": "ux098",
+      "Passed": 32,
+      "SHA256": "C12B708B8C2D03AD90465FA79A35A20A1716B86D5BCA48FE7A409D1A38753247"
+    },
+    {
+      "Report": "test-output/ux0910-final-stage/stage-report.json",
+      "Kind": "stage",
+      "Passed": 31,
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765"
+    },
+    {
+      "Report": "test-output/ux0910-final-compact/compact-report.json",
+      "Kind": "compact",
+      "Passed": 82,
+      "SHA256": "D3A2A7C956AF239036297F066CDCFF70150041DCD956A229BC7A43F9383A8E5F"
+    },
+    {
+      "Report": "test-output/ux0910-final-integration/integration-report.json",
+      "Kind": "integration",
+      "Passed": 17,
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9"
+    }
+  ],
+  "CoreTestUsesPublishedCore": true,
+  "RuntimeHashes": [
+    {
+      "SHA256": "32EAC8BDCCD288D0731D061C6FDC07B7B6E1A86F24B7E10C09AF00D1826B6783",
+      "Path": "Taskboard.dll"
+    },
+    {
+      "SHA256": "700D41894A9011F9ADE1A8939784D598023B7858A931094B0E4DCDF2320A21CB",
+      "Path": "Taskboard.Core.dll"
+    },
+    {
+      "SHA256": "9FAB90B2C796B6357593CD3DAC7E5BFDB9ED87552798A35110ACE3CBEDA2867A",
+      "Path": "即时任务看板.exe"
+    }
+  ],
+  "LegacyHintFailureReproduced": true,
+  "HintNativeDisplayVerified": true,
+  "HintSingleBorderVerified": true,
+  "HintTimeoutMs": 1200,
+  "SystemTooltipFadeDisabled": true,
+  "ObservedGapAbove": 5.853398704528804,
+  "ObservedGapBelow": 5.853398704528814,
+  "Screenshots": [
+    "test-output/ux0910-final-ux0910/hint-bubble.png",
+    "test-output/ux0910-final-ux0910/compact-name-spacing.png"
+  ],
+  "MouseMoved": false,
+  "KeyboardInjected": false,
+  "ProductionDataChanged": false,
+  "StartupConfigurationChanged": false,
+  "UserProcessesStopped": false,
+  "CodebaseMemory": {
+    "Notes": "docs/INDEX-STATUS.md",
+    "InitialConnectionRestored": true,
+    "InitialRefreshNodes": 5616,
+    "RootVerified": "D:/Derp/Documents/0renwumianban",
+    "FinalError": "Transport closed",
+    "Connected": false,
+    "InitialRefreshEdges": 15992,
+    "Persistence": true,
+    "InitialSourceFreshness": "metadata_changed and new files not_tracked",
+    "FinalGraphFreshnessVerified": false,
+    "FinalRefreshSucceeded": false,
+    "PartialFiles": 8,
+    "InitialIndexedAt": "2026-10-17T14:29:05Z",
+    "InitialFullRefreshSucceeded": true,
+    "UnusableFiles": 0
+  },
+  "DataMigrationChanged": false,
+  "RequestOneClarification": "用户明确第1项为最后运行阶段提示变成错误悬浮窗口，已复现空WPF窗口引用；沿用现有数据迁移规则。",
+  "Boundaries": [
+    "提示本身真实显示与消失通过，其他任务窗口位于屏幕外；全程没有鼠标或键盘注入。",
+    "此前桌面真实点击与开合观感边界保持，不冒充本轮实测。",
+    "普通本地修改未上传GitHub，上一公开0.9.5，旧包与正式数据保留。"
+  ]
+}

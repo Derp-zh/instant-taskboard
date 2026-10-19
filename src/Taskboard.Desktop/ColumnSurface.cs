@@ -15,6 +15,9 @@ internal sealed partial class ColumnSurface : SurfaceWindow
 {
     protected override bool ScrollEnabled => false;
     internal override double GlassTransparency => Transparency;
+    // A layered child needs nonzero alpha over its entire existing input area.
+    // The visible tint remains in the persistent compositor layer.
+    protected override void ApplyGlassTint() => Root.Background = Ui.Brush("#01192333");
     private readonly BoardController controller;
     public BoardColumn Definition { get; private set; }
     public Lane Lane => Definition.BuiltinLane ?? Lane.Refining;
@@ -37,6 +40,11 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     private Grid? cardPreview;
     private Guid? previewBefore;
     private long lastDragScroll;
+    internal void RestartCardMarquees()
+    {
+        foreach (var item in items.OfType<WorkItem>()) RenderedCard(item.Id)?.SetMarquees(true);
+        InvalidateAnimation();
+    }
     public ColumnSurface(BoardController controller, Lane lane) : this(controller, controller.Engine.State.Preferences.Columns.First(x => x.BuiltinLane == lane)) { }
     public ColumnSurface(BoardController controller, BoardColumn definition) : base(240, 680)
     {
@@ -56,6 +64,7 @@ internal sealed partial class ColumnSurface : SurfaceWindow
         list = new ListBox { ItemsSource = items, Background = Brushes.Transparent, BorderThickness = new Thickness(0),
             Padding = new Thickness(10, 0, 10, 0), HorizontalContentAlignment = HorizontalAlignment.Stretch, AllowDrop = true };
         VirtualizingPanel.SetIsVirtualizing(list, true); VirtualizingPanel.SetVirtualizationMode(list, VirtualizationMode.Recycling);
+        VirtualizingPanel.SetScrollUnit(list, ScrollUnit.Pixel);
         ScrollViewer.SetCanContentScroll(list, true); ScrollViewer.SetHorizontalScrollBarVisibility(list, ScrollBarVisibility.Disabled);
         var style = new Style(typeof(ListBoxItem));
         style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
@@ -79,8 +88,8 @@ internal sealed partial class ColumnSurface : SurfaceWindow
                 var point = e.GetPosition(list); var scroll = FindScroll(list);
                 if (Environment.TickCount64 - lastDragScroll >= 70)
                 {
-                    if (point.Y < 30) { scroll?.LineUp(); lastDragScroll = Environment.TickCount64; }
-                    else if (point.Y > list.ActualHeight - 30) { scroll?.LineDown(); lastDragScroll = Environment.TickCount64; }
+                    if (point.Y < 30 && scroll is not null) { QuickScroll.StepItem(scroll, -1); lastDragScroll = Environment.TickCount64; }
+                    else if (point.Y > list.ActualHeight - 30 && scroll is not null) { QuickScroll.StepItem(scroll, 1); lastDragScroll = Environment.TickCount64; }
                 }
                 if (controller.CardDrag is { } drag) drag.Preview(this, DropBefore(point));
             }
@@ -110,6 +119,8 @@ internal sealed partial class ColumnSurface : SurfaceWindow
         ResetFooter();
         var menu = new ContextMenu(); resizeToggle = new MenuItem { Header = "调整本窗口大小" };
         resizeToggle.Click += (_, _) => { if (edgeResize) StopResize(); else { edgeResize = true; resizeToggle.Header = "结束调整"; edges.Visibility = Visibility.Visible; count.Text = "调整中"; controller.SuppressCollapse = true; } }; menu.Items.Add(resizeToggle);
+        var reset = new MenuItem { Header = "本窗口恢复到默认" };
+        reset.Click += (_, _) => { if (edgeResize) StopResize(); controller.RestoreColumnDefault(this); }; menu.Items.Add(reset);
         Root.ContextMenu = menu;
         Root.PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) StopResize(); };
         Deactivated += (_, _) => { if (edgeResize) StopResize(); };
@@ -127,7 +138,8 @@ internal sealed partial class ColumnSurface : SurfaceWindow
         {
             group = new Thumb { Width = 22, Height = 22, Margin = new Thickness(4), HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Bottom, Cursor = Cursors.SizeNESW, ToolTip = "拖动：等比例调整最大范围" };
             var glyph = new FrameworkElementFactory(typeof(TextBlock)); glyph.SetValue(TextBlock.TextProperty, "⤢"); glyph.SetValue(TextBlock.FontSizeProperty, 20.0); glyph.SetValue(TextBlock.ForegroundProperty, Ui.Accent); glyph.SetValue(TextBlock.BackgroundProperty, Brushes.Transparent);
-            group.Template = new ControlTemplate(typeof(Thumb)) { VisualTree = glyph }; Grid.SetRowSpan(group, 3); Root.Children.Add(group);
+            var dragArea = new FrameworkElementFactory(typeof(Border)); dragArea.SetValue(Border.BackgroundProperty, Brushes.Transparent); dragArea.AppendChild(glyph);
+            group.Template = new ControlTemplate(typeof(Thumb)) { VisualTree = dragArea }; group.Tag = "WorkspaceResizeGrip"; Grid.SetRowSpan(group, 3); Root.Children.Add(group);
             group.DragStarted += (_, _) => controller.BeginWorkspaceResize(); group.DragDelta += (_, _) => controller.ResizeWorkspaceFromPointer(); group.DragCompleted += (_, _) => controller.EndWorkspaceResize();
         }
         Refresh(); ApplySettings();
@@ -206,6 +218,11 @@ internal sealed partial class ColumnSurface : SurfaceWindow
         foreach (var item in items.OfType<WorkItem>().Where(x => ids.Contains(x.Id)))
             FindChild<TaskCard>(list.ItemContainerGenerator.ContainerFromItem(item))?.Rebuild();
     }
+    internal TaskCard? RenderedCard(Guid id)
+    {
+        var item = items.OfType<WorkItem>().FirstOrDefault(x => x.Id == id);
+        return item is null ? null : FindChild<TaskCard>(list.ItemContainerGenerator.ContainerFromItem(item));
+    }
     public TaskCard? Locate(Guid id)
     {
         var item = items.OfType<WorkItem>().FirstOrDefault(x => x.Id == id); if (item is null) return null;
@@ -216,8 +233,9 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     private void ResetFooter()
     {
         footer.Children.Clear();
-        footer.Children.Add(Ui.DashedButton("＋ 新建任务", () => { if (Lane == Lane.Inspiration) InlineNew(); else controller.OpenNewEntry(Lane, Definition.BuiltinLane is null ? Definition.Id : null); }));
+        footer.Children.Add(Ui.DashedButton("＋ 新建任务", () => { if (Lane == Lane.Inspiration && controller.Engine.State.Preferences.InspirationQuickEntry) InlineNew(); else controller.OpenNewEntry(Lane, Definition.BuiltinLane is null ? Definition.Id : null); }));
     }
+    internal void RefreshEntryMode() { if (finishInline is not null) finishInline(); else ResetFooter(); }
     internal void RevealNewEntry() { list.ScrollIntoView(footer); list.UpdateLayout(); }
     internal bool NewEntryIsLast => ReferenceEquals(items.LastOrDefault(), footer) && VisualTreeHelper.GetParent(footer) is not null;
     internal bool IsTaskCardAt(Point screenPoint) => IsVisible &&
@@ -229,7 +247,12 @@ internal sealed partial class ColumnSurface : SurfaceWindow
         return hit is not null && Ancestor<TaskCard>(hit) is null && !SurfaceWindow.IsInteractive(hit)
             && Ancestor<System.Windows.Controls.Primitives.ScrollBar>(hit) is null;
     }
-    public void PrepareHide() => flushInline?.Invoke();
+    public void PrepareHide()
+    {
+        flushInline?.Invoke();
+        foreach (var item in items.OfType<WorkItem>()) RenderedCard(item.Id)?.SetMarquees(false);
+        InvalidateAnimation();
+    }
     private static T? Ancestor<T>(DependencyObject? source) where T : DependencyObject
     { for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current)) if (current is T value) return value; return null; }
     private static ScrollViewer? FindScroll(DependencyObject source) => FindChild<ScrollViewer>(source);
@@ -248,7 +271,7 @@ internal sealed class LaneTemplateSelector(DataTemplate task, DataTemplate entry
     public override DataTemplate SelectTemplate(object item, DependencyObject container) => item is WorkItem ? task : entry;
 }
 
-internal sealed class TaskCard : Border
+internal sealed partial class TaskCard : Border
 {
     public static readonly DependencyProperty ControllerProperty = DependencyProperty.Register(nameof(Controller), typeof(BoardController), typeof(TaskCard),
         new PropertyMetadata(null, (d, _) => ((TaskCard)d).Build()));
@@ -257,12 +280,26 @@ internal sealed class TaskCard : Border
     private Point start;
     private bool pressed;
     private long flashGeneration;
+    internal int BuildCount { get; private set; }
+    private string? presentationKey;
+    private string PresentationKey(WorkItem item) => System.Text.Json.JsonSerializer.Serialize(new
+    {
+        item.DisplayTitle, item.Lane, StageCount = item.Stages.Count, item.TimerUnread, item.PendingReasons, ArchivedPreview,
+        Stages = (ArchivedPreview ? BoardEngine.CardStages(item) : Controller.VisibleCardStages(item)).Select(x => new
+        { x.Id, x.Name, x.Text, x.IsRunning, x.Codex?.ThreadId, x.Codex?.ThreadName }),
+        Ai = Controller.Engine.State.AiOptions.Where(x => item.AiIds.Contains(x.Id)).Select(x => new { x.Name, x.Color }),
+        Priority = Controller.Engine.State.PriorityOptions.Where(x => x.Id == item.PriorityId).Select(x => new { x.Name, x.Color })
+    });
     public TaskCard()
     {
         TaskCardLayout.Frame(this); Cursor = Cursors.Hand;
         DataContextChanged += (_, _) => Build();
-        PreviewMouseDown += (_,_) => { if (!ArchivedPreview && DataContext is WorkItem { TimerUnread:true } item) { item.TimerUnread = false; Controller.Engine.Notify([item.Id]); } };
-        MouseLeftButtonDown += (_, e) => { if (ArchivedPreview) return; start = e.GetPosition(this); pressed = true; CaptureMouse(); e.Handled = true; };
+        PreviewMouseDown += (_,_) =>
+        {
+            if (!ArchivedPreview && DataContext is WorkItem { TimerUnread: true } item)
+            { item.TimerUnread = false; Controller.Engine.Touch(); Dispatcher.BeginInvoke(new Action(() => Controller.Engine.Notify([item.Id])), System.Windows.Threading.DispatcherPriority.Background); }
+        };
+        MouseLeftButtonDown += (_, e) => { if (ArchivedPreview || SurfaceWindow.IsInteractive(e.OriginalSource as DependencyObject)) return; start = e.GetPosition(this); pressed = true; CaptureMouse(); e.Handled = true; };
         MouseMove += (_, e) =>
         {
             if (!pressed || e.LeftButton != MouseButtonState.Pressed || DataContext is not WorkItem item) return;
@@ -274,37 +311,54 @@ internal sealed class TaskCard : Border
             try { DragDrop.DoDragDrop(this, new DataObject("Taskboard.Task", item.Id), DragDropEffects.Move); }
             finally { GiveFeedback -= feedback; drag.Dispose(); Controller.CardDrag = null; Mouse.SetCursor(null); }
         };
-        MouseLeftButtonUp += (_, e) => { var click = pressed && IsMouseOver; pressed = false; ReleaseMouseCapture(); if (click && DataContext is WorkItem item) Controller.EditTask(item.Id); e.Handled = true; };
+        MouseLeftButtonUp += (_, e) => { var click = pressed && IsMouseOver; pressed = false; ReleaseMouseCapture(); if (click && DataContext is WorkItem item) Controller.ToggleTaskEditor(item.Id); e.Handled = true; };
         LostMouseCapture += (_, _) => pressed = false;
         MouseLeave += (_, e) => { if (e.LeftButton != MouseButtonState.Pressed) pressed = false; };
     }
     private void Build()
     {
+        BuildCount++;
+        if (collapseScopes > 0) return;
         if (DataContext is not WorkItem item || Controller is null) return;
+        presentationKey = PresentationKey(item);
+        stageSections.Clear();
         var stack = new StackPanel(); var title = Ui.Label(item.DisplayTitle, 13, Ui.Accent); title.FontWeight = FontWeights.SemiBold;
-        title.Tag = "TaskTitle"; title.TextTrimming = TextTrimming.CharacterEllipsis; title.MaxHeight = 42; stack.Children.Add(TaskCardLayout.Title(title));
-        var stages = BoardEngine.CardStages(item); var showNames = item.Lane != Lane.Inspiration && item.Stages.Count > 1;
+        title.Tag = "TaskTitle"; title.TextTrimming = TextTrimming.CharacterEllipsis; title.MaxHeight = 42;
+        var titleRow = Heading(new MarqueeText(title) { HorizontalAlignment = HorizontalAlignment.Left }, item, item.Stages.Count == 1 ? item.Stages[0] : null);
+        stack.Children.Add(TaskCardLayout.Title(titleRow));
+        var stages = ArchivedPreview ? BoardEngine.CardStages(item) : Controller.VisibleCardStages(item); var showNames = item.Stages.Count > 1;
+        if (stages.Count > 0) stack.Children.Add(new CardSeparator(Ui.Accent, overlay: true) { Tag = "TaskTitleSeparator" });
+        CardHeading? firstHeading = null; Border? firstPill = null; TextBlock? firstDetails = null;
         foreach (var stage in stages)
         {
+            var section = new StackPanel { Tag = "TaskStageSection", DataContext = stage, Opacity = stage.IsRunning == true ? 1 : .45, ClipToBounds = true };
             if (showNames)
             {
-                if (stack.Children.Count > 1) stack.Children.Add(new Border { Height = 1, Background = Ui.Line, Margin = new Thickness(0, 3.6, 0, 2.4) });
+                if (stage != stages[0]) section.Children.Add(new CardSeparator(Ui.Line) { Tag = "TaskStageSeparator" });
                 var name = Ui.Pill(stage.Name, "#9CAAC2"); name.HorizontalAlignment = HorizontalAlignment.Left;
                 name.Tag = "TaskStageName"; name.ToolTip = stage.Name;
                 var label = (TextBlock)name.Child; label.FontSize = 12; label.TextWrapping = TextWrapping.NoWrap; label.TextTrimming = TextTrimming.CharacterEllipsis;
-                stack.Children.Add(name);
+                name.Child = null; name.Child = new MarqueeText(label);
+                var heading = Heading(name, item, stage); section.Children.Add(heading);
+                if (stage == stages[0]) { firstHeading = heading; firstPill = name; }
             }
-            var text = Ui.Label(stage.Text, stage.Id == item.CurrentStageId || !showNames ? 14 : 12, Ui.Text); text.Tag = "TaskStageDetails";
-            text.TextTrimming = TextTrimming.CharacterEllipsis; text.MaxHeight = showNames ? 42 : 64; stack.Children.Add(text);
+            var text = Ui.Label(stage.Text, 14, Ui.Text); text.Tag = "TaskStageDetails";
+            if (stage == stages[0]) firstDetails = text;
+            text.TextTrimming = TextTrimming.CharacterEllipsis; text.MaxHeight = showNames ? 42 : 64; section.Children.Add(text);
+            stageSections[stage.Id] = section; stack.Children.Add(section);
         }
         var pills = new WrapPanel();
         foreach (var option in Controller.Engine.State.AiOptions.Where(x => item.AiIds.Contains(x.Id))) pills.Children.Add(Ui.Pill(option.Name, option.Color));
         var priority = Controller.Engine.State.PriorityOptions.FirstOrDefault(x => x.Id == item.PriorityId);
         if (priority is not null) pills.Children.Add(Ui.Pill(priority.Name, priority.Color));
         stack.Children.Add(pills);
-        if (item.Codex is not null) stack.Children.Add(Ui.Label("Codex · "+item.Codex.Caption,11,Ui.Accent));
         if (item.PendingReasons.Count > 0) stack.Children.Add(Ui.Label(string.Join(" · ", item.PendingReasons), 11, Ui.Brush("#E9C582")));
         Compact(stack); var content = new Grid(); content.Children.Add(stack);
+        if (firstHeading is not null && firstPill is not null && firstDetails is not null)
+        {
+            void MatchGap() => TaskCardLayout.MatchTitleGap(firstHeading, firstPill, firstDetails);
+            MatchGap(); content.Loaded += (_, _) => MatchGap();
+        }
         if (item.TimerUnread) content.Children.Add(new System.Windows.Shapes.Ellipse { Width=6,Height=6,Fill=Ui.Brush("#F28F98"),HorizontalAlignment=HorizontalAlignment.Right,VerticalAlignment=VerticalAlignment.Top,IsHitTestVisible=false });
         Child = content;
         if (ArchivedPreview)
@@ -326,14 +380,61 @@ internal sealed class TaskCard : Border
         }
         ContextMenu = menu;
     }
-    public void Rebuild() => Build();
+    public void Rebuild()
+    {
+        if (DataContext is WorkItem item && Controller is not null && presentationKey == PresentationKey(item)) return;
+        Build();
+    }
+    internal void SetMarquees(bool restart)
+    {
+        Visit(this);
+        void Visit(DependencyObject node)
+        {
+            if (node is MarqueeText text) { if (restart) text.Restart(); else text.Pause(); return; }
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(node); i++) Visit(VisualTreeHelper.GetChild(node, i));
+        }
+    }
+    private CardHeading Heading(FrameworkElement label, WorkItem item, Stage? stage)
+    {
+        var row = new CardHeading(label);
+        if (stage is null || item.Lane == Lane.Inspiration) return row;
+        {
+            var binding = stage.Codex;
+            var text = Ui.Label(binding is null ? "未绑定" : string.IsNullOrWhiteSpace(binding.ThreadName) ? "未命名会话" : binding.ThreadName, 11, Ui.Muted);
+            text.TextAlignment = TextAlignment.Right;
+            var name = new MarqueeText(text, conversation: true) { Tag = "TaskConversationName", Margin = new Thickness(5, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Right, ToolTip = binding is null ? "未绑定" : text.Text + " · " + binding.ThreadId, DataContext = stage };
+            row.SetConversation(name);
+        }
+        if (item.Stages.Count > 1)
+        {
+            row.SetStateButton(StageButton(item, stage));
+        }
+        return row;
+    }
+    private Button StageButton(WorkItem item, Stage stage)
+    {
+        var running = stage.IsRunning == true;
+        var button = Ui.Button("", () => { });
+        button.Click += (_, _) =>
+        {
+            if (!Controller.SetStageRunningByUser(item.Id, stage.Id, stage.IsRunning != true)) { Ui.Hint(button, BoardEngine.LastRunningStageMessage, !Controller.Smoke, this); return; }
+            Controller.Persist();
+        };
+        button.Tag = "TaskStageRun"; button.DataContext = stage; button.Content = new StageRunIcon(running, !ArchivedPreview);
+        button.Width = button.Height = 24; button.Padding = new Thickness(0); button.Margin = new Thickness(3, 0, 0, 0);
+        button.Background = Brushes.Transparent; button.BorderThickness = new Thickness(0); button.IsEnabled = !ArchivedPreview;
+        button.ToolTip = ArchivedPreview ? "阶段状态（归档预览）" : running ? "运行中，点击改为未运行" : "未运行，点击改为运行中";
+        System.Windows.Automation.AutomationProperties.SetName(button, stage.Name + "：" + (running ? "运行中" : "未运行"));
+        return button;
+    }
     private static void Compact(DependencyObject root)
     {
         if (root is TextBlock text) text.Margin = new Thickness(text.Margin.Left, text.Margin.Top * .6, text.Margin.Right, text.Margin.Bottom * .6);
-        if (root is Border pill && pill.Child is TextBlock) pill.Margin = new Thickness(pill.Margin.Left, pill.Margin.Top * .6, pill.Margin.Right, pill.Margin.Bottom * .6);
+        if (root is Border pill && pill.Child is TextBlock or MarqueeText) pill.Margin = new Thickness(pill.Margin.Left, pill.Margin.Top * .6, pill.Margin.Right, pill.Margin.Bottom * .6);
         // Newly constructed card visuals only; no shared editor styles change.
         if (root is Panel panel) foreach (UIElement child in panel.Children) Compact(child);
-        else if (root is Border border && border.Child is not null) Compact(border.Child);
+        else if (root is Decorator decorator && decorator.Child is not null) Compact(decorator.Child);
     }
     public void Flash()
     {

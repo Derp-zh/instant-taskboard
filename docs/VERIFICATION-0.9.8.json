@@ -1,0 +1,93 @@
+{
+  "Version": "0.9.8",
+  "Date": "2026-10-18",
+  "LocalOnly": true,
+  "Entry": "release/即时任务看板-0.9.8-final/即时任务看板.exe",
+  "Passed": 333.0,
+  "Reports": [
+    {
+      "Kind": "core",
+      "Passed": 171,
+      "Report": "test-output/ux098-final-core/report.json",
+      "SHA256": "59C5FA41D8FE5D6A2E9F798A744E4CD26D926BF7AF9F91B98195DD2BD79ECA15"
+    },
+    {
+      "Kind": "features",
+      "Passed": 32,
+      "Report": "test-output/ux098-verified-ux098/ux098-report.json",
+      "SHA256": "E6C4DE576F4E8C34930E4683E1DE0002B39FF235480A1C8A47045C08F1057F0F"
+    },
+    {
+      "Kind": "stage-regression",
+      "Passed": 31,
+      "Report": "test-output/ux098-verified-stage/stage-report.json",
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765"
+    },
+    {
+      "Kind": "compact-regression",
+      "Passed": 82,
+      "Report": "test-output/ux098-verified-compact/compact-report.json",
+      "SHA256": "1111F88287987A6CC3600508BCEAB2C5224C2A5CDB612FEDFC8CEAD9DA6F4B05"
+    },
+    {
+      "Kind": "integration",
+      "Passed": 17,
+      "Report": "test-output/ux098-verified-integration/integration-report.json",
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9"
+    }
+  ],
+  "RuntimeHashes": [
+    {
+      "Path": "Taskboard.dll",
+      "SHA256": "C0263C6AE5439A42A371A49C69B0E5A80A15EF7607A843C0A62EF799CCB9B326"
+    },
+    {
+      "Path": "Taskboard.Core.dll",
+      "SHA256": "CAB5866AED9F6A0B06437A9E566B8ED2347FC40C4B3A7775DCDA46620B271213"
+    },
+    {
+      "Path": "即时任务看板.exe",
+      "SHA256": "C1BBF551EBA10FB624E945D891DE7684B78A41DB12000D17C278BB25CA54136A"
+    }
+  ],
+  "CoreTestUsesPublishedCore": true,
+  "MouseMoved": false,
+  "KeyboardInjected": false,
+  "DesktopVisualVerified": false,
+  "RealCodexCatalogVerified": false,
+  "ProductionDataChanged": false,
+  "StartupConfigurationChanged": false,
+  "UserProcessesStopped": false,
+  "DraftSwitchSpeed": 1.35,
+  "OtherAnimationDurationMs": 100,
+  "CardCollapseDurationMs": 180,
+  "ObservedOffscreenStageCollapseMs": 195.9888,
+  "WorkspaceBarrierLogicVerified": true,
+  "WorkspaceBatchMembershipVerified": true,
+  "ActualDesktopStartFrameVerified": false,
+  "Defaults": {
+    "InitialArchivePreviews": 20,
+    "AutoArchiveCompleted": true,
+    "ArchiveRetentionWhenEnabled": 40,
+    "AutoDeleteArchives": false,
+    "AutoArchiveAfterDays": 5
+  },
+  "CodebaseMemory": {
+    "Attempted": [
+      "index_status",
+      "get_architecture",
+      "search_graph"
+    ],
+    "Connected": false,
+    "Error": "Transport closed",
+    "Fallback": "指定源码/rg与显式相关来源哈希",
+    "GraphRefreshed": false,
+    "IndexNotes": "docs/INDEX-STATUS.md"
+  },
+  "Boundaries": [
+    "所有检查使用新隔离目录；真实鼠标观感和实际Codex目录连接本轮未验收。",
+    "会话协议名称和游标字段查对官方源码，不等于本机连线已验收。",
+    "没有使用此前已经结束的桌面暂停许可。",
+    "普通本地修改未上传GitHub，旧包与正式数据保留。"
+  ]
+}

@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -18,6 +19,8 @@ internal sealed class EditorSurface : Grid
     private readonly bool snapshotMode;
     public EditSession Session { get; }
     private readonly StackPanel stages = new();
+    private readonly System.Collections.Generic.Dictionary<Guid, TextBox> stageThreads = new();
+    internal readonly System.Collections.Generic.Dictionary<Guid, StageConversationPicker> StagePickers = new();
     private readonly TextBlock status;
     private readonly Button aiButton;
     private readonly Button priorityButton;
@@ -26,6 +29,8 @@ internal sealed class EditorSurface : Grid
     private readonly DispatcherTimer autosave;
     private bool submitting;
     private bool closing;
+    private readonly Func<System.Threading.Tasks.Task<bool>> saveAndClose;
+    internal System.Threading.Tasks.Task<bool> SaveAndClose() => saveAndClose();
     private readonly Button closeButton;
     private readonly Border draftNumber;
     private readonly TextBlock numberText;
@@ -52,7 +57,7 @@ internal sealed class EditorSurface : Grid
         draftNumber = new Border { Tag = "DraftOrdinal", Width = badgeDiameter, Height = badgeDiameter, Margin = new Thickness(3),
             Background = Ui.Brush("#C04B5B70"), BorderBrush = Brushes.White, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(badgeDiameter / 2), IsHitTestVisible = false,
             Child = new Viewbox { Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly, Margin = new Thickness(8, 4, 8, 4), Child = numberText }, Visibility = Visibility.Collapsed };
-        closeButton = Ui.Button("×", CloseEditor); closeButton.Tag = "EditorClose"; closeButton.Width = 48; closeButton.Height = 40; closeButton.Padding = new Thickness(0);
+        closeButton = Ui.Button(session.TaskId is null ? "×" : "取消保存", CloseEditor); closeButton.Tag = "EditorClose"; closeButton.Width = session.TaskId is null ? 48 : 84; closeButton.Height = 40; closeButton.Padding = new Thickness(0);
         closeButton.Background = Ui.Brush("#C04B5B70"); closeButton.BorderBrush = Brushes.White; closeButton.Foreground = Brushes.White;
         closeButton.Style = (Style)Application.Current.FindResource("EditorCloseButton");
         var closeSlot = new Grid { VerticalAlignment = VerticalAlignment.Center }; closeSlot.Children.Add(closeButton); closeSlot.Children.Add(draftNumber);
@@ -80,23 +85,6 @@ internal sealed class EditorSurface : Grid
         priorityButton = Ui.Button("选择", () => ShowOptions(false)); priorityPanel.Children.Add(priorityButton); Grid.SetColumn(priorityPanel, 2); row.Children.Add(priorityPanel);
         aiMenu = new OptionMenuToggle(aiButton); priorityMenu = new OptionMenuToggle(priorityButton);
         body.Children.Add(row); body.Children.Add(optionManager); RefreshOptionLabels();
-        var codexPanel = new StackPanel(); codexPanel.Children.Add(Ui.Label("Codex会话关联",12,Ui.Muted));
-        var threadId = Ui.Input(session.Working.Codex?.ThreadId ?? ""); threadId.ToolTip = "准确会话编号；空白表示不关联";
-        var bindingNote = Ui.Label(session.Working.Codex?.Caption ?? "未关联",11,Ui.Muted);
-        var chats = new ComboBox { MinHeight = 32, MaxDropDownHeight = 240, DisplayMemberPath = nameof(CodexThread.Caption), Visibility = Visibility.Collapsed };
-        chats.SelectionChanged += (_,_) => { if (chats.SelectedItem is CodexThread selected) threadId.Text = selected.Id; };
-        var browse = Ui.Button("选择现有聊天",async () =>
-        {
-            try { var values = await controller.Codex.Catalog(); chats.ItemsSource = values; chats.Visibility = values.Length>0 ? Visibility.Visible : Visibility.Collapsed; bindingNote.Text = values.Length>0 ? controller.CodexStatus : "暂未读到聊天，可粘贴准确会话编号；实时状态待确认。"; }
-            catch { bindingNote.Text = "读取中断；实时状态待确认，可稍后重试。"; }
-        });
-        threadId.TextChanged += (_,_) =>
-        {
-            var id = threadId.Text.Trim(); if (id.Length > 0 && !Guid.TryParse(id,out _)) { bindingNote.Text = "请输入完整会话编号，暂未更改关联。"; return; }
-            if (id != session.Working.Codex?.ThreadId) session.Working.Codex = id.Length == 0 ? null : new CodexBinding { ThreadId = id };
-            bindingNote.Text = id.Length>0 ? "保存后关联 · "+controller.CodexStatus : "未关联"; Changed();
-        };
-        codexPanel.Children.Add(threadId); codexPanel.Children.Add(browse); codexPanel.Children.Add(chats); codexPanel.Children.Add(bindingNote); body.Children.Add(codexPanel);
         var reminderRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 8) };
         var reminderEnabled = new CheckBox { Tag = "ReminderToggle", Width = 22, Height = 22, IsChecked = session.Working.Reminder.Enabled, Foreground = Ui.Text,
             VerticalAlignment = VerticalAlignment.Center, Clip = new EllipseGeometry(new Point(11, 11), 11, 11) };
@@ -144,24 +132,36 @@ internal sealed class EditorSurface : Grid
             autosave.Stop();
             if (Session.TaskId is Guid task) controller.DeleteTask(task);
             else controller.DeleteDraft(this);
-        }); delete.HorizontalAlignment = HorizontalAlignment.Left; delete.Foreground = Ui.Brush("#F28F98"); Grid.SetRow(delete, 1); bottom.Children.Add(delete);
-        var save = Ui.Button("保存任务", async () =>
+        }); delete.Height = closeButton.Height; delete.HorizontalAlignment = HorizontalAlignment.Left; delete.Foreground = Ui.Brush("#F28F98"); Grid.SetRow(delete, 1); bottom.Children.Add(delete);
+        saveAndClose = async () =>
         {
-            if (submitting) return;
-            if (!Session.StatusSelected) { status.Text = "请先选择当前状态，再保存任务。"; laneSelector.Focus(); laneSelector.IsDropDownOpen = true; return; }
-            if (threadId.Text.Trim().Length > 0 && !Guid.TryParse(threadId.Text.Trim(),out _)) { bindingNote.Text = "请输入完整会话编号，或清空关联后保存。"; return; }
-            if (reminderEnabled.IsChecked == true && error.Text.Length > 0) { Ui.Error(error.Text); return; }
+            if (submitting || closing || snapshotMode) return false;
+            if (!Session.StatusSelected) { status.Text = "请先选择当前状态，再保存任务。"; laneSelector.Focus(); laneSelector.IsDropDownOpen = true; return false; }
+            if (reminderEnabled.IsChecked == true && error.Text.Length > 0) { Ui.Error(error.Text); return false; }
             submitting = true;
-            Root.IsEnabled = false;
+            Root.IsHitTestVisible = false;
             try
             {
                 autosave.Stop(); controller.Engine.StageSession(Session);
-                if (await controller.SubmitSession(Session)) { controller.RemoveEditor(this); Destroy(); }
+                if (await controller.SubmitSession(Session)) { controller.RemoveEditor(this); Destroy(); return true; }
+                return false;
             }
-            finally { submitting = false; Root.IsEnabled = true; }
-        }, true);
-        Grid.SetColumn(save, 1); Grid.SetRow(save, 1); bottom.Children.Add(save); Grid.SetRow(bottom, 2); Root.Children.Add(bottom);
-        autosave.Tick += async (_, _) => { autosave.Stop(); if (await controller.Flush()) status.Text = Session.TaskId is null ? Session.Working.HasContent ? "草稿已暂存" : "未保存到任务列表" : "修改已暂存，正式任务仍保持原值"; };
+            finally { submitting = false; Root.IsHitTestVisible = true; }
+        };
+        var save = Ui.Button("保存任务", async () => await SaveAndClose(), true);
+        save.Foreground = Ui.Brush("#102033"); save.Tag = "SaveTask";
+        if (session.TaskId is not null) closeButton.SetBinding(FrameworkElement.WidthProperty,
+            new System.Windows.Data.Binding(nameof(ActualWidth)) { Source = save });
+        save.Height = closeButton.Height; Grid.SetColumn(save, 1); Grid.SetRow(save, 1); bottom.Children.Add(save); Grid.SetRow(bottom, 2); Root.Children.Add(bottom);
+        autosave.Tick += async (_, _) => { autosave.Stop(); if (await controller.Flush() && !submitting && !closing) status.Text = Session.TaskId is null ? Session.Working.HasContent ? "草稿已暂存" : "未保存到任务列表" : "修改已暂存，正式任务仍保持原值"; };
+        // Block edits during persistence without triggering the disabled theme's
+        // global dimming/focus change just before the closing snapshot.
+        Root.PreviewKeyDown += (_, e) => { if (submitting || closing) e.Handled = true; };
+        Root.PreviewTextInput += (_, e) => { if (submitting || closing) e.Handled = true; };
+        Root.AddHandler(TextCompositionManager.PreviewTextInputStartEvent, new TextCompositionEventHandler((_, e) => { if (submitting || closing) e.Handled = true; }));
+        Root.AddHandler(TextCompositionManager.PreviewTextInputUpdateEvent, new TextCompositionEventHandler((_, e) => { if (submitting || closing) e.Handled = true; }));
+        DataObject.AddPastingHandler(Root, (_, e) => { if (submitting || closing) e.CancelCommand(); });
+        Root.PreviewMouseDown += (_, e) => { foreach (var picker in StagePickers.Values) picker.CollapseUnlessContains(e.OriginalSource as DependencyObject); };
     }
     private void Changed()
     {
@@ -172,25 +172,50 @@ internal sealed class EditorSurface : Grid
     }
     private void RenderStages()
     {
-        stages.Children.Clear();
+        var buffers = StagePickers.ToDictionary(x => x.Key, x => (Text: x.Value.Input.Text, Expanded: x.Value.Pane.Visibility == Visibility.Visible));
+        foreach (var picker in StagePickers.Values) picker.Dispose(); StagePickers.Clear(); stages.Children.Clear(); stageThreads.Clear();
         foreach (var stage in Session.Working.Stages)
         {
             var panel = new StackPanel();
             var heading = new DockPanel { Margin = new Thickness(7, 5, 7, 0) };
-            var current = Ui.Button(stage.Id == Session.Working.CurrentStageId ? "当前阶段" : "设为当前", () =>
-            { Session.Working.CurrentStageId = stage.Id; Changed(); RenderStages(); });
+            var current = Ui.Button("", () => { }); current.Tag = "StageRun";
+            current.Content = StageRunIcon.Caption(false, false);
+            current.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            current.Width = current.DesiredSize.Width - current.Margin.Left - current.Margin.Right;
+            void PresentRunState()
+            {
+                current.Content = StageRunIcon.Caption(stage.IsRunning == true, !snapshotMode);
+                current.ToolTip = stage.IsRunning == true ? "点击设为未运行" : "点击设为运行中";
+                System.Windows.Automation.AutomationProperties.SetName(current, stage.IsRunning == true ? "运行中，点击切换为未运行" : "未运行，点击切换为运行中");
+            }
+            PresentRunState(); current.Click += (_, _) =>
+            {
+                var running = stage.IsRunning != true;
+                if (!BoardEngine.CanSetStageRunning(Session.Working, stage.Id, running)) { Ui.Hint(current, BoardEngine.LastRunningStageMessage, !controller.Smoke); return; }
+                stage.IsRunning = running; Changed(); PresentRunState();
+            };
+            var bindingPanel = StageBindingEditor(stage, out var bindingButton);
+            if (buffers.TryGetValue(stage.Id, out var buffer)) { stageThreads[stage.Id].Text = buffer.Text; bindingPanel.Visibility = buffer.Expanded ? Visibility.Visible : Visibility.Collapsed; }
+            bindingButton.Width = current.Width * 1.6;
+            DockPanel.SetDock(bindingButton, Dock.Right); heading.Children.Add(bindingButton);
             DockPanel.SetDock(current, Dock.Right); heading.Children.Add(current);
             var name = Ui.Input(stage.Name); name.MinHeight = 28; name.MaxWidth = 155; name.Padding = new Thickness(9, 4, 9, 4);
             name.Margin = new Thickness(0, 3, 3, 3); name.HorizontalAlignment = HorizontalAlignment.Left; name.Foreground = Ui.Accent;
             name.ToolTip = "阶段名称"; name.TextChanged += (_, _) => { stage.Name = name.Text; Changed(); }; heading.Children.Add(name);
-            if (Session.Working.Stages.Count > 1) panel.Children.Add(heading);
+            panel.Children.Add(heading); panel.Children.Add(bindingPanel);
             var text = Ui.Input(stage.Text, true); text.Style = (Style)FindResource("StageBodyInput"); text.Background = Brushes.Transparent;
             text.BorderThickness = new Thickness(0); text.Margin = new Thickness(0); text.Padding = new Thickness(10, 5, 10, 10);
             text.MaxHeight = 180; text.ToolTip = "阶段详情"; text.TextChanged += (_, _) => { stage.Text = text.Text; Changed(); }; panel.Children.Add(text);
             var frame = Ui.Panel(panel, Ui.Brush("#A0121D2D"), 0); frame.CornerRadius = new CornerRadius(20);
+            StagePickers[stage.Id].StageScope = frame;
             panel.IsKeyboardFocusWithinChanged += (_, _) => frame.BorderBrush = panel.IsKeyboardFocusWithin ? Ui.Accent : Ui.Line;
             stages.Children.Add(frame);
         }
+    }
+    private StackPanel StageBindingEditor(Stage stage, out Button button)
+    {
+        var picker = new StageConversationPicker(controller, stage, Changed, snapshotMode);
+        StagePickers[stage.Id] = picker; stageThreads[stage.Id] = picker.Input; button = picker.Trigger; return picker.Pane;
     }
     public void RefreshOptionLabels()
     {
@@ -233,17 +258,18 @@ internal sealed class EditorSurface : Grid
     private async void CloseEditor()
     {
         if (closing || submitting) return;
+        _ = controller.CleanupRetainedStages();
         if (Session.TaskId is null) { controller.CloseDraftWindow(); return; }
-        closing = true; Root.IsEnabled = false;
+        closing = true; Root.IsHitTestVisible = false;
         try
         {
             autosave.Stop(); controller.Engine.Discard(Session);
             if (!await controller.Flush()) { Session.Visible = true; controller.Engine.StageSession(Session); return; }
             controller.RemoveEditor(this); Destroy();
         }
-        finally { closing = false; Root.IsEnabled = true; }
+        finally { closing = false; Root.IsHitTestVisible = true; }
     }
-    public void PrepareHide() { aiMenu.Close(); priorityMenu.Close(); autosave.Stop(); controller.Engine.StageSession(Session); }
+    public void PrepareHide() { foreach (var picker in StagePickers.Values) picker.Collapse(); aiMenu.Close(); priorityMenu.Close(); autosave.Stop(); controller.Engine.StageSession(Session); }
     internal void Suspend()
     {
         if (closing || submitting) return;
@@ -252,7 +278,7 @@ internal sealed class EditorSurface : Grid
     }
     public void Show() => controller.ShowEditor(this, false);
     public void Activate() => controller.ShowEditor(this, true);
-    public void Destroy() { aiMenu.Dispose(); priorityMenu.Dispose(); autosave.Stop(); Host = null; }
+    public void Destroy() { foreach (var picker in StagePickers.Values) picker.Dispose(); aiMenu.Dispose(); priorityMenu.Dispose(); autosave.Stop(); Host = null; }
     private void ShowOptionManager(bool ai)
     {
         optionManager.Children.Clear(); optionManager.Visibility = Visibility.Visible;
@@ -269,15 +295,22 @@ internal sealed class EditorSurface : Grid
     private readonly ComboBox laneSelector;
     internal EditorSurface CreateSnapshot()
     {
-        var copy = new EditorSurface(controller, Copies.Of(Session), snapshotMode: true) { Width = Width, Height = Height };
+        var width = double.IsNaN(Width) ? ActualWidth : Width;
+        var height = double.IsNaN(Height) ? ActualHeight : Height;
+        var copy = new EditorSurface(controller, Copies.Of(Session), snapshotMode: true) { Width = width, Height = height };
+        QuickScroll.SetVerticalBarWidth(copy, QuickScroll.GetVerticalBarWidth(this));
+        QuickScroll.SetThumbMargin(copy, QuickScroll.GetThumbMargin(this));
         copy.SetValue(System.Windows.Documents.TextElement.FontFamilyProperty, GetValue(System.Windows.Documents.TextElement.FontFamilyProperty));
         copy.SetValue(System.Windows.Documents.TextElement.ForegroundProperty, GetValue(System.Windows.Documents.TextElement.ForegroundProperty));
         copy.SetDraftPresentation(closeButton.Visibility == Visibility.Visible, DraftNumber); copy.status.Text = status.Text;
-        copy.Measure(new Size(Width, Height)); copy.Arrange(new Rect(0, 0, Width, Height)); copy.UpdateLayout();
+        foreach (var pair in StagePickers)
+            if (copy.StagePickers.TryGetValue(pair.Key, out var counterpart)) counterpart.Pane.Visibility = pair.Value.Pane.Visibility;
+        copy.Measure(new Size(width, height)); copy.Arrange(new Rect(0, 0, width, height)); copy.UpdateLayout();
         foreach (var pair in SnapshotChildren<TextBox>(this).Zip(SnapshotChildren<TextBox>(copy))) pair.Second.Text = pair.First.Text;
         foreach (var pair in SnapshotChildren<ScrollViewer>(this).Zip(SnapshotChildren<ScrollViewer>(copy)))
         { pair.Second.ScrollToVerticalOffset(pair.First.VerticalOffset); pair.Second.ScrollToHorizontalOffset(pair.First.HorizontalOffset); }
         copy.UpdateLayout();
+        foreach (var pair in SnapshotChildren<StageRunIcon>(this).Zip(SnapshotChildren<StageRunIcon>(copy))) pair.Second.FreezeAt(pair.First.Angle);
         foreach (var pair in SnapshotChildren<TextBox>(this).Zip(SnapshotChildren<TextBox>(copy)))
             if (pair.First.Template.FindName("frame", pair.First) is Border sourceFrame && pair.Second.Template.FindName("frame", pair.Second) is Border copyFrame)
                 copyFrame.BorderBrush = sourceFrame.BorderBrush;

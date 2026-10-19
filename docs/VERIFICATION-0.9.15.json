@@ -1,0 +1,250 @@
+{
+  "Version": "0.9.15",
+  "Date": "2026-10-19",
+  "LocalOnly": true,
+  "Entry": "release/即时任务看板-0.9.15-final/即时任务看板.exe",
+  "Passed": 633,
+  "Reports": [
+    {
+      "Kind": "ux0915",
+      "Report": "test-output/ux0915-final11-ux0915/ux0915-report.json",
+      "Passed": 41,
+      "SHA256": "A8FA7784F2DA4507AAC1B2DA8A9875A51B1B1D599CDA26580467C93CD42A8C55"
+    },
+    {
+      "Kind": "ux099",
+      "Report": "test-output/ux0915-final11-ux099/ux099-report.json",
+      "Passed": 30,
+      "SHA256": "A8E8A7F8833A713507A3DD0695D0FC70B63266BCD8DEC39ACB2955736D89617C"
+    },
+    {
+      "Kind": "ux0910",
+      "Report": "test-output/ux0915-final11-ux0910/ux0910-report.json",
+      "Passed": 15,
+      "SHA256": "12FC6BF9F2C527D9EEB3A57BFD7BA9D41C140AFC3B3642EE12C0A1DE95EDD717"
+    },
+    {
+      "Kind": "ux0911",
+      "Report": "test-output/ux0915-final11-ux0911/ux0911-report.json",
+      "Passed": 37,
+      "SHA256": "8E1D753C6DA3622E3897824E45FB3193F3FCD1288BC674A641BF72E4B3C8D290"
+    },
+    {
+      "Kind": "ux0912",
+      "Report": "test-output/ux0915-final11-ux0912/ux0912-report.json",
+      "Passed": 23,
+      "SHA256": "45798DBD475A8BE159ABBA1A2594D14893F787354AB130B5D06C6C547759E927"
+    },
+    {
+      "Kind": "ux0913",
+      "Report": "test-output/ux0915-final11-ux0913/ux0913-report.json",
+      "Passed": 31,
+      "SHA256": "1E09CA3B921E6A569F3EBB1B6BF39E61E1F98AF2705612CF4F2D0939A605C5FA"
+    },
+    {
+      "Kind": "ux0914",
+      "Report": "test-output/ux0915-final11-ux0914/ux0914-report.json",
+      "Passed": 30,
+      "SHA256": "CA936D02B385872ED96636579DB9F1D764C80154B51541FBF9E61CB98ABDECF8"
+    },
+    {
+      "Kind": "stage",
+      "Report": "test-output/ux0915-final11-stage/stage-report.json",
+      "Passed": 31,
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765"
+    },
+    {
+      "Kind": "integration",
+      "Report": "test-output/ux0915-final11-integration/integration-report.json",
+      "Passed": 17,
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9"
+    },
+    {
+      "Kind": "ux0915-render",
+      "Report": "test-output/ux0915-final11-solo2-ux0915-render/ux0915-render-report.json",
+      "Passed": 24,
+      "SHA256": "2248F0A025FB7578E967B18E0F249336CB7CFCECF875F2EBA873ABDCF75BC3F0"
+    },
+    {
+      "Kind": "ux0913-render",
+      "Report": "test-output/ux0915-final11-solo2-ux0913-render/ux0913-render-report.json",
+      "Passed": 16,
+      "SHA256": "39FD0735910D8294AE0102705AAF0D7BDA5BD1E9F3F062F6FF66BCFC5D7EDE65"
+    },
+    {
+      "Kind": "ux0913-render",
+      "Report": "test-output/ux0915-final11-solo2-ux0913-render/ux0914-closing-report.json",
+      "Passed": 6,
+      "SHA256": "B4148B0E08465608B7991954334642136FB81CDF5B8463B6238216D089BE2275"
+    },
+    {
+      "Kind": "ux0912-render",
+      "Report": "test-output/ux0915-final11-solo2-ux0912-render/render-report.json",
+      "Passed": 54,
+      "SHA256": "BB5ED41F12CC7B5EBD1BC8365ED5E3A3D03D3ADAFE5BE7E3479CE2650467667F"
+    },
+    {
+      "Kind": "scroll",
+      "Report": "test-output/ux0915-final11-solo2-scroll/scroll-report.json",
+      "Passed": 81,
+      "SHA256": "4EF93C8D243F687CE5DE201618F7E661F5FB8B29805BE00A6511CC474DB8AA55"
+    },
+    {
+      "Kind": "ux0914-desktop",
+      "Report": "test-output/ux0915-final11-ux0914-desktop/ux0914-desktop-report.json",
+      "Passed": 26,
+      "SHA256": "231314C57361A5758601C142FD6CB08BD1E0B5CF91A2D9C38AC9A47B0AE631FB"
+    },
+    {
+      "Kind": "core",
+      "Report": "test-output/ux0915-final-core/report.json",
+      "Passed": 171,
+      "SHA256": "49EB52FD2C0C97C2BFCE3DF059E45F3F58A30B424B8E7DE2918AD08032AC2BD0"
+    }
+  ],
+  "ExtraChecks": [
+    {
+      "Report": "test-output/ux0915-final11-solo2-performance/performance-report.json",
+      "SHA256": "AE8B6B578914A06BD5788587395CB31DBDAB5D91652EF5FA983EBE63B31B3E40",
+      "Passed": true
+    },
+    {
+      "Report": "test-output/ux0915-final11-solo2-animation/animation-pixels.json",
+      "SHA256": "2E0B7A87E9BD67657B602C097D8D00D96A4E03C6D643CD7DE557CCAFC97C5139",
+      "Passed": true
+    }
+  ],
+  "RuntimeHashes": [
+    {
+      "Path": "Taskboard.dll",
+      "SHA256": "E375674D6C09C5BA0807FA92BE57C027F3CA3DE18E5B7F1E7EA3065090765FA7"
+    },
+    {
+      "Path": "Taskboard.Core.dll",
+      "SHA256": "6BE95695CDC0EA69046A01081102DCF5EDAE4F2F1D5521383E09702F8CEBE6E7"
+    },
+    {
+      "Path": "即时任务看板.exe",
+      "SHA256": "6A7CCA8E7DBE7A20475DB65574E1C96DCC52B0D62631EF154B1F9ED15018284A"
+    }
+  ],
+  "SamePortableForUiChecks": true,
+  "SamePortableForDesktopAndUiChecks": true,
+  "CoreUsesPublishedAssembly": true,
+  "DesktopChecks": {
+    "Status": "passed",
+    "Report": "test-output/ux0915-final11-ux0914-desktop/ux0914-desktop-report.json"
+  },
+  "NewRequirements": {
+    "SaveText": "#102033",
+    "ConversationWidth": "6-10 M at inherited font",
+    "MarqueeStartSeconds": 0.5,
+    "MarqueeEndSeconds": 0.3,
+    "PixelsPerSecond": 24,
+    "DeletedCodexStatusLine": true,
+    "FloatingOpenClose": "live controls and native aperture, no snapshot handoff",
+    "DurationTargetMs": 100,
+    "UserAcceptedBusyUiDroppedFrames": true
+  },
+  "RepeatedOpenSampling": {
+    "Cycles": 12,
+    "NewTaskCycles": 8,
+    "EditCycles": 2,
+    "SettingsCycles": 2,
+    "MaxLateDifference": 0,
+    "ActualDarkWindowBaselines": [
+      44,
+      44,
+      44,
+      44,
+      44,
+      44,
+      44,
+      44,
+      43.66666666666662,
+      43.66666666666662,
+      43.66666666666662,
+      43.66666666666662
+    ],
+    "BusyUiBlockMs": 45
+  },
+  "WhiteBarSampling": [
+    {
+      "name": "新建",
+      "openingWhiteCycles": 4,
+      "closingWhiteCycles": 3,
+      "quickWhiteCycles": 3,
+      "totalOpen": 4,
+      "totalClose": 4,
+      "totalQuick": 3
+    },
+    {
+      "name": "编辑",
+      "openingWhiteCycles": 4,
+      "closingWhiteCycles": 4,
+      "quickWhiteCycles": 3,
+      "totalOpen": 4,
+      "totalClose": 4,
+      "totalQuick": 3
+    },
+    {
+      "name": "设置",
+      "openingWhiteCycles": 4,
+      "closingWhiteCycles": 4,
+      "quickWhiteCycles": 3,
+      "totalOpen": 4,
+      "totalClose": 4,
+      "totalQuick": 3
+    }
+  ],
+  "ListPresentation": {
+    "Report": "test-output/ux0915-final11-solo2-ux0912-render/render-report.json",
+    "Rule": "首次物理显现后所有采样保持2以内；首显延迟、实际完成和旧105ms原始差值均单列",
+    "EarlierTimingFailures": [
+      "test-output/ux0915-final9-solo2-ux0912-render/render-cycle-0.json",
+      "test-output/ux0915-final10-solo2-ux0912-render/render-cycle-0.json"
+    ]
+  },
+  "BallRealMotion": {
+    "Report": "test-output/ux0915-final11-solo2-animation/animation-pixels.json",
+    "OpeningMonotonic": true,
+    "ClosingMonotonic": true,
+    "FixedCanvasWidth": 370,
+    "SnapshotHandoffs": 0
+  },
+  "AdditionalSharedProbe": {
+    "Passed": false,
+    "Report": "test-output/ux0915-final11-shared/startup-error.txt",
+    "SHA256": "5896F4DB7F8A7BA4FAE893308BDF614DB58351EB4F169839EF424C8092282339",
+    "Error": "System.InvalidOperationException: 球真实开合采样未通过：无中间帧、回退或内容交接\n   at Taskboard.Desktop.PerformanceChecks.SampleBallAnimation(BoardController controller)\n   at Taskboard.Desktop.PerformanceChecks.SampleBallAnimation(BoardController controller)\n   at Taskboard.Desktop.SharedMotionChecks.Run(BoardController controller)\n   at Taskboard.Desktop.Program.<>c__DisplayClass0_0.<<Main>b__0>d.MoveNext()",
+    "Previous0914Report": "test-output/ux0915-previous-shared-baseline/startup-error.txt",
+    "Previous0914SHA256": "98EB525DEF4AA4B413DC0EE7BF05146FF47F726B8DC25833D7DDF91113705194",
+    "OverlayObserved": true,
+    "OverlayScreenshot": "test-output/ux0915-final11-shared/ball-expanded-screen.png",
+    "SecondProbeError": "test-output/ux0915-final11-shared-clear/startup-error.txt",
+    "SecondProbeScreenshot": "test-output/ux0915-final11-shared-clear/ball-expanded-screen.png",
+    "Scope": "两次实际截图均为遮住球采样区域的ChatGPT桌面通知；该探测未走到共享草稿断言，不当作产品通过或已确认草稿回归。未关闭或移动用户窗口。"
+  },
+  "MouseMoved": true,
+  "CursorRestored": true,
+  "ProductionDataChanged": false,
+  "StartupConfigurationChanged": false,
+  "UserProcessesStopped": false,
+  "CodebaseMemory": {
+    "Project": "Instant-taskboard",
+    "Connected": true,
+    "Persisted": true,
+    "Details": "docs/INDEX-STATUS.md",
+    "Freshness": "metadata_changed / XAML not_tracked; direct source and package hashes supplement"
+  },
+  "Boundaries": [
+    "新建/编辑/设置使用已确认的UI线程真实裁切；忙碌可延迟首帧/丢帧，白条短暂高亮不保证每轮采到。逐轮采样及漏采数保留，未承诺120FPS。",
+    "最初旧检查假设首次异步返回早于40ms、每轮捕获白条峰值，及用×寻找已改名取消按钮，已按现有规则修订；40ms门槛和实际反向仍检查。早期失败目录保留。",
+    "早期屏幕测试读到Smoke模式移至屏幕外的旧位置；最终测试在Show后移回仅测试宿主，按实际坐标与暗色基线验证。旧误取点记录不计通过。",
+    "最终真实鼠标已通过，证据来自同一便携包。",
+    "混合DPI/热插拔、所有显卡负载及用户环境偶发情况仍需复核；左侧吸附T184待实现，其他外部接入原边界保持。",
+    "额外共享抽牌探测按实际Passed和错误记录单列，不计入本轮必需项数量；此前新旧版均曾50%透明度前置色差27，不擅改透明度或提高阈值。",
+    "列表旧105ms后判定会将DWM晚于原生完成的首显判为闪烁；保留旧原始差值，新增首次物理显现/实际完成记录，检查各区域首次显现后有无回退，未承诺全部首显100ms内完成。球另保留阻塞55ms原始帧，正常展开和收起独立要求中间帧。",
+    "普通本地修改未上传GitHub，不操作正式任务、自启、保留数据或用户进程。"
+  ]
+}

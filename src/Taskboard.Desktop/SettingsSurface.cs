@@ -30,11 +30,14 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         foreach (var section in Sections)
         { var button = Ui.Button(section, () => SelectSection(section)); button.FontSize = 12; navigation.Add(section, button); sidebar.Children.Add(button); }
         body.Children.Add(sidebar); Grid.SetColumn(content, 1); body.Children.Add(content); Grid.SetRow(body, 1); Root.Children.Add(body); SelectSection(CurrentSection);
+        BeforeOpen += () => { if (controller.IsRestoringWorkspace) return; archiveAllLoaded = false; pages.Remove("归档"); if (CurrentSection == "归档") SelectSection("归档"); };
     }
     internal void RefreshSection() { pages.Clear(); SelectSection(CurrentSection); }
     internal void SelectSection(string name)
     {
-        if (!navigation.ContainsKey(name)) return; CurrentSection = name;
+        if (!navigation.ContainsKey(name)) return;
+        if (name == "归档" && CurrentSection != "归档") { archiveAllLoaded = false; pages.Remove("归档"); }
+        CurrentSection = name;
         foreach (var (section, button) in navigation) { button.Background = section == name ? Ui.Brush("#36574F") : Ui.Card; button.Foreground = section == name ? Ui.Accent : Ui.Text; }
         if (!pages.TryGetValue(name, out var page))
         {
@@ -46,6 +49,23 @@ internal sealed partial class SettingsSurface : SurfaceWindow
     private StackPanel MainSettings()
     {
         var panel = new StackPanel(); panel.Children.Add(Ui.Label("主设置", 18));
+        var quickEntry = new CheckBox { Content = "灵感库使用快捷新建卡片", Tag = "InspirationQuickEntry", IsChecked = controller.Engine.State.Preferences.InspirationQuickEntry, Margin = new Thickness(0, 8, 0, 12) };
+        quickEntry.Click += (_, _) =>
+        {
+            controller.Engine.State.Preferences.InspirationQuickEntry = quickEntry.IsChecked == true;
+            foreach (var column in controller.Columns.Where(x => x.Lane == Lane.Inspiration)) column.RefreshEntryMode();
+            controller.Engine.Touch();
+        };
+        panel.Children.Add(quickEntry);
+        var edgeHide = new CheckBox { Content = "悬浮球吸附到桌面边缘并自动隐藏", Tag = "BallEdgeAutoHide", IsChecked = controller.Engine.State.Preferences.BallEdgeAutoHide, Margin = new Thickness(0, 8, 0, 4) };
+        edgeHide.Click += (_, _) =>
+        {
+            controller.Engine.State.Preferences.BallEdgeAutoHide = edgeHide.IsChecked == true;
+            controller.Ball.RefreshEdgeAutoHide(); controller.Engine.Touch();
+        };
+        panel.Children.Add(edgeHide);
+        panel.Children.Add(Ui.Label("吸附在屏幕右边缘，只能上下拖动。面板收起、鼠标离开2秒后收起，露出1/4；移上弹出，双向动画均为0.1秒。后台任务照常运行。", 12, Ui.Muted));
+        panel.Children.Add(HotkeySettings());
         var startup = new CheckBox { Content = "开机启动", IsChecked = controller.Engine.State.Preferences.AutoStart, Margin = new Thickness(0, 10, 0, 14), IsEnabled = !controller.Isolated };
         startup.Click += (_, _) =>
         {
@@ -61,7 +81,7 @@ internal sealed partial class SettingsSurface : SurfaceWindow
             panel.Children.Add(Ui.Label(StartupLinks.AutoStartStatus(), 12, Ui.Muted));
             panel.Children.Add(Ui.Button("Windows启动应用设置", () => Try(() => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("ms-settings:startupapps") { UseShellExecute = true }))));
         }
-        panel.Children.Add(Ui.Label("即时任务看板 0.9.3 · " + DraftSwitchMotion.VariantLabel + "。", 12, Ui.Muted)); return panel;
+        panel.Children.Add(Ui.Label("即时任务看板 0.9.12 · " + DraftSwitchMotion.VariantLabel + "。", 12, Ui.Muted)); return panel;
     }
     private StackPanel WindowSettings()
     {
@@ -80,7 +100,7 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         ballSlider.ValueChanged += (_, _) => { ballCaption.Text = $"悬浮球透明度 {ballSlider.Value:0}%"; controller.SetBallTransparency(ballSlider.Value); }; panel.Children.Add(ballSlider);
         var resize = new CheckBox { Content = "显示各列右下角独立尺寸入口", IsChecked = controller.Engine.State.Preferences.ResizeCorner, Margin = new Thickness(0, 8, 0, 14) };
         resize.Click += (_, _) => { controller.Engine.State.Preferences.ResizeCorner = resize.IsChecked == true; controller.ApplySettings(); controller.Engine.Touch(); }; panel.Children.Add(resize);
-        panel.Children.Add(Ui.Button("恢复窗口默认位置", controller.RestoreDefaults)); panel.Children.Add(Ui.Label("最大范围是当前显示列表共同组成的外框。拖动最左列左下的小图案，可等比例调整整组。", 12, Ui.Muted)); return panel;
+        panel.Children.Add(Ui.Button("恢复窗口默认", controller.RestoreDefaults)); panel.Children.Add(Ui.Label("恢复整组的默认大小和位置。列表右键可只恢复该窗口，并保留当前最大范围的缩放。", 12, Ui.Muted)); return panel;
     }
     private StackPanel ListSettings()
     {
@@ -194,3 +214,4 @@ internal sealed partial class SettingsSurface : SurfaceWindow
     }
     private static void Try(Action action) { try { action(); } catch (Exception e) { Ui.Error(e.Message); } }
 }
+

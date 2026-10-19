@@ -1,4 +1,72 @@
-# Codebase Memory 文档索引刷新记录
+# 索引检查与补证记录
+
+## 0.9.16本轮
+
+已实际调用index_status确认Instant-taskboard根目录；get_architecture、search_graph、trace_path和get_code_snippet用于精确定位。2026-10-19T07:25:09Z按该名称full持久化刷新，6773节点、20067边，ready。九个PowerShell文件部分解析，图标等按设计排除；本轮五个C#路径覆盖无记录问题，但freshness仍报metadata_changed。已直接核实源码并以VERIFICATION-0.9.16及BUILD-INFO-0.9.16的源码/运行DLL哈希补证，不宣称图完整或新鲜度全绿。后续文档新增由索引自动刷新，状态数量不作完整性保证。
+
+以下为旧索引记录。
+
+2026-10-19 0.9.15本轮：实际index_status后get_architecture，search_graph定位NewTask/RevealLiveList/CommitRestingFrame、trace_path到CompleteHandoff、get_code_snippet读取交接；按路径覆盖及新文件缺失重建full持久化。最终产品源码定稿后刷新为6476节点/18975边，UTC2026-10-18T22:16:48Z，根D:/Derp/Documents/0renwumianban，parse_partial8、unusable0；产物.codebase-memory/graph.db.zst。重建后C#（含新LiveScroll/LiveBall/CardHeading）仍报metadata_changed，Theme.xaml not_tracked，按直接源码与BUILD-INFO-0.9.15-local哈希补证，不把ready当全部新鲜。回执为test-output/index-0915-final-refresh.json、index-0915-final-status.json、index-0915-final-coverage.json。此后仅修订时序检查与交付文档，产品源码保持；时序检查直接读取和来源SHA256补证，不再循环重建。下列为历史回执。
+
+## 2026-10-19 0.9.14：交互范围、保存与滚动路径已刷新
+
+本轮工具先短暂无命名空间，随后恢复；实际index_status检查Instant-taskboard ready、根D:/Derp/Documents/0renwumianban，再architecture/search_graph/trace_path/get_code_snippet定位；精确覆盖metadata_changed，Theme.xaml为not_tracked，直接读取相关源码补证。新增QuickScroll及新检查后执行full、persistence=true一次刷新成功，6193节点/18160边，8个PowerShell部分解析、0不可用，持久化图已写入.codebase-memory/graph.db.zst。
+
+最终status、coverage和symbols回执见test-output/index-0914-final-*.json；ShowOrbMenu、StepItem、CanMove已可检索。刷新后C#仍有metadata_changed，Theme.xaml未追踪，不能说完全新鲜；XAML依靠直接源码、实际滑块几何/命中测试和包来源SHA256覆盖。不循环重建。正式数据、发布目录和测试产物继续排除，未上传GitHub。
+
+## 2026-10-19 0.9.13：右侧吸附与新交互已刷新
+
+实际index_status核对Instant-taskboard、ready、根D:/Derp/Documents/0renwumianban；依次architecture、search_graph、trace_path、get_code_snippet定位。新增HintScreenPin与Ux0913Checks起初not_tracked，其他修改文件metadata_changed，已直接读取指定源码，并执行full、persistence=true一次刷新，6031节点/17511边，8个PowerShell部分解析、0不可用，图已写入.codebase-memory/graph.db.zst。新增符号已能精准检索。
+
+刷新后六条精确源码路径仍报告metadata_changed，但已从not_tracked变为有记录。按工具限制如实保留新鲜度信号，不循环重建或把ready说成完全覆盖；以直接源码、最终便携包与显式来源SHA256补证。回执见test-output/index-0913-final-status.json、index-0913-final-coverage.json、index-0913-final-symbols.json。正式数据、发布目录和测试产物继续排除；普通修改未上传GitHub。
+
+## 2026-10-19 0.9.12：真实裁切与最终包
+
+接手实际index_status确认Instant-taskboard ready、根D:/Derp/Documents/0renwumianban，先架构后符号、关系和片段定位；覆盖或路径缺失处直接核实指定源码。最终full、persistence=true成功，5943节点/17094边，8个PowerShell部分解析、0不可用；图已写入.codebase-memory/graph.db.zst。电脑端需求规划、源码定位和交付ADR已按命名章节更新。
+
+RevealLiveList/ClipLiveList、ConversationWidth及本轮检查已可精准搜索。精确源码路径均无记录解析问题，但工具刷新后仍报metadata_changed，不能等同于新鲜度干净通过；使用直接源码、最终包378项检查、实屏54项和显式来源SHA256补证，不重复无效重建。回执test-output/index-0912-final-status.json、index-0912-final-coverage.json、index-0912-final-symbols.json。release、test-output、preserved-data继续排除，普通修改未上传GitHub。
+
+## 2026-10-18 0.9.11：已连接并改用指定名称
+
+实际index_status检查Instant-taskboard返回未索引，列出现有taskboard；继而核对旧名ready、根D:/Derp/Documents/0renwumianban和覆盖，再调用get_architecture、search_graph、trace_path、get_code_snippet。精确路径提示metadata_changed，按用户指定名Instant-taskboard执行full、persistence=true重建，初次5706节点/16204边；最新复查5811节点/16628边，ready，indexed_at=2026-10-18T14:41:42Z，8个部分解析（PowerShell）、0不可用。.codebase-memory/graph.db.zst已写入，保留数据、运行包和测试产物继续排除。
+
+当前电脑端需求规划及交付ADR已按命名章节更新。新增HideAtEdge/RestoreFromEdge已能search_graph定位，trace_path能连到4秒闲置、徽标刷新及原生裁形，get_code_snippet的完整方法与当前源码一致。7项指定源码覆盖均no_recorded_issue，但即使刷新后新鲜度仍标metadata_changed，不能将其说成全覆盖或新鲜度干净通过；已读取指定源码并以最终包的来源SHA256和最终301项检查补证，不因该信号反复重建。回执在test-output/index-0911-final-status.json、index-0911-final-coverage.json、index-0911-final-symbols.json。下面断连记录仅代表历史版本。
+
+## 2026-10-18 0.9.10：连接恢复并按需刷新
+
+接手实际index_status返回ready、根目录D:/Derp/Documents/0renwumianban，indexed_at仍2026-10-17T14:29:05Z，5260节点/14618边；随后get_architecture/search_graph/trace_path/get_code_snippet定位读取及Ui.Hint。精确覆盖显示Models、AtomicStore、ColumnSurface为metadata_changed，MarqueeText/CardSeparator为not_tracked；因此执行full、persistence=true刷新，初次5616节点/15992边，8个部分解析、0不可用，写入.codebase-memory/graph.db.zst。图缺口或元数据变化仍直接读取指定源码，不将ready等同新鲜。
+
+新交付完成后再次index_repository/index_status/check_index_coverage全部返回Transport closed，未完成最终刷新，不能声称图涵盖0.9.10最终代码或覆盖通过。错误回执保存为test-output/index-0910-final-refresh.json、index-0910-final-status.json、index-0910-final-coverage.json；初次成功摘要为index-0910-initial-summary.json。当前按指定源码及构建来源哈希补证，重连后再刷新最终图。release、test-output和preserved-data继续排除。普通本地修改不自动提交图到GitHub。
+
+## 2026-10-18 0.9.9：实际工具仍断连
+
+按顺序实际调用taskboard的index_status、get_architecture，再search_graph，均返回Transport closed，无法核验根目录/覆盖/新鲜度，因此未重建或声称图已刷新，未假造trace_path/get_code_snippet结果。按相关文档与指定源码用rg补证，最终显式源码和运行文件SHA256见BUILD-INFO-0.9.9-local。
+
+当前入口PRD33/TASKS21/IMPLEMENTATION0.9.9。重连后先核实根目录D:/Derp/Documents/0renwumianban及覆盖、新鲜度，再按需刷新；新符号MarqueeText、CardSeparator、SaveAndClose、CommitRestingFrame需覆盖。旧0.9.7图保留为历史，未冒充新鲜。实际桌面前台预检失败不等于产品交互失败，且不能计为鼠标验证通过。
+
+## 2026-10-18 0.9.8：实际工具断连
+
+本轮先调用taskboard的index_status检查索引，随后get_architecture和search_graph，均返回Transport closed。因此当前Codebase Memory没有可用连接，未执行重建、ADR更新或持久化刷新，不能把0.9.7的ready计数当作本轮新鲜索引。图工具不可用后按相关章节、rg与指定源码核实；最终构建清单的显式相关源码与运行文件SHA256补证，未遍历全部源码、旧聊天或历史日志。
+
+当前0.9.8入口PRD32 U117至U125/A135至A143、TASKS20 T140至T148、IMPLEMENTATION0.9.8，验收与报告见ACCEPTANCE-0.9.8和VERIFICATION-0.9.8。下次工具重连后应核实覆盖并刷新这些新符号：WorkspaceRevealBatch、StageConversationPicker、VisibleCardStages、CleanupRetainedStages、TaskCardMotion、DueArchives、TrimArchiveHistory。旧0.9.7图仍是历史版本，不删除、不伪装为已更新。
+
+## 2026-10-17 0.9.7阶段运行与菜单修订
+
+接手先实际index_status，taskboard ready、根目录D:/Derp/Documents/0renwumianban，开始5029节点/13487边、8个部分解析、0不可用；再get_architecture、search_graph、trace_path、get_code_snippet精准定位。末个运行阶段补充前再次读取图中SetStageRunning片段，覆盖或新鲜度不明处直接核实指定源码，未遍历全部历史源码或聊天。
+
+ADR按名更新当前入口、规则、实施、Codex阶段会话、规划与交付六章，保留其余内容。0.9.7最终源码、文档及完整本地包完成后full持久化成功，5260节点/14618边、8个部分解析、0不可用；index_status ready，indexed_at=2026-10-17T14:29:05Z。回执test-output/index-097-final-refresh.json、index-097-final-status.json、index-097-final-coverage.json，图写入.codebase-memory/graph.db.zst；release/test-output/preserved-data继续排除。
+
+立即核对9个指定路径仍全部metadata_changed，不宣称图已证明源码新鲜。通过指定源码、52个相关来源SHA256、最终Core DLL与规则检查使用DLL一致、运行文件哈希及476文件ZIP逐字节核对补证。151规则、31阶段/录入/原生注册、82控件、17迁移设置通过。实际输入尝试默认注册成功但测试窗口未取得前台，不能写成中英文触发、真实点击或气泡画面已验收。当前PRD31/TASKS19，至少保留一运行阶段及原球显隐开关第一/设置第二；普通本地修改未上传GitHub，上一公开0.9.5。详见ACCEPTANCE-0.9.7和VERIFICATION-0.9.7。
+
+## 2026-10-15至16 0.9.6本地及桌面验收
+
+本轮开始实际index_status为taskboard ready、根目录D:/Derp/Documents/0renwumianban、4788节点/12801边、8个PowerShell部分解析，随后get_architecture、search_graph、trace_path与get_code_snippet定位输入观察和布局。路径metadata_changed，直接读取指定源码补证；未遍历历史源码或聊天。
+
+ADR按名更新当前入口、规则、实施、规划与交付五章。最后full持久化成功，4964节点/13401边、8个部分解析、0不可用解析，index_status ready且indexed_at=2026-10-15T15:38:17Z。回执test-output/index-096-refresh.json、index-096-status.json及index-096-coverage.json，图写入.codebase-memory/graph.db.zst。release/test-output/preserved-data继续排除。
+
+立即核验9个指定路径仍metadata_changed，不声称图确认源码新鲜；新增CapturePress、MousePressGate、PositionFloating、RestoreColumnDefault均可检索。结论以直接源码和BUILD-INFO-0.9.6-local来源/运行文件SHA256、476文件ZIP逐个核验补证。16项不显示窗口的布局/配置/原始输入登记/样式检查和82控件通过；实际游戏、Alt+Tab及移动鼠标的桌面检查尚待用户协调回复，不冒充已完成。当前PRD30/TASKS18，0.9.6普通本地修改未发布GitHub，公开仍0.9.5。
+
+2026-10-16收到用户协调同意后，22项桌面布局、4项普通外点、5项仅原始输入全屏模拟、6项手势及真实Alt+Tab画面核验通过；前文待协调为此前状态。实际游戏未操作。最终入口verified完整目录，截图与运行输出排除公开。新增隔离测试入口及工具后再次更新ADR并full持久化，最终回执见test-output/index-096-desktop-refresh.json、index-096-desktop-status.json和index-096-desktop-coverage.json；计数以实际回执为准，metadata_changed限制继续直接源码/构建哈希补证。
 
 ## 2026-10-15 0.9.5本地版：统一进度与最终错位32/32
 
@@ -12,7 +80,7 @@ manage_adr(set_sections)已更新当前入口、产品规则、实施、电脑�
 
 ## 2026-10-15 0.9.4本地常用版：连接恢复
 
-本轮实际调用index_status确认taskboard ready、根目录<project>，旧图indexed_at=2026-10-14T21:51:15Z、4357节点/12007边、5个PowerShell部分解析。随后get_architecture、search_graph、trace_path、get_code_snippet和check_index_coverage定位；动画/外点路径metadata_changed，相关当前源码用rg和精准读取核实。
+本轮实际调用index_status确认taskboard ready、根目录D:/Derp/Documents/0renwumianban，旧图indexed_at=2026-10-14T21:51:15Z、4357节点/12007边、5个PowerShell部分解析。随后get_architecture、search_graph、trace_path、get_code_snippet和check_index_coverage定位；动画/外点路径metadata_changed，相关当前源码用rg和精准读取核实。
 
 manage_adr(set_sections)已收到sections_updated回执，更新当前文档入口、已确认规则、电脑端规划、从零重写实施与交付入口五章，其余内容保留。接口章节名不带Markdown井号；一次名称格式拒绝后已按接口要求重试成功，不宣称拒绝请求已写入。
 
@@ -24,7 +92,7 @@ manage_adr(set_sections)已收到sections_updated回执，更新当前文档入�
 
 ## 2026-10-15 0.9.3本地交付：收尾连接断开，刷新未确认
 
-本轮开始及继续工作时实际调用index_status：taskboard ready，根目录<project>，4357节点、12007边，indexed_at=2026-10-14T21:51:15Z；5个PowerShell部分解析、0不可用解析。随后实际调用get_architecture、search_graph、trace_path、get_code_snippet和check_index_coverage。改变文件metadata_changed，新增DraftCardGeometry未追踪，因此用rg及指定源码、隔离实际运行核实，不把旧图作为最终源码证明。
+本轮开始及继续工作时实际调用index_status：taskboard ready，根目录D:/Derp/Documents/0renwumianban，4357节点、12007边，indexed_at=2026-10-14T21:51:15Z；5个PowerShell部分解析、0不可用解析。随后实际调用get_architecture、search_graph、trace_path、get_code_snippet和check_index_coverage。改变文件metadata_changed，新增DraftCardGeometry未追踪，因此用rg及指定源码、隔离实际运行核实，不把旧图作为最终源码证明。
 
 程序、两包及文档完成后，manage_adr(set_sections)返回Transport closed；再次index_status及index_repository(full,persistence=true)也返回同一错误，未取得成功回执，不能声称ADR写入或索引刷新完成。旧持久图保留；恢复连接后先核对index_status，更新当前文档入口与规则ADR并对该根目录full重新索引，检查新增几何、外点/动画和文档路径覆盖。不得把旧计数写成0.9.3的新计数。
 
@@ -34,7 +102,7 @@ manage_adr(set_sections)已收到sections_updated回执，更新当前文档入�
 
 当前入口为HANDOFF、INDEX、PRD第26节U69至U78及TASKS T91至T100；实施、验收、验证摘要和便携清单对应0.9.2。122规则、61控件、77窗口、39画卷及真实外点/重复调用、球展开、横向抽牌采样通过。运行包476文件，完整ZIP逐文件校验通过，未上传GitHub。
 
-实际调用index_status确认taskboard ready及根目录后，get_architecture、search_graph、trace_path、get_code_snippet定位，再直接核实改变的源码。manage_adr以set_sections更新当前文档入口、已确认规则、电脑端需求规划、从零重写实施与交付入口，保留其他章节。交付阶段以full模式索引<project>并持久化至.codebase-memory/graph.db.zst；节点/边及解析计数以工具实际结果为准。release、test-output、preserved-data继续排除；部分PowerShell或非追踪样式缺口由相关源码和隔离测试核实，图索引不替代实际画面验证。
+实际调用index_status确认taskboard ready及根目录后，get_architecture、search_graph、trace_path、get_code_snippet定位，再直接核实改变的源码。manage_adr以set_sections更新当前文档入口、已确认规则、电脑端需求规划、从零重写实施与交付入口，保留其他章节。交付阶段以full模式索引D:/Derp/Documents/0renwumianban并持久化至.codebase-memory/graph.db.zst；节点/边及解析计数以工具实际结果为准。release、test-output、preserved-data继续排除；部分PowerShell或非追踪样式缺口由相关源码和隔离测试核实，图索引不替代实际画面验证。
 
 ## 2026-10-15 新会话接手入口
 

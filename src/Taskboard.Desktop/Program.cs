@@ -19,11 +19,24 @@ internal static class Program
         var scrollRestoreVerify = false;
         var scrollStackVerify = false;
         var outsideObserverVerify = false;
+        var gameInputVerify = false;
         var floatingVerify = false;
+        var workspaceVerify = false;
+        var workspaceGeometryVerify = false;
         var appearanceVerify = false;
         var compactVerify = false;
+        var stageVerify = false;
+        var ux098Verify = false;
+        var ux099Verify = false;
+        var ux099DesktopVerify = false;
+        var ux0910Verify = false; var hintDisplayVerify = false;
+        var ux0911Verify = false;
+        var ux0912RenderVerify = false;
+        var ux0912Verify = false; var ux0913Verify = false; var ux0914Verify = false; var ux0914DesktopVerify = false; var ux0913RenderVerify = false;
+        var featureDesktopVerify = false;
         var sharedVerify = false;
         var integrationVerify = false; var startupEntryVerify = false; var startupInvocation = false;
+        var ux0915Verify = false; var ux0915RenderVerify = false; var codexLifecycleVerify = false;
         var defaultData = DataPaths.DefaultDataDirectory;
         var data = defaultData; var isolated = false; var smoke = false; var startupCheck = false; var desktopVerify = false; var hasDataDirectory = false; var codexVerify = false; var animationVerify=false; var listeningVerify = false;
         for (var i = 0; i < args.Length; i++)
@@ -34,15 +47,35 @@ internal static class Program
             else if (args[i] == "--startup-check") startupCheck = true;
             else if (args[i] == "--desktop-verify") desktopVerify = true;
             else if (args[i] == "--codex-verify") { codexVerify=true; startupCheck=true; }
+            else if (args[i] == "--codex-lifecycle-verify") codexLifecycleVerify = true;
             else if (args[i] == "--animation-verify") animationVerify=true;
             else if (args[i] == "--performance-verify") performanceVerify=true;
             else if (args[i] == "--scroll-verify") scrollVerify=true;
             else if (args[i] == "--scroll-restore-verify") { scrollVerify = true; scrollRestoreVerify = true; }
             else if (args[i] == "--scroll-stack-verify") { scrollVerify = true; scrollRestoreVerify = true; scrollStackVerify = true; }
             else if (args[i] == "--outside-observer-verify") outsideObserverVerify = true;
+            else if (args[i] == "--game-input-verify") { outsideObserverVerify = true; gameInputVerify = true; }
             else if (args[i] == "--floating-verify") { outsideObserverVerify = true; floatingVerify = true; }
+            else if (args[i] == "--workspace-verify") { outsideObserverVerify = true; workspaceVerify = true; }
+            else if (args[i] == "--workspace-geometry-verify") { outsideObserverVerify = true; workspaceVerify = true; workspaceGeometryVerify = true; }
             else if (args[i] == "--appearance-verify") { appearanceVerify = true; startupCheck = true; }
             else if (args[i] == "--compact-verify") { compactVerify = true; startupCheck = true; }
+            else if (args[i] == "--stage-verify") { stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux098-verify") { ux098Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux099-verify") { ux099Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux099-desktop-verify") { ux099DesktopVerify = true; stageVerify = true; desktopVerify = true; }
+            else if (args[i] == "--ux0910-verify") { ux0910Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0911-verify") { ux0911Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0912-render-verify") { ux0912RenderVerify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0913-render-verify") { ux0913RenderVerify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0914-desktop-verify") { ux0914DesktopVerify = true; stageVerify = true; desktopVerify = true; }
+            else if (args[i] == "--ux0914-verify") { ux0914Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0915-verify") { ux0915Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0915-render-verify") { ux0915RenderVerify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0913-verify") { ux0913Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0912-verify") { ux0912Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--hint-display-verify") { ux0910Verify = true; hintDisplayVerify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--feature-desktop-verify") { featureDesktopVerify = true; outsideObserverVerify = true; }
             else if (args[i] == "--shared-verify") sharedVerify = true;
             else if (args[i] == "--integration-verify") { integrationVerify = true; startupCheck = true; }
             else if (args[i] == "--startup-entry-verify") { startupEntryVerify = true; startupCheck = true; }
@@ -50,8 +83,14 @@ internal static class Program
             else if (args[i] == "--listening-verify") { listeningVerify = true; startupCheck = true; }
             else { MessageBox.Show("不支持的启动参数：" + args[i]); return 2; }
         }
-        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify || sharedVerify || outsideObserverVerify) && !hasDataDirectory)
+        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify || sharedVerify || outsideObserverVerify || codexLifecycleVerify) && !hasDataDirectory)
         { Console.Error.WriteLine("验证模式必须明确指定隔离数据目录。"); return 2; }
+        if (codexVerify)
+        {
+            if (string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)) return 2;
+            try { return CodexChecks.Run(data).GetAwaiter().GetResult() ? 0 : 3; }
+            catch (Exception error) { Directory.CreateDirectory(data); File.WriteAllText(Path.Combine(data, "codex-error.txt"), error.ToString()); return 1; }
+        }
         if (startupEntryVerify)
         {
             try { StartupLinks.VerifyAndUpdateExistingEntry(data); return 0; }
@@ -96,7 +135,7 @@ internal static class Program
             }
             catch (Exception e) { MessageBox.Show(e.Message, "即时任务看板"); return 1; }
         }
-        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify || sharedVerify || outsideObserverVerify) && (!hasDataDirectory || string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)))
+        if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify || sharedVerify || outsideObserverVerify || codexLifecycleVerify) && (!hasDataDirectory || string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)))
         { Console.Error.WriteLine("验证模式必须明确指定非正式目录的 --data-dir。"); return 2; }
         using var mutex = DataPaths.Lock(data, out var acquired);
         if (!acquired) { MessageBox.Show("这一份任务数据已经打开，请从托盘找到即时任务看板。"); return 0; }
@@ -111,13 +150,15 @@ internal static class Program
         {
             try
             {
-                controller = new BoardController(data, isolated, smoke || startupCheck); if (!listeningVerify && !appearanceVerify && !integrationVerify && !compactVerify && !sharedVerify) await controller.Start();
+                controller = new BoardController(data, isolated, smoke || startupCheck); if (!listeningVerify && !appearanceVerify && !integrationVerify && !compactVerify && !stageVerify && !sharedVerify && !workspaceGeometryVerify) await controller.Start();
                 if (startupInvocation && !isolated) File.WriteAllText(Path.Combine(DataPaths.SystemRoot, "last-startup.json"), System.Text.Json.JsonSerializer.Serialize(new { utc = DateTime.UtcNow, version = typeof(Program).Assembly.GetName().Version!.ToString(), executable = Environment.ProcessPath }));
                 startupClock.Stop();
                 if (smoke || startupCheck) File.WriteAllText(Path.Combine(data, "startup-report.json"), System.Text.Json.JsonSerializer.Serialize(new { readyMs = startupClock.Elapsed.TotalMilliseconds, tasks = controller.Engine.State.Tasks.Count, draftsAndEdits = controller.Engine.State.Sessions.Count }));
-                if (outsideObserverVerify) { if (floatingVerify) await FloatingInteractionChecks.Run(controller); else await OutsideObserverChecks.Run(controller); await controller.Exit(); }
+                if (codexLifecycleVerify) { await CodexDesktopLifecycleChecks.Run(controller); await controller.Exit(); }
+                else if (outsideObserverVerify) { if (featureDesktopVerify) await FeatureDesktopChecks.Run(controller); else if (workspaceVerify) await WorkspaceChecks.Run(controller, workspaceGeometryVerify); else if (floatingVerify) await FloatingInteractionChecks.Run(controller); else await OutsideObserverChecks.Run(controller, gameInputVerify); await controller.Exit(); }
                 else if (sharedVerify) { await SharedMotionChecks.Run(controller); await controller.Exit(); }
                 else if (compactVerify) { await CompactChecks.Run(controller); await controller.Exit(); }
+                else if (stageVerify) { if (ux0915RenderVerify) await Ux0915RenderChecks.Run(controller); else if (ux0915Verify) await Ux0915Checks.Run(controller); else if (ux0914DesktopVerify) await Ux0914DesktopChecks.Run(controller); else if (ux0914Verify) await Ux0914Checks.Run(controller); else if (ux0913RenderVerify) await Ux0913RenderChecks.Run(controller); else if (ux0913Verify) await Ux0913Checks.Run(controller); else if (ux0912Verify) await Ux0912Checks.Run(controller); else if (ux0912RenderVerify) await Ux0912RenderChecks.Run(controller); else if (ux0911Verify) await Ux0911Checks.Run(controller); else if (ux0910Verify) await Ux0910Checks.Run(controller, hintDisplayVerify); else if (ux099DesktopVerify) await Ux099DesktopChecks.Run(controller); else if (ux099Verify) await Ux099Checks.Run(controller); else if (ux098Verify) await Ux098Checks.Run(controller); else await StageFeatureChecks.Run(controller); await controller.Exit(); }
                 else if (integrationVerify) { await IntegrationChecks.Run(controller); await controller.Exit(); }
                 else if (appearanceVerify) { AppearanceChecks.Run(controller); await controller.Exit(); }
                 else if (scrollVerify) { await ScrollMotionChecks.Run(controller, scrollRestoreVerify, scrollStackVerify); await controller.Exit(); }
@@ -131,14 +172,14 @@ internal static class Program
             catch (Exception e)
             {
                 Directory.CreateDirectory(data); File.WriteAllText(Path.Combine(data, "startup-error.txt"), e.ToString());
-                if (!smoke && !startupCheck && !desktopVerify && !scrollVerify && !outsideObserverVerify) Ui.Error("即时任务看板不能启动：" + e.Message);
+                if (!smoke && !startupCheck && !desktopVerify && !scrollVerify && !outsideObserverVerify && !codexLifecycleVerify) Ui.Error("即时任务看板不能启动：" + e.Message);
                 controller?.Dispose(); application.Shutdown(1);
             }
         };
         application.DispatcherUnhandledException += (_, e) =>
         {
             try { Directory.CreateDirectory(data); File.AppendAllText(Path.Combine(data, "errors.log"), DateTime.Now + " " + e.Exception + Environment.NewLine); } catch { }
-            if (smoke || startupCheck || desktopVerify) { application.Shutdown(1); }
+            if (smoke || startupCheck || desktopVerify || codexLifecycleVerify) { application.Shutdown(1); }
             else Ui.Error("操作失败，未提交内容仍在窗口中：" + e.Exception.Message);
             e.Handled = true;
         };
@@ -157,3 +198,7 @@ internal static class Program
         finally { mutex.ReleaseMutex(); }
     }
 }
+
+
+
+

@@ -12,6 +12,9 @@ public static class Names
 
 public sealed class Stage
 {
+    // Null only occurs in legacy data; WorkItem maps the former current stage once.
+    public bool? IsRunning { get; set; }
+    public CodexBinding? Codex { get; set; }
     [System.Text.Json.Serialization.JsonRequired]
     public Guid Id { get; set; } = Guid.NewGuid();
     [System.Text.Json.Serialization.JsonRequired]
@@ -38,9 +41,12 @@ public sealed class Reminder
     public DateTime? LastOccurrence { get; set; }
 }
 
-public sealed class WorkItem
+public sealed class WorkItem : System.Text.Json.Serialization.IJsonOnDeserialized
 {
+    public DateTime? CompletedSinceUtc { get; set; }
     public Guid? ColumnId { get; set; }
+    // Read legacy task bindings once, then persist bindings on their owning stage.
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public CodexBinding? Codex { get; set; }
     public bool TimerUnread { get; set; }
     [System.Text.Json.Serialization.JsonRequired]
@@ -52,6 +58,7 @@ public sealed class WorkItem
     [System.Text.Json.Serialization.JsonRequired]
     public List<Stage> Stages { get; set; } = [new()];
     [System.Text.Json.Serialization.JsonRequired]
+    // Legacy location retained for migration; display and automation use IsRunning.
     public Guid CurrentStageId { get; set; }
     [System.Text.Json.Serialization.JsonRequired]
     public List<Guid> AiIds { get; set; } = [];
@@ -64,12 +71,27 @@ public sealed class WorkItem
     [System.Text.Json.Serialization.JsonRequired]
     public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;
 
-    public WorkItem() => CurrentStageId = Stages[0].Id;
+    public WorkItem() { CurrentStageId = Stages[0].Id; Stages[0].IsRunning = true; }
+    void System.Text.Json.Serialization.IJsonOnDeserialized.OnDeserialized()
+    {
+        if (Stages is not null) foreach (var stage in Stages.Where(x => x is not null)) stage.IsRunning ??= stage.Id == CurrentStageId;
+        if (Stages is { Count: > 0 } && !Stages.Any(x => x?.IsRunning == true) &&
+            (Stages.FirstOrDefault(x => x?.Id == CurrentStageId) ?? Stages.FirstOrDefault(x => x is not null)) is { } fallback)
+            fallback.IsRunning = true;
+        if (Codex is null) return;
+        var current = Stages?.FirstOrDefault(x => x?.Id == CurrentStageId);
+        if (current is null) throw new JsonException("旧会话关联缺少对应的当前阶段");
+        if (current.Codex is not null && !Copies.Same(current.Codex, Codex)) throw new JsonException("阶段与旧任务会话关联冲突");
+        current.Codex = Codex; Codex = null;
+    }
+    [System.Text.Json.Serialization.JsonIgnore]
+    // Compatibility accessor; new UI and observers must address stages individually.
+    public CodexBinding? CurrentCodex => Stages.FirstOrDefault(x => x.Id == CurrentStageId)?.Codex;
     [System.Text.Json.Serialization.JsonIgnore]
     public bool HasContent => !string.IsNullOrWhiteSpace(Title) || Stages.Any(x => !string.IsNullOrWhiteSpace(x.Text));
     [System.Text.Json.Serialization.JsonIgnore]
     public string DisplayTitle => !string.IsNullOrWhiteSpace(Title) ? Title.Trim() :
-        Stages.SelectMany(x => x.Text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+        Stages.Where(x => Stages.Count == 1 || x.IsRunning == true).SelectMany(x => x.Text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
             .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))?.Trim() ?? "未命名任务";
 }
 
@@ -118,6 +140,12 @@ public sealed class WindowPosition
 
 public sealed class Preferences
 {
+    public bool AutoArchiveCompleted { get; set; } = true;
+    public int AutoArchiveAfterDays { get; set; } = 5;
+    public bool AutoDeleteArchives { get; set; }
+    public bool InspirationQuickEntry { get; set; } = true;
+    public bool BallEdgeAutoHide { get; set; } = true;
+    public BoardHotkey Hotkey { get; set; } = new();
     public NotificationListeningOptions Listening { get; set; } = new();
     public List<BoardColumn> Columns { get; set; } = BoardColumn.Defaults();
     // Optional for backwards compatibility with 0.3/0.4 data files.

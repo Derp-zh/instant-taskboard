@@ -1,0 +1,152 @@
+{
+  "date": "2026-10-19",
+  "targetVersion": "0.9.14",
+  "verdict": "not_accepted_for_existing_desktop_auto_movement",
+  "releaseIntegrity": [
+    {
+      "file": "Taskboard.dll",
+      "sha256": "962159F40D67A4CE68FFD08EA1ED3D8073EFED87B96D228BEDB8B8EF66380794",
+      "matchesReleaseManifest": true
+    },
+    {
+      "file": "Taskboard.Core.dll",
+      "sha256": "6BE95695CDC0EA69046A01081102DCF5EDAE4F2F1D5521383E09702F8CEBE6E7",
+      "matchesReleaseManifest": true
+    },
+    {
+      "file": "即时任务看板.exe",
+      "sha256": "9203629678476676F93A0E5A74B3E377DA13DA85A90D17967F6AC6D282D94746",
+      "matchesReleaseManifest": true
+    }
+  ],
+  "packagedReadOnlyDiagnostic": {
+    "passed": true,
+    "existingThreadsRead": 32,
+    "status": "历史服务可读 · 实时状态待确认",
+    "liveTransportConnected": false,
+    "metadataOnly": true,
+    "mutationMethodsBlocked": true,
+    "conversationContentsLogged": false
+  },
+  "controlledPollingReproduction": {
+    "targetVersion": "0.9.14.0",
+    "syntheticFixture": true,
+    "originalAssemblyUsed": true,
+    "originalObserverEventsUsed": true,
+    "originalObserverStatus": "服务已连接 · 按会话核实实时状态",
+    "observations": [
+      {
+        "sequence": 1,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "active",
+          "activeFlags": []
+        },
+        "phase": "Running",
+        "lane": "Running"
+      },
+      {
+        "sequence": 2,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "active",
+          "activeFlags": [
+            "waitingOnUserInput"
+          ]
+        },
+        "phase": "WaitingForInput",
+        "lane": "Action"
+      },
+      {
+        "sequence": 3,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "active",
+          "activeFlags": [
+            "waitingOnUserInput"
+          ]
+        },
+        "phase": "WaitingForInput",
+        "lane": "Action"
+      },
+      {
+        "sequence": 4,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "active",
+          "activeFlags": []
+        },
+        "phase": "Running",
+        "lane": "Running"
+      },
+      {
+        "sequence": 5,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "active",
+          "activeFlags": []
+        },
+        "phase": "Running",
+        "lane": "Running"
+      },
+      {
+        "sequence": 6,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "idle"
+        },
+        "phase": "Running",
+        "lane": "Running"
+      },
+      {
+        "sequence": 7,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "idle"
+        },
+        "phase": "Running",
+        "lane": "Running"
+      },
+      {
+        "sequence": 8,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "idle"
+        },
+        "phase": "Running",
+        "lane": "Running"
+      },
+      {
+        "sequence": 9,
+        "method": "probe/snapshot",
+        "status": {
+          "type": "idle"
+        },
+        "phase": "Running",
+        "lane": "Running"
+      }
+    ],
+    "turnHistoryReadCount": 0,
+    "finalLane": "Running",
+    "finalPhase": "Running",
+    "waitingSnapshotRecognized": true,
+    "completionPollingGapReproduced": true,
+    "desktopLifecycleVerified": false,
+    "formalDataOpened": false,
+    "mouseOrKeyboardInjected": false
+  },
+  "readOnlyUserConfigurationFacts": {
+    "endpointConfigured": false,
+    "eligibleBoundRunningStageCount": 1
+  },
+  "formalDataWritten": false,
+  "existingChatModified": false,
+  "mouseOrKeyboardInjected": false,
+  "currentDesktopRealLifecycleTested": false,
+  "productCodeChanged": false,
+  "limits": [
+    "original_desktop_bridge_not_fixed",
+    "controlled_fixture_is_not_a_real_desktop_chat",
+    "history_only_never_substitutes_for_live_state"
+  ]
+}

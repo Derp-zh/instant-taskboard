@@ -18,6 +18,12 @@ internal sealed partial class BoardController
     private Point outsidePressPoint;
     private long workspaceGeneration;
     internal void VerifyOutsideObserverRegistration() { using var observer = new OutsideClickObserver(this); }
+    internal object OutsideInputStatus => outsideClicks?.Status ?? new { RawInput = false };
+    internal void DisableLegacyInputForIsolatedCheck()
+    {
+        if (!Isolated) throw new InvalidOperationException("仅隔离验证可以关闭普通输入通道");
+        outsideClicks?.DisableLegacyHook();
+    }
     private System.Collections.Generic.IEnumerable<SurfaceWindow> FloatingWindows() => taskWindows.Values.Cast<SurfaceWindow>().Append(draftStack).Concat(auxiliary).Where(x => x.FloatingAnimations).Distinct();
     internal SurfaceWindow? DismissibleWindow() => FloatingWindows()
         .Where(x => x.ShouldRestore).OrderByDescending(x => x.WindowLayer).ThenByDescending(x => x.ActivationOrder).FirstOrDefault();
@@ -32,6 +38,7 @@ internal sealed partial class BoardController
     internal void ObserveOutsidePress(SurfaceWindow target, bool inside, Point screenPoint = default, long? pressedAt = null, bool leftButton = true, bool taskCard = false)
     {
         if (!Expanded || !target.ShouldRestore) return;
+        if (!inside) foreach (var editor in Editors.Where(x => x.Host == target)) foreach (var picker in editor.StagePickers.Values) picker.Collapse();
         if (inside || !leftButton || taskCard) { outsideTarget = null; return; }
         var now = pressedAt ?? Environment.TickCount64;
         // Physical press time avoids mistaking delayed dispatcher deliveries
@@ -48,7 +55,7 @@ internal sealed partial class BoardController
         {
             var editors = Editors.Where(x => x.Host == target).ToArray();
             if (editors.Length == 0) target.Destroy();
-            else { foreach (var editor in editors) editor.Suspend(); Persist(); }
+            else { foreach (var editor in editors) _ = editor.SaveAndClose(); }
         }
     }
     internal void CloseDraftWindow()
@@ -64,7 +71,7 @@ internal sealed partial class BoardController
     }
     [DllImport("user32.dll")] private static extern uint GetDoubleClickTime();
     [DllImport("user32.dll")] private static extern int GetSystemMetrics(int index);
-    private sealed class OutsideClickObserver : IDisposable
+    private sealed partial class OutsideClickObserver : IDisposable
     {
         private readonly BoardController controller;
         private readonly MouseHook callback;
@@ -85,13 +92,19 @@ internal sealed partial class BoardController
             observerThread = new Thread(() =>
             {
                 observerDispatcher = Dispatcher.CurrentDispatcher;
-                hook = SetWindowsHookEx(14, callback, IntPtr.Zero, 0);
-                if (hook == IntPtr.Zero) failure = new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "无法启用窗口外点击检测");
+                try
+                {
+                    StartRawInput();
+                    hook = SetWindowsHookEx(14, callback, IntPtr.Zero, 0);
+                    if (hook == IntPtr.Zero) failure = new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "无法启用窗口外点击检测");
+                }
+                catch (Exception e) { failure = e; }
                 ready.Set();
-                if (failure is not null) return;
+                if (failure is not null) { StopRawInput(); return; }
                 try { Dispatcher.Run(); }
-                finally { UnhookWindowsHookEx(hook); }
+                finally { UnhookWindowsHookEx(hook); StopRawInput(); }
             }) { IsBackground = true, Name = "Taskboard outside clicks" };
+            observerThread.SetApartmentState(ApartmentState.STA);
             observerThread.Start(); ready.Wait();
             if (failure is not null) throw failure;
             _ = Task.Run(DeliverPresses);
@@ -104,8 +117,8 @@ internal sealed partial class BoardController
                 // This thread only captures point and time. Never
                 // wait for WPF/layout/persistence: Windows removes a slow
                 // low-level hook silently, permanently losing outside clicks.
-                presses.Writer.TryWrite(new Press(Marshal.PtrToStructure<MouseData>(data).Point,
-                    Environment.TickCount64, Interlocked.Read(ref controller.workspaceGeneration), message.ToInt64() == 0x0201));
+                var mouse = Marshal.PtrToStructure<MouseData>(data);
+                CapturePress(mouse.Point, mouse.Time, message.ToInt64() == 0x0201 ? 0 : message.ToInt64() == 0x0204 ? 1 : 2, 1);
             }
             return CallNextHookEx(hook, code, message, data);
         }
@@ -116,8 +129,13 @@ internal sealed partial class BoardController
             await foreach (var press in presses.Reader.ReadAllAsync())
             {
                 if (disposed) return;
-                var (point, pressedAt, generation, leftButton) = press;
-                var root = Native.GetAncestor(WindowFromPoint(point), 2);
+                var point = press.Point; var pressedAt = press.PressedAt; var generation = press.Generation; var leftButton = press.Button == 0;
+                // Fullscreen capture can hide/lock the cursor over our overlay;
+                // the input owner is then more reliable than its screen position.
+                var capturedExternal = CapturedByExternalWindow(press);
+                if (!pressGate.Accept(press.Button, pressedAt, press.Source, generation) && !capturedExternal) continue;
+                var root = capturedExternal ? press.Foreground : Native.GetAncestor(WindowFromPoint(point), 2);
+                if (root == IntPtr.Zero && IsFullscreen(press.Foreground)) root = press.Foreground;
                 GetWindowThreadProcessId(root, out var process);
                 var external = root != IntPtr.Zero && process != Environment.ProcessId;
                 if (!OwnedBy(root, ballHandle) && !ui.HasShutdownStarted)
@@ -161,7 +179,7 @@ internal sealed partial class BoardController
             if (Thread.CurrentThread != observerThread) observerThread.Join(2000);
         }
         private delegate IntPtr MouseHook(int code, IntPtr message, IntPtr data);
-        private readonly record struct Press(PixelPoint Point, long PressedAt, long Generation, bool LeftButton);
+        private readonly record struct Press(PixelPoint Point, long PressedAt, long Generation, int Button, int Source, IntPtr Foreground, bool CursorVisible);
         [StructLayout(LayoutKind.Sequential)] private struct PixelPoint { public int X, Y; }
         [StructLayout(LayoutKind.Sequential)] private struct MouseData { public PixelPoint Point; public uint Buttons, Flags, Time; public IntPtr Extra; }
         [DllImport("user32.dll", SetLastError = true)] private static extern IntPtr SetWindowsHookEx(int id, MouseHook callback, IntPtr module, uint thread);

@@ -27,7 +27,7 @@ public sealed partial class BoardEngine
         var item = State.Tasks.First(x => x.Id == id);
         if (!CanArchive(item)) throw new InvalidOperationException("只有已完成或暂搁置列表的任务可以归档");
         State.Archives.Add(new ArchivedTask { Item = Copies.Of(item), OriginalColumn = Copies.Of(BoardColumns.For(State.Preferences, item)), OriginalIndex = State.Tasks.IndexOf(item) });
-        if (State.Archives.Count > 20) State.Archives.RemoveAt(0);
+        TrimArchiveHistory();
         State.Tasks.Remove(item); State.Sessions.RemoveAll(x => x.TaskId == id);
         ForgetHistory(id); redo.Clear(); Notify([id]);
     }
@@ -38,10 +38,32 @@ public sealed partial class BoardEngine
         var column = State.Preferences.Columns.FirstOrDefault(x => x.BuiltinLane == archive.OriginalColumn.BuiltinLane);
         if (column is null) { column = Copies.Of(archive.OriginalColumn); State.Preferences.Columns.Add(column); }
         column.Deleted = false; column.Visible = true; column.Assign(item); CleanReferences(item);
-        if (item.Codex is { } binding) { binding.Generation++; binding.Phase = CodexPhase.Unknown; binding.SourceEpoch = ""; binding.TurnId = null; binding.PendingRequests.Clear(); binding.LastSequence = -1; }
+        ResetBindings(item);
         State.Tasks.Insert(Math.Min(archive.OriginalIndex, State.Tasks.Count), item); State.Archives.Remove(archive);
         ForgetHistory(id); redo.Clear(); Notify([id]); return item;
     }
     private void ForgetHistory(Guid id)
     { undo.RemoveAll(x => x.Before.Id == id); redo.RemoveAll(x => x.Entry.Before.Id == id); }
+    public int TrimArchiveHistory()
+    {
+        if (!State.Preferences.AutoDeleteArchives || State.Archives.Count <= 40) return 0;
+        var keep = State.Archives.Select((x, i) => (Archive: x, Index: i)).OrderByDescending(x => x.Archive.ArchivedUtc).ThenByDescending(x => x.Index).Take(40).Select(x => x.Archive.Item.Id).ToHashSet();
+        var removed = State.Archives.RemoveAll(x => !keep.Contains(x.Item.Id)); if (removed > 0) Touch(); return removed;
+    }
+    public void InitializeCompletionTimes(DateTime nowUtc)
+    {
+        var changed = false;
+        foreach (var item in State.Tasks.Where(x => x.ColumnId is null && x.Lane == Lane.Done && x.CompletedSinceUtc is null))
+        { item.CompletedSinceUtc = nowUtc; changed = true; }
+        if (changed) Touch();
+    }
+    public Guid[] DueArchives(DateTime nowUtc)
+    {
+        InitializeCompletionTimes(nowUtc);
+        if (!State.Preferences.AutoArchiveCompleted) return [];
+        var days = State.Preferences.AutoArchiveAfterDays;
+        if (days < 1 || days > 36500) throw new InvalidOperationException("自动归档天数无效");
+        return State.Tasks.Where(x => x.ColumnId is null && x.Lane == Lane.Done && x.CompletedSinceUtc is DateTime since && nowUtc - since > TimeSpan.FromDays(days)
+            && !State.Sessions.Any(s => s.TaskId == x.Id)).Select(x => x.Id).ToArray();
+    }
 }

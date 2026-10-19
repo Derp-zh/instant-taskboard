@@ -1,0 +1,1509 @@
+{
+  "version": "0.9.16",
+  "date": "2026-10-19",
+  "fullIntegrationPassed": false,
+  "runtime": "release/即时任务看板-0.9.16-final",
+  "originalDesktopPackage": "OpenAI.Codex_26.1013.4894.0_x64__2p2nqsd0c76g0",
+  "codexCliVersion": "0.163.0-alpha.10.2",
+  "nativeReadSchemaVersion": 1,
+  "reports": {
+    "core": {
+      "assertionsPassed": 205,
+      "localReport": "test-output/codex-core-0916-reconnect-final3/report.json",
+      "checks": [
+        "未选择状态的非空内容可暂存",
+        "未选择状态保存时提示先选择",
+        "未选择状态跨序列化保留",
+        "未选择状态的共享草稿不占用任何列表",
+        "删除未占用列表后无状态草稿仍可保存并重启读取",
+        "旧草稿未含新字段时保留原已选状态",
+        "悬浮窗口、多列表、球默认透明度分别为10%、20%、40%",
+        "悬浮窗口透明度独立持久化",
+        "空内容不形成草稿或任务",
+        "仅改阶段名和新增空阶段不暂存",
+        "仅选AI不暂存",
+        "非空草稿暂存但不参与正式列表与搜索",
+        "无名称可以正式保存并以详情首行展示",
+        "编辑副本不修改正式任务",
+        "同一任务仅一份编辑会话",
+        "X放弃已建任务未提交修改",
+        "阶段改名不影响编号递增",
+        "阶段运行标记独立，不限制并行数量",
+        "多阶段卡片仅显示全部运行阶段，不展示暂无进程阶段",
+        "搜索覆盖非当前阶段正文",
+        "灵感库同样只展示运行阶段，全部阶段信息仍保留",
+        "跨列移动可连续撤销",
+        "提交标题保留后台提醒及列表变化",
+        "字段撤销保留后台更新",
+        "同列向后移动不发生偏移",
+        "撤销排序恢复原位置",
+        "删除任务",
+        "撤销删除恢复内容与顺序",
+        "删除选项清空任务及编辑引用",
+        "删除选项后保存撤销不恢复无效引用",
+        "睡眠错过多个周期只补一次且移入待操作",
+        "同一次到期不重复提醒",
+        "已完成任务停止提醒",
+        "一次性提醒只执行一次",
+        "每周提醒严格推进到未来",
+        "未提交编辑跨进程恢复但不变成正式修改",
+        "关闭新建草稿跨进程保留",
+        "损坏主文件从有效备份恢复且保留原件",
+        "主文件备份都坏时拒绝启动",
+        "坏数据不会被空看板覆盖",
+        "拒绝空阶段元素",
+        "拒绝无效当前阶段",
+        "拒绝重复任务编号",
+        "拒绝未知选项引用",
+        "拒绝非法窗口尺寸",
+        "拒绝非法颜色",
+        "拒绝空持久草稿",
+        "被占用的主文件使写入明确失败",
+        "写入失败不破坏旧文件",
+        "撤销仅保留本次运行最近20次提交",
+        "灵感自动输入保存不计入字段撤销步数",
+        "配置备份不含任务、阶段内容或草稿",
+        "平台配置及默认20%透明度可往返恢复",
+        "恢复配置不更改任务、提醒、草稿或未提交输入",
+        "恢复配置保留现有任务所引用选项",
+        "配置导入拒绝旧任务全量备份",
+        "配置包夹带任务字段时拒绝导入",
+        "拒绝超范围透明度",
+        "拒绝非有限透明度",
+        "旧版本缺少透明度字段时兼容默认20%",
+        "旧数据缺少球透明度时独立采用40%，普通窗口仍为20%",
+        "拒绝无限大的球透明度，防止合成画面失效",
+        "球透明度随配置备份恢复，源数据保持不变",
+        "撤销跨列移动后可恢复",
+        "恢复跨列移动并返回撤销栈",
+        "恢复删除不产生归档",
+        "任务字段撤销与恢复成对工作",
+        "产生新正式任务清空恢复分支",
+        "归档移出活动列表并保存全部阶段",
+        "取消归档恢复原身份、阶段及已删除原列表",
+        "开启自动删除后第41条归档永久移除最早记录且维持40条",
+        "进行中任务不能归档",
+        "归档历史独立持久保存并在重启恢复",
+        "配置备份不含历史归档任务或阶段正文",
+        "不同默认列表编号的配置导入仍保留任务且不重复内置角色",
+        "任务与配置分开保存且配置不含历史任务",
+        "分离配置读取后活动任务和历史仍完整",
+        "中断两文件保存时优先任务内恢复配置不丢任务",
+        "配置损坏从配置备份恢复且历史任务不丢失",
+        "两份配置都损坏时从完整任务副本恢复设置",
+        "已保存目录的任务和备份缺失时拒绝创建空数据替代",
+        "再次登记旧版本不能降级最新自启目标",
+        "最新文件已移除时选择仍存在的最高版本",
+        "相同版本优先较新构建",
+        "恢复列内排序恢复原落点",
+        "撤销最多保留本次运行20步",
+        "恢复与撤销保持相同20步运行内边界",
+        "新建草稿记录独立UTC创建时间",
+        "草稿创建时间跨保存和重启保留",
+        "旧草稿缺少创建字段时使用原始时间，切换不改创建先后",
+        "灵感隐藏不计数，改名保持角色",
+        "保护列表禁止删除：随手记录",
+        "保护列表禁止删除：进行中",
+        "保护列表禁止删除：待操作",
+        "数量增加可恢复隐藏列并新增自定义列",
+        "自定义列任务不混入完善中",
+        "正式任务阻止删除列表",
+        "配置导入保留现有任务引用的列表且任务不变",
+        "空列表删除后撤销任务会恢复列表身份",
+        "自定义列移动撤销恢复准确列表",
+        "非空草稿阻止删除列表",
+        "所有列可隐藏而不丢任务",
+        "旧数据无列配置时兼容六列",
+        "状态、平台、优先级、提醒与会话本身不触发空任务暂存",
+        "名称或详情启用暂存后，所有字段和两个列表的独立草稿跨重启完整保留",
+        "旧关联无损迁移到原当前阶段，不误绑阶段0",
+        "迁移后的任务不再写回旧任务级关联",
+        "旧当前阶段映射为运行中，其余阶段暂无进程",
+        "暂无进程阶段更新自己的会话状态且不改变任务列表或其他阶段",
+        "标记运行后的可信新信号驱动任务列表；历史来源阶段状态不参与聚合",
+        "多个运行阶段中有一个等待回答，优先进入待操作",
+        "其他运行阶段继续执行时不会盖过已有的待操作请求",
+        "一个阶段结束待检查时，另一阶段执行仍保持待操作优先",
+        "暂停阶段的待处理会话不再参与任务列表聚合",
+        "读取早期全暂停副本时恢复原定位阶段，至少保留一个运行阶段且不删信息",
+        "未填标题且只有暂停阶段有文字时，不把隐藏详情当作可见标题",
+        "单阶段任务不能关闭唯一运行标记，详情入口始终保留",
+        "运行阶段显示不再受旧四阶段摘要数量上限限制",
+        "阶段详情和名称提交保留每个阶段最新后台状态",
+        "改绑只重置对应阶段，保留旧会话历史且不改其他阶段",
+        "撤销阶段改绑恢复对应关联并保留其他阶段",
+        "重做阶段改绑恢复新关联",
+        "归档恢复重置所有阶段的监听代次，保留关联内容",
+        "多阶段关联通过正式保存、归档、取消归档和磁盘重读",
+        "撤销删除保留每阶段会话且更换监听身份，拒绝删除前的排队信号",
+        "重做已移除阶段时重新核实关联，旧阶段排队信号不可套用",
+        "提交未改阶段开关的旧编辑副本时保留列表上最新的运行标记",
+        "正式卡片拒绝关闭最后运行阶段，不改内容或历史",
+        "正式保存拒绝全暂停编辑，保留原任务",
+        "编辑和列表并发关闭不同阶段时，合并仍保留编辑侧选定的运行阶段",
+        "快捷卡片默认开启，默认快捷键按物理Ctrl和波浪键定义",
+        "拒绝无修饰键、保留F12以及纯修饰键注册",
+        "归档默认五天开启、超40自动删除默认关闭",
+        "进入已完成列表记录独立完成时间",
+        "编辑已完成任务不重置完成时间",
+        "离开已完成清除完成计时",
+        "重新完成重新计时",
+        "严格超过指定整天数才归档",
+        "自定义七天门槛生效",
+        "调低天数使用原完成时间判断",
+        "关闭自动归档不返回到期任务",
+        "存在未提交编辑时暂不自动归档",
+        "编辑副本处理后恢复到期判断",
+        "自动归档只作用于已完成内置列表",
+        "缺少完成计时时从当前计起，避免意外即时归档",
+        "取消归档回已完成后重新计时，不立刻再次归档",
+        "默认关闭自动删除，超过40也保留全部归档",
+        "超过40归档及可选策略跨重读完整保留",
+        "开启后永久删除较早归档并保留最近40条",
+        "启用自动删除时新增归档仍保持最近40条",
+        "关闭自动删除后立即停止淘汰",
+        "自定义天数、关闭淘汰及全部归档一同持久化",
+        "回答请求已处理不冒充恢复、不清时间红点",
+        "批准请求已处理仍待真实恢复、不清时间红点",
+        "可信实际恢复使待操作回进行中并同时清时间红点",
+        "请求处理通知不借缓存运行状态拉回时间提醒任务",
+        "仅空闲快照不借缓存运行状态移列或清红点",
+        "未知通知不借缓存运行状态移列或清红点",
+        "相同运行阶段的可信新快照仍报告实际移列与红点变化",
+        "已在进行中的后台运行刷新不自行清除红点",
+        "回答后直接结束只进入结果待检查、不虚构恢复或清红点",
+        "可信新轮次开始可从待检查恢复并清红点",
+        "另一个运行阶段仍待批准时待操作优先、红点保留",
+        "另一个运行阶段结果待检查时不被恢复事件盖过",
+        "暂停阶段不参与待处理聚合、可信运行移列才清红点",
+        "重连后B待检查暂为未知时仍优先待操作、不被A运行覆盖",
+        "重连待处理保护通过正式存储保存重读仍有效",
+        "B也确认恢复后才解除多阶段待处理保护并清红点",
+        "断线保留WaitingForInput的待处理保护且不虚构恢复",
+        "断线保留WaitingForApproval的待处理保护且不虚构恢复",
+        "可信运行不改变Inspiration人工列表及时间红点",
+        "可信运行不改变Refining人工列表及时间红点",
+        "可信运行不改变Paused人工列表及时间红点",
+        "可信运行不改变Done人工列表及时间红点",
+        "自定义列表不自动移列或清除时间红点",
+        "人工暂停阶段只更新自身状态、不移列或清时间红点",
+        "旧编辑草稿提交不覆盖后台恢复移列与已清除红点",
+        "恢复移列及红点清除通过正式存储重读保持",
+        "历史只读来源不能恢复任务或清除红点",
+        "旧绑定代次不能恢复任务或清除红点",
+        "其他轮次运行快照不能恢复当前轮次",
+        "其他会话运行信号不能恢复绑定任务",
+        "乱序运行信号不能重放恢复或清除红点",
+        "同一轮次重复开始不能重放恢复",
+        "断线不等同结束或恢复、不清时间红点",
+        "已验证新连接epoch重新确认状态、序号独立并按实际恢复清红点",
+        "历史来源不能宣称运行或自动流转",
+        "可信开始事件确认运行",
+        "等待回答进入待操作",
+        "权限等待独立显示",
+        "单项请求消失不冒充恢复执行",
+        "可信恢复回进行中且清除时间红点",
+        "别的会话事件不能污染关联",
+        "旧轮次结束不能覆盖当前运行",
+        "旧关联代次不能修改状态",
+        "正常结束进入待操作但不完成任务",
+        "失败单独记录",
+        "中断单独记录",
+        "断线待确认且不误报结束",
+        "AI事件不拉回已完成",
+        "自定义列不参与AI自动流转",
+        "乱序信号拒绝",
+        "标题提交保留监听最新状态",
+        "改绑提升代次并保留旧关联历史",
+        "300任务全部阶段搜索反馈低于200ms"
+      ]
+    },
+    "turnTracker": {
+      "assertionsPassed": 39,
+      "localReport": "test-output/codex-turn-tracker-0916-final/report.json",
+      "checks": [
+        "first idle completed history never becomes current completion",
+        "newly discovered history without an observed active turn is inconclusive",
+        "a known historical terminal cannot be revived by stale active metadata",
+        "binding during execution establishes the exact active turn",
+        "idle without exact current terminal does not complete",
+        "another completed turn does not finish the observed turn",
+        "notLoaded does not masquerade as end of execution",
+        "missing completion notification is reconciled by exact observed turn metadata",
+        "polling terminal is idempotent",
+        "real terminal arriving after reconciliation is not replayed",
+        "late stale running turn cannot revive a completed turn",
+        "new current notification starts a subsequent turn",
+        "older terminal cannot override subsequent turn",
+        "retired start cannot override subsequent turn",
+        "current thread state notification is accepted",
+        "notification arriving during poll invalidates stale poll",
+        "a fresh retry can reconcile the current terminal",
+        "same binding state retained across reconnection does not replay terminal",
+        "unbinding and rebinding establishes a fresh historical baseline",
+        "a terminal notification without an observed current turn cannot replay history on a new binding",
+        "non-authoritative historical service cannot establish current turn",
+        "non-authoritative notification cannot establish current turn",
+        "thread B notification cannot contaminate A",
+        "multiple active turns are inconclusive",
+        "trustworthy current start establishes event baseline",
+        "duplicate current start cannot clear pending requests",
+        "unknown terminal status is not a completion",
+        "exact observed failed terminal remains explicit",
+        "interrupted terminal preserves its status",
+        "later live turn supersedes older completed turn without intermediate false wait",
+        "pagination uses only the allowed read method 0",
+        "pagination uses only the allowed read method 1",
+        "exact current turn is found beyond the newest metadata page",
+        "all requests exclude chat items and explicitly request newest-first metadata",
+        "opaque pagination cursor is forwarded unchanged",
+        "repeated cursor stops without manufacturing a terminal",
+        "page bound remains explicitly inconclusive",
+        "initial baseline reads only the newest page rather than all history",
+        "malformed response is inconclusive"
+      ]
+    },
+    "observerFixture": {
+      "assertionsPassed": 18,
+      "localReport": "test-output/codex-observer-0916-reconnect-final/report.json",
+      "checks": [
+        "共享传输与逐会话live分别报告、不冒称原桌面身份",
+        "首次idle仅有旧完成记录不误移列或清红点",
+        "交错B批准等待准确归属B、不污染A",
+        "单个未加载会话不可用不杀其他会话实时能力",
+        "active准确轮次合成开始、已在进行中不自行清时间红点",
+        "等待问题进入待操作且保留红点",
+        "原生请求resolved本身不冒称执行恢复",
+        "可信恢复清A红点且不覆盖B等待",
+        "没有完成通知仍由准确当前轮次补查移待操作",
+        "重复idle补查当前终态幂等、不重复结束",
+        "解绑重绑销毁旧轮次记忆、旧完成记录不重放",
+        "重连保留绑定当前轮次、补查准确终态且不重放旧轮次",
+        "观察器只读、未接管聊天或启动轮次",
+        "轮次补查使用已核实降序和notLoaded元数据协议",
+        "读中收到新事件使整批旧轮询含snapshot全部丢弃",
+        "历史只读降级的快照始终非权威、不合成运行事件",
+        "旧连接epoch的整批轮询不能污染新连接",
+        "解绑删除Tracker并拒绝解绑前已在途的轮询"
+      ]
+    },
+    "desktopBridge": {
+      "assertionsPassed": 25,
+      "localReport": "test-output/codex-desktop-bridge-0916-final/report.json",
+      "checks": [
+        "validated local Codex active status is live capable",
+        "turn identity and opaque cursor are retained",
+        "no output or message text survives metadata projection",
+        "validated local idle status is live capable without inferring a completion",
+        "question wait flag is preserved",
+        "approval wait flag is preserved",
+        "another thread response cannot supply trust",
+        "remote host is explicitly unsupported",
+        "missing response host is inconclusive",
+        "non-Codex kind does not inherit local desktop trust",
+        "unrecognized schema cannot grant trust",
+        "unloaded thread does not inherit connection trust",
+        "system error does not infer completion",
+        "failed tool response is unavailable per-thread",
+        "malformed content is inconclusive",
+        "only exact advertised GUID pipe naming is eligible",
+        "lookalike pipe names do not qualify",
+        "other GUID pipes are ignored",
+        "logical operation allowlist exposes no arbitrary tool execution or writes",
+        "malformed waiting flags cannot be silently dropped and reclassified as running",
+        "installed desktop peer passed package/session/user identity and advertised read_thread checks",
+        "original visible test chat A returned verified live metadata: live-original-desktop",
+        "original visible test chat B returned verified live metadata: live-original-desktop",
+        "unavailable synthetic thread fails per-thread without destroying original desktop connection",
+        "valid original visible test chat remains readable after unavailable target"
+      ]
+    },
+    "existingUI": {
+      "assertionsPassed": 41,
+      "localReport": "test-output/codex0916-ux-final/ux0915-report.json",
+      "checks": [
+        "300宽下会话实际字体限制10字符且溢出",
+        "300宽下会话位于右侧状态图标紧邻左侧",
+        "300宽下阶段气泡占满右边控件以外的剩余空间并滚动",
+        "300宽下短阶段保持自然气泡不拉伸",
+        "300宽下只删除Codex状态行，正文保持",
+        "430宽下会话实际字体限制10字符且溢出",
+        "430宽下会话位于右侧状态图标紧邻左侧",
+        "430宽下阶段气泡占满右边控件以外的剩余空间并滚动",
+        "430宽下短阶段保持自然气泡不拉伸",
+        "430宽下只删除Codex状态行，正文保持",
+        "350宽下会话实际字体限制10字符且溢出",
+        "350宽下会话位于右侧状态图标紧邻左侧",
+        "350宽下阶段气泡占满右边控件以外的剩余空间并滚动",
+        "350宽下短阶段保持自然气泡不拉伸",
+        "350宽下只删除Codex状态行，正文保持",
+        "不再显示的关联进程状态变化不会重建卡片或打断滚动",
+        "循环开始停顿0.5秒期间不移动",
+        "停顿后以24单位每秒缓慢单向滚动",
+        "滚到末尾后保持0.3秒，无反向播放",
+        "末停结束回到开头，重新进入0.5秒停顿",
+        "会话短/中/长名称实际宽度均在6至10字符内：短",
+        "会话短/中/长名称实际宽度均在6至10字符内：MMMMMMMM",
+        "会话短/中/长名称实际宽度均在6至10字符内：MMMMMMMMMMMM",
+        "新建/编辑保存文字深蓝黑，按钮仍可操作",
+        "新建/编辑保存文字深蓝黑，按钮仍可操作",
+        "反复新建开合第1轮全程真实控件，结束无截图交接",
+        "反复新建开合第2轮全程真实控件，结束无截图交接",
+        "反复新建开合第3轮全程真实控件，结束无截图交接",
+        "反复新建开合第4轮全程真实控件，结束无截图交接",
+        "反复新建开合第5轮全程真实控件，结束无截图交接",
+        "反复新建开合第6轮全程真实控件，结束无截图交接",
+        "反复新建开合第7轮全程真实控件，结束无截图交接",
+        "反复新建开合第8轮全程真实控件，结束无截图交接",
+        "实际动画帧中真实内容持续可见，使用已确认的UI裁切路径",
+        "关闭最后一张草稿时保留真实控件，收起开始不提前清空",
+        "收起完成后再释放最后草稿控件",
+        "关闭最后草稿后立即新建，旧清理不会移除新内容",
+        "球向左展开及收起使用实际宽度中间帧，结束仍为58单位",
+        "球全程真实控件，无截图交接或隐藏内容",
+        "球右侧锚点及原搜索输入控件保持，宽度动画不跳换宿主",
+        "离屏首帧有兜底，销毁后模拟已排队旧帧回调不再访问失效句柄"
+      ]
+    },
+    "originalDesktop": {
+      "assertionsPassed": 184,
+      "localReport": "test-output/codex0916-original-desktop-final5/codex-lifecycle-report.json",
+      "checks": [
+        "原桌面进程包身份、用户及会话已核实",
+        "A/B原桌面会话分别可读实时状态",
+        "绑定前已结束的历史轮次不误移列",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Unknown",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Running",
+        "B实际阶段状态符合Unknown",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Running",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Running",
+        "B实际阶段状态符合Running",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Running",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Action",
+        "A实际阶段状态符合ReadyForReview",
+        "A已确认待处理保护符合预期",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Action",
+        "B实际阶段状态符合ReadyForReview",
+        "B已确认待处理保护符合预期",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Action",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Action",
+        "A提醒红点符合实际执行状态",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Running",
+        "A已确认待处理保护符合预期",
+        "A提醒红点符合实际执行状态",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Action",
+        "B实际阶段状态符合ReadyForReview",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Action",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "实际编辑保存保留用户修改",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Running",
+        "A提醒红点符合实际执行状态",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Running",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Action",
+        "B已确认待处理保护符合预期",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Action",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Running",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Action",
+        "B已确认待处理保护符合预期",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Action",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Running",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Running",
+        "B实际阶段状态符合Running",
+        "B已确认待处理保护符合预期",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Running",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Running",
+        "A实际阶段状态符合Running",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Action",
+        "B实际阶段状态符合ReadyForReview",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Action",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Action",
+        "A实际阶段状态符合ReadyForReview",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Action",
+        "B实际阶段状态符合ReadyForReview",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "multi实际任务列符合Action",
+        "multi实际持久化列及红点一致",
+        "multi实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "A实际任务列符合Action",
+        "A实际阶段状态符合Unknown",
+        "A已确认待处理保护符合预期",
+        "A实际持久化列及红点一致",
+        "A实际卡片位于对应列表控件",
+        "B实际任务列符合Action",
+        "B实际阶段状态符合ReadyForReview",
+        "B实际持久化列及红点一致",
+        "B实际卡片位于对应列表控件",
+        "原桌面事件不移动人工Inspiration",
+        "原桌面事件不移动人工Refining",
+        "原桌面事件不移动人工Paused",
+        "原桌面事件不移动人工Done",
+        "自定义列和未运行阶段不被原桌面事件移列",
+        "隔离桌面流程明确结束"
+      ],
+      "originalDesktop": true,
+      "syntheticFixture": false,
+      "actualCardsVerified": true,
+      "actualPersistenceVerified": true,
+      "checkpoints": [
+        {
+          "label": "ready",
+          "elapsedMs": 1091,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                },
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "baseline_old_terminal_not_replayed",
+          "elapsedMs": 64420,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                },
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "A_B_original_desktop_execution",
+          "elapsedMs": 67488,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "A_B_exact_terminal_reconciled",
+          "elapsedMs": 126530,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "timer_after_editor_open",
+          "elapsedMs": 128068,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": true,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "resume_clears_timer_multistage_waits",
+          "elapsedMs": 130081,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "real_editor_save_preserves_background",
+          "elapsedMs": 130878,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "reconnect_preserves_B_waiting_priority",
+          "elapsedMs": 137460,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": true,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": false
+                },
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": true,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "late_bind_current_execution_no_cross_chat",
+          "elapsedMs": 139584,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": true,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": false
+                },
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": true,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "both_stages_really_resume_then_running",
+          "elapsedMs": 142042,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": false
+                },
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "B_ends_A_runs_waiting_wins",
+          "elapsedMs": 176476,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Running",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Running",
+                  "awaiting": false,
+                  "hasTurn": false
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "final_A_B_completed",
+          "elapsedMs": 232112,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "idle_rebind_does_not_replay_old_terminal",
+          "elapsedMs": 235085,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        },
+        {
+          "label": "finished",
+          "elapsedMs": 235388,
+          "source": "desktop-native",
+          "identityVerified": true,
+          "liveThreads": 2,
+          "rows": [
+            {
+              "alias": "A",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "Unknown",
+                  "awaiting": false,
+                  "hasTurn": false
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "B",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            },
+            {
+              "alias": "multi",
+              "lane": "Action",
+              "custom": false,
+              "TimerUnread": false,
+              "phases": [
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                },
+                {
+                  "running": true,
+                  "phase": "ReadyForReview",
+                  "awaiting": true,
+                  "hasTurn": true
+                }
+              ],
+              "cardInExpectedColumn": true,
+              "columnVisible": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "directoryDiagnostic": {
+    "exitCode": 3,
+    "directoryPassed": true,
+    "sourceIdentityVerified": true,
+    "fullIntegrationPassed": false,
+    "localReport": "test-output/codex-directory-0916-final-wait/codex-report.json"
+  },
+  "limitations": {
+    "asyncUserInput": {
+      "supported": false,
+      "visibleQuestionAttempted": true,
+      "observedMetadata": {
+        "type": "active",
+        "activeFlags": []
+      },
+      "reason": "原桌面可见异步提问未在只读接口中暴露等待状态；不使用聊天正文或窗口文字猜测。"
+    },
+    "synchronousUserInput": {
+      "originalDesktopVerified": false,
+      "reason": "测试聊天为Default模式，同步request_user_input仅Plan模式可用；未完成Plan模式原桌面验收。"
+    },
+    "approvalWaitingAndAnswerRecovery": {
+      "originalDesktopVerified": false,
+      "realPermissionRequestAttempted": true,
+      "reason": "自建聊天确实发起require_escalated权限请求；自动审批环境未形成可人工暂停的等待批准状态，未观察到waitingOnApproval，不能算批准恢复验收。"
+    },
+    "sharedTerminalTransport": "观察器夹具通过，未做真实终端全生命周期验收。",
+    "compatibility": "桥接依赖已核实桌面协议；远端host、未加载会话、未知schema、身份不符均不可作为实时来源。",
+    "screenTesting": "最终包验证WPF卡片控件、实际编辑保存及持久化；没有重复进行真实鼠标或闪烁像素采样，不用旧版数量冒充。",
+    "startupOrdering": "已加入未发现桌面时重试及历史降级后重新发现；未通过关闭用户原桌面来做启动顺序实测。"
+  },
+  "sourceHashes": {
+    "src/Taskboard.Core/CodexState.cs": "529D0618D24BCD92F6CC1C99E96D5F2D81C655154F61AFB54CEA2F75495B5584",
+    "src/Taskboard.Core/BoardEngine.cs": "F7742A0FEA1D04A5C5979B1099C3E489779FEC2DAC97D14758A34EEA859D3547",
+    "src/Taskboard.Desktop/CodexObserver.cs": "BC287817F80389ABD03629E76D2AAA98FA74DF306C5BFFB7B1C273854AE7E087",
+    "src/Taskboard.Desktop/CodexDesktopBridge.cs": "1E4628BF234770E6FAC8FFC4D8F92DB962F08EED568F6D3302EF3A431149BD81",
+    "src/Taskboard.Desktop/CodexTurnTracker.cs": "48D34E262B06DCAC9387249E12228B9F57F3C96B638DD3A931DAE423997067EE",
+    "src/Taskboard.Desktop/CodexChecks.cs": "A6E1D6EE5B8B4EE193CE3AA3F1FE574DABAF8588D1F878376613F1A83A6EC1F3",
+    "src/Taskboard.Desktop/CodexDesktopLifecycleChecks.cs": "D4D5C16E79D76746088FA6605BE36193EA6216D387CC3028E39F5D0B4BAC901B",
+    "src/Taskboard.Desktop/Program.cs": "C813CE53A55CCD5A66FCFC03665317EEA0985FB01E7BE24967E300767A080B8E",
+    "src/Taskboard.Desktop/Taskboard.Desktop.csproj": "20D7930DC7BEBF8E5B272F86E3B363D51FDAAC79A287CECE1CE739D5CB066B66",
+    "tests/Taskboard.Checks/CodexRecoveryRules.cs": "910143EDC5549603B21E81AA40B1924E0C84EC644C109C957C05ED392FC40977"
+  },
+  "runtimeHashes": {
+    "即时任务看板.exe": "D94FA7AF8CD001D8B50E793EC5C279480AD5BC8BF7E8C22DE2E36EA31DB35253",
+    "Taskboard.dll": "750E9DF616575BE63A61FDC54433A0B288EB2AE9262BA9A90D1431E35156201D",
+    "Taskboard.Core.dll": "CA6E8923B9882223D29265E718E507FB93DB6F195F0009684FAC52CE248C4B83"
+  },
+  "privacy": {
+    "productionDataChanged": false,
+    "conversationContentsIncluded": false,
+    "threadIdentifiersIncluded": false,
+    "rawScreenshotsIncluded": false
+  },
+  "codebaseMemory": {
+    "project": "Instant-taskboard",
+    "rootVerified": true,
+    "refreshed": true,
+    "indexedAtUtc": "2026-10-19T07:25:09Z",
+    "sourceFreshnessSignal": "metadata_changed",
+    "supplement": "已直接核实本轮源码并记录源码与运行DLL哈希；PowerShell部分解析不完整。"
+  }
+}

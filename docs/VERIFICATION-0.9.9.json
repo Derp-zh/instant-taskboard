@@ -1,0 +1,101 @@
+{
+  "Version": "0.9.9",
+  "Date": "2026-10-18",
+  "LocalOnly": true,
+  "Entry": "release/即时任务看板-0.9.9-final/即时任务看板.exe",
+  "Passed": 363.0,
+  "Reports": [
+    {
+      "SHA256": "F457A73AE856413AA3C0F6C148566C8F720C6C32C6EC97706923AFF2A078BB04",
+      "Report": "test-output/ux099-final-core/report.json",
+      "Passed": 171,
+      "Kind": "core"
+    },
+    {
+      "SHA256": "29006F22B18514A17DD4C59D5CF49620DF86261361545D6D3A215C1EFCED74F9",
+      "Report": "test-output/ux099-verified-ux099/ux099-report.json",
+      "Passed": 30,
+      "Kind": "ux099"
+    },
+    {
+      "SHA256": "C9EDAD8CCC8B62E80433AD60E9F4774F0F92BDFC795AFAB503808E05F462BA59",
+      "Report": "test-output/ux099-verified-ux098/ux098-report.json",
+      "Passed": 32,
+      "Kind": "ux098-regression"
+    },
+    {
+      "SHA256": "F4DBD07C037A6C47D4D12C3CA1C43B53C99B9653241A5919DEAA7417CF203765",
+      "Report": "test-output/ux099-verified-stage/stage-report.json",
+      "Passed": 31,
+      "Kind": "stage-regression"
+    },
+    {
+      "SHA256": "BF3C0F28F8CA2F48369E2BEBF329BFC3BE2D2D2EF0687CA6E69FADC1C21B79BE",
+      "Report": "test-output/ux099-verified-compact/compact-report.json",
+      "Passed": 82,
+      "Kind": "compact-regression"
+    },
+    {
+      "SHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9",
+      "Report": "test-output/ux099-verified-integration/integration-report.json",
+      "Passed": 17,
+      "Kind": "integration"
+    }
+  ],
+  "CoreTestUsesPublishedCore": true,
+  "RuntimeHashes": [
+    {
+      "SHA256": "30829A860CB7038AC98042EB5572EBF3E11959BC6BDA35B31D3FBA246167042A",
+      "Path": "Taskboard.dll"
+    },
+    {
+      "SHA256": "700D41894A9011F9ADE1A8939784D598023B7858A931094B0E4DCDF2320A21CB",
+      "Path": "Taskboard.Core.dll"
+    },
+    {
+      "SHA256": "26EFD533A5D9DA7367F90090B13AB569A12E8BE410E4377E1EEF49E9F77518F2",
+      "Path": "即时任务看板.exe"
+    }
+  ],
+  "DraftSwitchSpeed": 1.35,
+  "DraftSwitchQueueThreshold": "2/3 unchanged: user withdrew request 3",
+  "OtherAnimationDurationMs": 100,
+  "HintDurationMs": 1200,
+  "Marquee": {
+    "Width": "six uppercase M advances in current font",
+    "PixelsPerSecond": 36,
+    "InitialPauseSeconds": 0.5,
+    "EndPauseSeconds": 0.2,
+    "RestartOnWorkspaceOpen": true
+  },
+  "CodebaseMemory": {
+    "Connected": false,
+    "GraphRefreshed": false,
+    "Fallback": "rg、指定源码与显式来源SHA256",
+    "Error": "Transport closed",
+    "Attempted": [
+      "index_status",
+      "get_architecture",
+      "search_graph"
+    ]
+  },
+  "DesktopAttempts": [
+    "test-output/ux099-desktop-a/ux099-desktop-report.json",
+    "test-output/ux099-desktop-b/ux099-desktop-report.json"
+  ],
+  "DesktopInputVerified": false,
+  "DesktopVisualVerified": false,
+  "DesktopPreflightFailure": "测试窗口未取得前台，未发出鼠标或键盘输入",
+  "MouseMoved": false,
+  "KeyboardInjected": false,
+  "ProductionDataChanged": false,
+  "StartupConfigurationChanged": false,
+  "UserProcessesStopped": false,
+  "RealCodexCatalogVerified": false,
+  "Boundaries": [
+    "用户授权暂停后尝试实际桌面验证；前台检查失败即停止，未操作正式数据。",
+    "363项隔离检查不能代替真实点击与合成画面闪烁验收。",
+    "索引工具实际断连，未假称刷新；旧包与旧报告保留。",
+    "本轮普通修改不上传GitHub，上一公开版本0.9.5。"
+  ]
+}

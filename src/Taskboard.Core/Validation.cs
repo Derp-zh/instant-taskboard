@@ -14,7 +14,7 @@ public static partial class Validation
         Unique(state.Tasks!, x => x.Id); Unique(state.Sessions!, x => x.Id);
         foreach (var item in state.Tasks!) { CheckItem(item, ai, priority); Require(item.HasContent, "正式任务没有有效内容"); }
         var ids = state.Tasks!.Select(x => x.Id).ToHashSet();
-        Require(state.Archives is not null && state.Archives.Count <= 20, "归档数量超过20或集合无效");
+        Require(state.Archives is not null, "归档集合无效");
         Require(state.Archives!.All(x => x is not null && x.Item is not null && x.OriginalColumn is not null), "归档记录无效");
         Require(state.Archives.Select(x => x.Item.Id).Distinct().Count() == state.Archives.Count, "归档任务重复");
         foreach (var archive in state.Archives)
@@ -35,6 +35,8 @@ public static partial class Validation
             else Require(!ids.Contains(s.Working.Id), "草稿与正式任务重复");
         }
         var p = state.Preferences!;
+        Require(p.AutoArchiveAfterDays is >= 1 and <= 36500, "自动归档天数应为1至36500的整数");
+        Require(p.Hotkey is not null && p.Hotkey.IsValid, "面板快捷键无效");
         NotificationSoundRules.Check(p.Listening);
         Require(p.Columns is not null, "列表配置为空"); Unique(p.Columns!, x => x.Id);
         Require(p.Columns!.All(x => !string.IsNullOrWhiteSpace(x.Name) && (x.BuiltinLane is null || Enum.IsDefined(x.BuiltinLane.Value)) && (!x.Protected || !x.Deleted)), "列表名称或角色无效");
@@ -54,15 +56,18 @@ public static partial class Validation
     private static void CheckItem(WorkItem item, HashSet<Guid> ai, HashSet<Guid> priority)
     {
         Require(item is not null && item.Id != Guid.Empty && item.Title is not null && Enum.IsDefined(item.Lane), "任务基础字段无效");
+        Require(item.CompletedSinceUtc is null || item.CompletedSinceUtc != default(DateTime), "任务完成时间无效");
         Require(item!.Stages is not null && item.Stages.Count > 0 && item.AiIds is not null && item.Reminder is not null && item.PendingReasons is not null, "任务缺少必要字段");
         Unique(item.Stages!, x => x.Id);
         Require(item.Stages!.All(x => x.Number >= 0 && x.Name is not null && x.Text is not null) && item.Stages.Select(x => x.Number).Distinct().Count() == item.Stages.Count, "阶段字段无效");
+        Require(item.Stages.Any(x => x.IsRunning == true), BoardEngine.LastRunningStageMessage);
         Require(item.Stages.Any(x => x.Number == 0) && item.Stages.Any(x => x.Id == item.CurrentStageId), "当前阶段指针无效");
         Require(item.Stages.Select(x => x.Number).SequenceEqual(item.Stages.Select(x => x.Number).Order()), "阶段顺序无效");
         Require(item.AiIds!.All(ai.Contains) && item.AiIds.Distinct().Count() == item.AiIds.Count && (item.PriorityId is null || priority.Contains(item.PriorityId.Value)), "字段选项引用无效");
         Require(item.PendingReasons!.All(x => x is not null), "待处理原因为空");
         var r = item.Reminder!;
-        if (item.Codex is { } c) Require(!string.IsNullOrWhiteSpace(c.ThreadId) && c.Generation > 0 && Enum.IsDefined(c.Phase) && c.PendingRequests is not null && c.PreviousThreads is not null, "Codex关联字段无效");
+        foreach (var c in item.Stages.Select(x => x.Codex).Append(item.Codex).OfType<CodexBinding>())
+            Require(c.BindingId != Guid.Empty && !string.IsNullOrWhiteSpace(c.ThreadId) && c.Generation > 0 && Enum.IsDefined(c.Phase) && c.PendingRequests is not null && c.PreviousThreads is not null, "阶段Codex关联字段无效");
         Require(Enum.IsDefined(r.Repeat) && Enum.IsDefined(r.Weekday) && r.Time >= TimeSpan.Zero && r.Time < TimeSpan.FromDays(1) && r.NextLocal != default, "提醒字段无效");
     }
 

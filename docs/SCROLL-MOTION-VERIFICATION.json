@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-14",
+  "branch": "codex/scroll-window-motion",
+  "baseline": "95c38cb",
+  "integrated": false,
+  "requested": {
+    "durationMs": 100,
+    "direction": "central horizontal reveal",
+    "line": "full-height vertical white line",
+    "scope": [
+      "draft",
+      "edit",
+      "settings"
+    ]
+  },
+  "ruleChecks": 87,
+  "motionChecks": 39,
+  "uiChecks": 77,
+  "mouseMoved": false,
+  "idleCpuPercent": 0.006508800715864937,
+  "evidence": {
+    "motion": "test-output/scroll-package-motion-01/scroll-report.json",
+    "ui": "test-output/scroll-package-ui-02/ui-report.json",
+    "rules": "test-output/scroll-core-01/report.json"
+  },
+  "artifact": {
+    "directory": "release/ScrollExperiment-20261014",
+    "launcher": "启动画卷实验.cmd",
+    "data": "experimental-data",
+    "filesVerified": 477,
+    "taskboardSha256": "9E15FC3D32C682930C903A493C3E9C59A4D6CE8B0CF594284F946B8FD6BB5EFF"
+  },
+  "index": {
+    "project": "taskboard-scroll-experiment",
+    "mode": "moderate",
+    "docsExcluded": true,
+    "coverage": "best effort; metadata_changed reported; implementation verified from source"
+  },
+  "limitations": [
+    "100ms excludes first layout/snapshot preparation",
+    "Actual frames limited by monitor refresh",
+    "Real pointer interactions were not automated",
+    "Other screens and systems not tested"
+  ]
+}

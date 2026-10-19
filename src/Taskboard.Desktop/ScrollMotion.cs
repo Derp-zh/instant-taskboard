@@ -7,6 +7,7 @@ internal static class ScrollMotion
 {
     internal const double DurationMs = 100;
     internal const double CoreWidth = 1;
+    internal static bool CanInterruptOpening(double elapsedMs) => elapsedMs >= DurationMs * 2 / 5;
     internal static double Ease(double progress)
     {
         var t = Math.Clamp(progress, 0, 1); return t * t * (3 - 2 * t);

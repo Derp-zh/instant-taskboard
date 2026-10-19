@@ -15,7 +15,7 @@ using WinRT;
 
 namespace Taskboard.Desktop;
 
-internal readonly record struct GlassRegion(Rect Bounds, double VisibleFrom = 0, double Radius = 20, bool FillCornerGaps = false);
+internal readonly record struct GlassRegion(Rect Bounds, double VisibleFrom = 0, double Radius = 20, bool FillCornerGaps = false, bool FlatRight = false);
 
 // A single top-level HWND contains the compositor backdrop and one transparent
 // WPF child surface. The child is an internal drawing/input surface, never an
@@ -38,6 +38,7 @@ internal sealed class LiveBackdrop : IDisposable
     private readonly Dictionary<(float Radius, bool Bottom, bool Left), CompositionDrawingSurface> cornerMasks = new();
     private GlassRegion[] previous = [];
     private double previousScale;
+    private double? previousTint;
     private DesktopWindowTarget? animationTarget;
     private ContainerVisual? animationRoot;
     private CompositionDrawingSurface? animationSurface;
@@ -70,10 +71,10 @@ internal sealed class LiveBackdrop : IDisposable
         displayRoot.RelativeSizeAdjustment = Vector2.One;
         displayRoot.Children.InsertAtBottom(root); target.Root = displayRoot; brush = compositor.CreateHostBackdropBrush();
     }
-    internal void Update(IEnumerable<GlassRegion> regions, double scale)
+    internal void Update(IEnumerable<GlassRegion> regions, double scale, double? tintTransparency = null)
     {
-        var current = regions.ToArray(); if (scale == previousScale && current.SequenceEqual(previous)) return;
-        previous = current; previousScale = scale;
+        var current = regions.ToArray(); if (scale == previousScale && tintTransparency == previousTint && current.SequenceEqual(previous)) return;
+        previous = current; previousScale = scale; previousTint = tintTransparency;
         root.Children.RemoveAll(); foreach (var shape in shapes) shape.Dispose(); shapes.Clear();
         foreach (var region in current)
         {
@@ -81,9 +82,15 @@ internal sealed class LiveBackdrop : IDisposable
             var holder = compositor!.CreateContainerVisual(); holder.Offset = new Vector3((float)(bounds.X * scale), (float)(bounds.Y * scale), 0);
             holder.Size = new Vector2((float)(bounds.Width * scale), (float)(bounds.Height * scale));
             AddRegionBackdrop(holder, region, scale, shapes); root.Children.InsertAtTop(holder); shapes.Add(holder);
+            if (tintTransparency is double transparency)
+            {
+                var paint = compositor.CreateColorBrush(Windows.UI.Color.FromArgb((byte)Math.Round(255 * (1 - transparency / 100)), 25, 35, 51));
+                var tint = compositor.CreateSpriteVisual(); tint.Size = holder.Size; tint.Brush = paint;
+                holder.Children.InsertAtTop(tint); shapes.Add(paint); shapes.Add(tint);
+            }
         }
     }
-    internal async Task Animate(IntPtr hwnd, byte[] image, int width, int height, bool horizontal, double from, double to, Action ready, Action finished)
+    internal async Task Animate(IntPtr hwnd, byte[] image, int width, int height, bool horizontal, double from, double to, Action ready, Action finished, Func<Task>? synchronizeStart = null, Action? started = null, bool flatRight = false)
     {
         CreateAnimation(hwnd, image, width, height, attach: false);
         if (horizontal)
@@ -91,13 +98,14 @@ internal sealed class LiveBackdrop : IDisposable
             // Morph a pill anchored at the right edge. A rectangular reveal
             // exposes square corners outside the original orb on frame one.
             var pill = compositor!.CreateRoundedRectangleGeometry();
-            pill.Size = new Vector2((float)from, height); pill.Offset = new Vector2((float)(width - from), 0);
+            var extra = flatRight ? height / 2f : 0;
+            pill.Size = new Vector2((float)from + extra, height); pill.Offset = new Vector2((float)(width - from), 0);
             pill.CornerRadius = new Vector2(height / 2f);
             var rounded = compositor.CreateGeometricClip(pill); animationRoot!.Clip = rounded;
             var size = compositor.CreateVector2KeyFrameAnimation(); var offset = compositor.CreateVector2KeyFrameAnimation();
             size.Duration = offset.Duration = TimeSpan.FromMilliseconds(100);
             var ease = compositor.CreateCubicBezierEasingFunction(new Vector2(.25f, .1f), new Vector2(.25f, 1));
-            size.InsertKeyFrame(0, new Vector2((float)from, height)); size.InsertKeyFrame(1, new Vector2((float)to, height), ease);
+            size.InsertKeyFrame(0, new Vector2((float)from + extra, height)); size.InsertKeyFrame(1, new Vector2((float)to + extra, height), ease);
             offset.InsertKeyFrame(0, new Vector2((float)(width - from), 0)); offset.InsertKeyFrame(1, new Vector2((float)(width - to), 0), ease);
             animationParts.Add(pill); animationParts.Add(rounded); animationParts.Add(size); animationParts.Add(offset); animationParts.Add(ease);
             var generation = animationGeneration;
@@ -110,7 +118,10 @@ internal sealed class LiveBackdrop : IDisposable
             // temporary native guard and starting the independent timeline.
             await compositor.RequestCommitAsync(); if (generation != animationGeneration) return;
             ready();
+            if (synchronizeStart is not null) await synchronizeStart();
+            if (generation != animationGeneration) return;
             batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation); batch.Completed += (_, _) => finished();
+            started?.Invoke();
             pill.StartAnimation("Size", size); pill.StartAnimation("Offset", offset); batch.End(); _ = compositor.RequestCommitAsync(); return;
         }
         var clip = compositor!.CreateInsetClip(); animationRoot!.Clip = clip;
@@ -121,8 +132,12 @@ internal sealed class LiveBackdrop : IDisposable
         animationParts.Add(clip); animationParts.Add(animation);
         animation.InsertKeyFrame(0,(float)(extent-from)); animation.InsertKeyFrame(1,(float)(extent-to),compositor.CreateLinearEasingFunction());
         root.Opacity = 0; AttachAnimation();
+        var preparedGeneration = animationGeneration;
         ready();
+        if (synchronizeStart is not null) await synchronizeStart();
+        if (preparedGeneration != animationGeneration) return;
         batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        started?.Invoke();
         batch.Completed += (_,_) => finished(); clip.StartAnimation(property,animation); batch.End();
         _ = compositor.RequestCommitAsync();
     }
@@ -144,7 +159,7 @@ internal sealed class LiveBackdrop : IDisposable
         animationRoot.Children.InsertAtTop(ui);
         if (attach) AttachAnimation();
     }
-    internal async Task AnimateScroll(IntPtr hwnd, byte[] image, int width, int height, double from, double to, double durationMs, double initialLight, Action ready, Action finished, Action started)
+    internal async Task AnimateScroll(IntPtr hwnd, byte[] image, int width, int height, double from, double to, double durationMs, double initialLight, Action ready, Action finished, Action started, Func<Task>? synchronizeStart = null)
     {
         CreateAnimation(hwnd, image, width, height, attach: false);
         var content = animationRoot!;
@@ -200,6 +215,8 @@ internal sealed class LiveBackdrop : IDisposable
         root.Opacity = 0; AttachAnimation(); await compositor.RequestCommitAsync(); if (generation != animationGeneration) return;
         ready(); await compositor.RequestCommitAsync(); if (generation != animationGeneration) return;
         Native.DwmFlush(); if (generation != animationGeneration) return;
+        if (synchronizeStart is not null) await synchronizeStart();
+        if (generation != animationGeneration) return;
         batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
         batch.Completed += (_,_) => finished();
         started(); state.StartAnimation("Frame", timeline); batch.End();
@@ -241,8 +258,18 @@ internal sealed class LiveBackdrop : IDisposable
         }
         root.Opacity = 0; AttachAnimation(); await compositor!.RequestCommitAsync();
     }
-    internal async Task CommitRestingFrame()
-    { root.Opacity = 1; await compositor!.RequestCommitAsync(); }
+    internal int RestingHandoffCount { get; private set; }
+    internal async Task CommitRestingFrame(Action showLive)
+    {
+        // Restore the backdrop and detach its animated copy in ONE commit.
+        // Restoring the backdrop while the snapshot is still attached doubles
+        // the glass and translucent UI for the final frame.
+        root.Opacity = 1;
+        if (shownAnimation is not null) displayRoot.Children.Remove(shownAnimation);
+        shownAnimation = null;
+        showLive(); RestingHandoffCount++;
+        await compositor!.RequestCommitAsync();
+    }
     internal async Task AnimateSwap(IntPtr hwnd, byte[] beforeCard, byte[] beforeSelectedCard, byte[] oldAfterCard, byte[] afterCard, byte[] after, int width, int height,
         double paneWidth, double selectedSlot, double paddingX, double paddingY, Action ready, Action finished, Action started)
     {
@@ -357,15 +384,15 @@ internal sealed class LiveBackdrop : IDisposable
             }
         }
     }
-    private void ClipRounded(ContainerVisual holder, float radius, List<IDisposable> parts)
+    private void ClipRounded(ContainerVisual holder, float radius, List<IDisposable> parts, bool flatRight = false)
     {
-        var geometry = CreateShape(holder.Size, radius); var clip = compositor!.CreateGeometricClip(geometry); holder.Clip = clip;
+        var geometry = CreateShape(holder.Size + new Vector2(flatRight ? radius : 0, 0), radius); var clip = compositor!.CreateGeometricClip(geometry); holder.Clip = clip;
         parts.Add(geometry); parts.Add(clip);
     }
     private void AddRegionBackdrop(ContainerVisual holder, GlassRegion region, double scale, List<IDisposable> parts, bool cornerTint = false)
     {
         var radius = (float)(region.Radius * scale); var cut = (float)(region.VisibleFrom * scale);
-        ClipRounded(holder, radius, parts);
+        ClipRounded(holder, radius, parts, region.FlatRight);
         var glass = compositor!.CreateSpriteVisual(); glass.Size = holder.Size; glass.Brush = brush;
         var clip = compositor.CreateInsetClip(cut, 0, 0, 0); glass.Clip = clip;
         holder.Children.InsertAtBottom(glass); parts.Add(clip); parts.Add(glass);
@@ -421,7 +448,7 @@ internal sealed class LiveBackdrop : IDisposable
     internal void RefreshSource()
     {
         var regions=previous; var scale=previousScale; previous=[]; previousScale=0;
-        brush.Dispose(); brush=compositor!.CreateHostBackdropBrush(); Update(regions,scale); _=compositor.RequestCommitAsync();
+        brush.Dispose(); brush=compositor!.CreateHostBackdropBrush(); Update(regions,scale,previousTint); _=compositor.RequestCommitAsync();
     }
     internal void Prepare(byte[] image, int width, int height)
     {
@@ -443,13 +470,19 @@ internal sealed class LiveBackdrop : IDisposable
 internal sealed class GlassContentHost : HwndHost
 {
     internal bool AnimationHidden { get; set; }
+    internal double RightAnchoredCanvasWidth { get; set; }
+    private IntPtr ownerHandle;
+    [StructLayout(LayoutKind.Sequential)] private struct ClientRect { public int Left, Top, Right, Bottom; }
+    [DllImport("user32.dll")] private static extern bool GetClientRect(IntPtr window, out ClientRect rect);
     private readonly FrameworkElement root;
+    private readonly SurfaceContentRoot automationRoot;
     private HwndSource? source;
     internal IntPtr ContentHandle => source?.Handle ?? IntPtr.Zero;
     [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hwnd,int command);
-    internal GlassContentHost(FrameworkElement root) { this.root = root; }
+    internal GlassContentHost(FrameworkElement root, SurfaceContentRoot automationRoot) { this.root = root; this.automationRoot = automationRoot; }
     protected override HandleRef BuildWindowCore(HandleRef parent)
     {
+        ownerHandle = parent.Handle;
         var parameters = new HwndSourceParameters("Taskboard content") { ParentWindow = parent.Handle,
             WindowStyle = 0x40000000 | (AnimationHidden ? 0 : 0x10000000), UsesPerPixelTransparency = true, TreatAsInputRoot = true,
             Width = Math.Max(1, (int)ActualWidth), Height = Math.Max(1, (int)ActualHeight) };
@@ -458,16 +491,21 @@ internal sealed class GlassContentHost : HwndHost
     }
     protected override void DestroyWindowCore(HandleRef hwnd) { source?.Dispose(); source = null; }
     protected override void OnWindowPositionChanged(Rect rectangle)
-    { base.OnWindowPositionChanged(rectangle); if (AnimationHidden && ContentHandle != IntPtr.Zero) ShowWindow(ContentHandle,0); }
+    { base.OnWindowPositionChanged(rectangle); SynchronizeCanvas(); if (AnimationHidden && ContentHandle != IntPtr.Zero) ShowWindow(ContentHandle,0); }
+    internal void SynchronizeCanvas()
+    {
+        if (RightAnchoredCanvasWidth <= 0 || ContentHandle == IntPtr.Zero || ownerHandle == IntPtr.Zero) return;
+        if (!GetClientRect(ownerHandle, out var client) || client.Right <= 0 || client.Bottom <= 0) return;
+        var width = (int)Math.Ceiling(RightAnchoredCanvasWidth * Native.GetDpiForWindow(ownerHandle) / 96.0);
+        Native.SetWindowPos(ContentHandle, IntPtr.Zero, client.Right - width, 0, width, client.Bottom, 0x14);
+        Native.ClearWindowRegion(ContentHandle);
+    }
     protected override IntPtr WndProc(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         if (message == 0x003D && lParam.ToInt64() == AutomationInteropProvider.RootObjectId)
         {
-            if (root is SurfaceContentRoot contentRoot)
-            {
-                handled = true;
-                return AutomationInteropProvider.ReturnRawElementProvider(hwnd, wParam, lParam, contentRoot.NativeProvider());
-            }
+            handled = true;
+            return AutomationInteropProvider.ReturnRawElementProvider(hwnd, wParam, lParam, automationRoot.NativeProvider());
         }
         return base.WndProc(hwnd, message, wParam, lParam, ref handled);
     }
