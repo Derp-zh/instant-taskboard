@@ -1,0 +1,53 @@
+{
+  "version": "0.9.16",
+  "verifiedAtUtc": "2026-10-19T07:39:15.470966+00:00",
+  "repository": "https://github.com/Derp-zh/instant-taskboard",
+  "releaseUrl": "https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.16",
+  "sourceTagCommit": "0a8e923e64983c515a89b24dfb503b6c65f1a53c",
+  "mainAtArtifactVerification": "0a8e923e64983c515a89b24dfb503b6c65f1a53c",
+  "tag": "v0.9.16",
+  "latest": true,
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "name": "instant-taskboard-0.9.16-win-x64.zip",
+      "bytes": 79802779,
+      "uploaded": true,
+      "serverDigest": "sha256:e24b6929d925eccd9b9f8f56e85b5ffb99cca76bacf021ee140a3afca08b5cc7",
+      "downloadSHA256": "E24B6929D925ECCD9B9F8F56E85B5FFB99CCA76BACF021EE140A3AFCA08B5CC7",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.16/instant-taskboard-0.9.16-win-x64.zip"
+    },
+    {
+      "name": "instant-taskboard-0.9.16-win-x64.zip.sha256",
+      "bytes": 104,
+      "uploaded": true,
+      "serverDigest": "sha256:90ba00613259d4e428eecc1f6dac5e72c81ccefd865ed78faed5bf240efd4db3",
+      "downloadSHA256": "90BA00613259D4E428EECC1F6DAC5E72C81CCEFD865ED78FAED5BF240EFD4DB3",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.16/instant-taskboard-0.9.16-win-x64.zip.sha256"
+    }
+  ],
+  "archiveSHA256": "E24B6929D925ECCD9B9F8F56E85B5FFB99CCA76BACF021EE140A3AFCA08B5CC7",
+  "all476DownloadedZipFilesMatchTestedManifest": true,
+  "downloadedShaFileMatchesZip": true,
+  "sourcePublication": {
+    "sourceFiles": 108,
+    "exactStagedByteMatches": 81,
+    "normalizedContentsMatch": true,
+    "publicSourceBuildPassed": true,
+    "publishedRuntimeIsActualTestedLocalPackage": true
+  },
+  "testedRuntimeHashes": {
+    "即时任务看板.exe": "D94FA7AF8CD001D8B50E793EC5C279480AD5BC8BF7E8C22DE2E36EA31DB35253",
+    "Taskboard.dll": "750E9DF616575BE63A61FDC54433A0B288EB2AE9262BA9A90D1431E35156201D",
+    "Taskboard.Core.dll": "CA6E8923B9882223D29265E718E507FB93DB6F195F0009684FAC52CE248C4B83"
+  },
+  "originalDesktopAssertions": 184,
+  "fullCodexIntegrationPassed": false,
+  "limitations": [
+    "异步提问未暴露可靠等待信号，仍未支持准确移列",
+    "同步Plan提问、权限等待与批准恢复未完成原桌面验收"
+  ],
+  "productionDataIncluded": false,
+  "rawChatOrScreenshotsIncluded": false
+}

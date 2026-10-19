@@ -4,7 +4,7 @@
 
 - [验收与未支持范围](ACCEPTANCE-0.9.16.md)、[逐层实测摘要](VERIFICATION-0.9.16.json)、[完整包来源](BUILD-INFO-0.9.16.json)。原桌面执行、结束、双向移列及重连等待保护已实测；异步提问仍缺信号，同步Plan提问和权限等待/批准恢复未验收，完整接入不是通过。
 - PRD第40节U170至U176/A188至A194，TASKS第28节T201至T208、IMPLEMENTATION的0.9.16节。保留第39节已确认界面交互；时间红点以本轮最新规则覆盖旧D12/R86。
-- 用户本轮明确授权发布源码、完整便携ZIP与SHA256：[GitHub 0.9.16](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.16)，远端回执见GITHUB-RELEASE-0.9.16.json。下列0.9.15及旧版状态均为历史。
+- 本轮已按用户要求同步发布源码、完整便携ZIP与SHA256，远端及下载逐文件核验通过：[GitHub 0.9.16](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.16)，远端回执见GITHUB-RELEASE-0.9.16.json。下列0.9.15及旧版状态均为历史。
 
 0.9.15最终状态：633项隔离/实屏/已协调真实鼠标检查通过，最终包26项实际输入已复核并恢复鼠标/前台；额外shared探测未通过，单列错误且不计通过数量。使用VERIFICATION-0.9.15的实际状态，不复用历史真实鼠标数量。
 

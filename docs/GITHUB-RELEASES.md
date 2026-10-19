@@ -1,5 +1,11 @@
 # GitHub运行包发布记录
 
+2026-10-19已发布[即时任务看板0.9.16](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.16)，同步源码/文档及完整476文件ZIP、SHA256。源码标签提交`0a8e923e64983c515a89b24dfb503b6c65f1a53c`；两个附件实际下载及逐文件校验通过，确认为latest。原桌面执行/结束/双向移列已实测；异步提问仍缺信号，计划模式提问及权限等待/批准恢复未验收，不宣称完整接入通过。
+
+[发布说明](GITHUB-UPDATE-0.9.16.md)、[机器回执](GITHUB-RELEASE-0.9.16.json)、[验收](ACCEPTANCE-0.9.16.md)。
+
+以下为历史发布记录。
+
 2026-10-15已发布[即时任务看板0.9.5](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.5)，当前最新版；源码标签v0.9.5对应提交`f034bc6b61b8019e370b321c23ff8e0c3d334a4b`。本次同时更新源码/文档及完整运行包，包含0.9.2至0.9.5累计修订，编辑窗口最终错位32/32。
 
 - 附件：instant-taskboard-0.9.5-win-x64.zip，79,637,762字节，共476文件及.NET运行组件。
