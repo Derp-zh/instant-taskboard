@@ -12,7 +12,7 @@ internal static class CodexRecoveryRules
             task.Stages[0].Codex = new CodexBinding
             {
                 ThreadId = "recovery-a", TurnId = "turn-a", SourceEpoch = "live-source",
-                Phase = CodexPhase.WaitingForInput, LastSequence = 0, PendingRequests = ["question-a"]
+                Phase = CodexPhase.WaitingForInput, LastSequence = 0
             };
             return task;
         }
@@ -23,6 +23,7 @@ internal static class CodexRecoveryRules
             CodexState.Apply(task, task.Stages[0].Id, message, sequence, generation, epoch, authoritative);
 
         var task = Item();
+        task.CurrentCodex!.PendingRequests.Add("question-a");
         var resolved = Message("serverRequest/resolved", new { threadId = "recovery-a", turnId = "turn-a", requestId = "question-a" });
         check(Apply(task, resolved, 1) && task.CurrentCodex!.PendingRequests.Count == 0 && task.CurrentCodex.Phase == CodexPhase.WaitingForInput && task.Lane == Lane.Action && task.TimerUnread,
             "回答请求已处理不冒充恢复、不清时间红点");
@@ -42,10 +43,13 @@ internal static class CodexRecoveryRules
             "仅空闲快照不借缓存运行状态移列或清红点");
         check(!Apply(task, Message("unknown/event", new { threadId = "recovery-a" }), 6) && task.Lane == Lane.Action && task.TimerUnread,
             "未知通知不借缓存运行状态移列或清红点");
-        check(Apply(task, Active(), 7) && task.Lane == Lane.Running && !task.TimerUnread,
-            "相同运行阶段的可信新快照仍报告实际移列与红点变化");
+        check(Apply(task, Active(), 7) && task.Lane == Lane.Running && task.TimerUnread,
+            "同轮运行快照保留阶段聚合移列，但不冒充真实恢复清时间红点");
+        task.Lane = Lane.Action;
+        Apply(task, Message("turn/started", new { threadId = "recovery-a", turn = new { id = "turn-real-new" } }), 8);
+        check(task.Lane == Lane.Running && !task.TimerUnread, "待操作中真正新轮次开始才恢复并清红点");
         task.TimerUnread = true;
-        check(!Apply(task, Active(), 8) && task.Lane == Lane.Running && task.TimerUnread,
+        check(!Apply(task, Active(turn: "turn-real-new"), 9) && task.Lane == Lane.Running && task.TimerUnread,
             "已在进行中的后台运行刷新不自行清除红点");
 
         task = Item();
@@ -68,8 +72,11 @@ internal static class CodexRecoveryRules
             "另一个运行阶段结果待检查时不被恢复事件盖过");
         task.Stages[1].IsRunning = false;
         Apply(task, Active(), 3);
-        check(task.Lane == Lane.Running && !task.TimerUnread,
-            "暂停阶段不参与待处理聚合、可信运行移列才清红点");
+        check(task.Lane == Lane.Running && task.TimerUnread,
+            "暂停阶段不参与待处理聚合，原运行阶段可回进行中但不假恢复清红点");
+        Apply(task, Message("turn/started", new { threadId = "recovery-a", turn = new { id = "turn-after-pause" } }), 4);
+        check(task.Lane == Lane.Running && task.TimerUnread,
+            "已经聚合回进行中后新轮次不追溯清除时间红点");
 
         // A real desktop reconnect used to erase B's review phase, allowing a
         // still-running A snapshot to pull the multi-stage card back to Running.
@@ -142,7 +149,7 @@ internal static class CodexRecoveryRules
         check(task.CurrentCodex!.Phase == CodexPhase.Unknown && task.Lane == Lane.Action && task.TimerUnread,
             "断线不等同结束或恢复、不清时间红点");
         Apply(task, Active(turn: "turn-new"), 1, epoch: "new-live-source");
-        check(task.CurrentCodex!.SourceEpoch == "new-live-source" && task.CurrentCodex.LastSequence == 1 && task.Lane == Lane.Running && !task.TimerUnread,
-            "已验证新连接epoch重新确认状态、序号独立并按实际恢复清红点");
+        check(task.CurrentCodex!.SourceEpoch == "new-live-source" && task.CurrentCodex.LastSequence == 1 && task.Lane == Lane.Running && task.TimerUnread,
+            "新连接epoch重新确认运行并独立计序，但仅重连不冒充待处理恢复清红点");
     }
 }

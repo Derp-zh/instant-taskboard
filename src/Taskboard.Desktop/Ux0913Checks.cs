@@ -26,9 +26,9 @@ internal static class Ux0913Checks
         Check(new Preferences().BallEdgeAutoHide && old.Deserialize<Preferences>()!.BallEdgeAutoHide, "新配置与缺少字段的旧配置默认开启吸附隐藏");
         old[nameof(Preferences.BallEdgeAutoHide)] = false;
         Check(!old.Deserialize<Preferences>()!.BallEdgeAutoHide, "已有明确关闭配置保留关闭");
-        foreach (var (text, factor) in new[] { ("未绑定", 1.0), ("M", 1.0), ("MMMMMMMM", 8.0 / 6), ("MMMMMMMMMMMM", 10.0 / 6) })
+        foreach (var (text, factor) in new[] { ("未绑定", 1.0), ("M", 1.0), ("中中中中", 4.0 / 3), ("中中中中中中", 5.0 / 3) })
         {
-            var label = Ui.Label(text, 11); Check(Math.Abs(MarqueeText.ConversationWidth(label) - MarqueeText.SixCharacterWidth(label) * factor) < .1, "会话宽度6至10英文字符：" + text);
+            var label = Ui.Label(text, 11); Check(Math.Abs(MarqueeText.ConversationWidth(label) - MarqueeText.ConversationMinimumWidth(label) * factor) < .1, "会话宽度3至5个中文字宽：" + text);
         }
         var session = controller.Engine.NewSession(Lane.Action); session.Working.Title = "短标题"; session.Working.Stages[0].Text = "阶段正文";
         session.Working.Stages[0].Codex = new CodexBinding { ThreadId = "a", ThreadName = "M" };

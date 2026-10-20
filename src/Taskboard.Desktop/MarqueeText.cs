@@ -57,8 +57,10 @@ internal sealed class MarqueeText : Decorator
     }
     private void Stop() { shift.BeginAnimation(TranslateTransform.XProperty, null); shift.X = 0; }
     internal double Offset => shift.X;
-    internal static double SixCharacterWidth(TextBlock label) => TextWidth(label, "MMMMMM");
-    internal static double ConversationWidth(TextBlock label) => Math.Clamp(TextWidth(label, label.Text), SixCharacterWidth(label), TextWidth(label, "MMMMMMMMMM"));
+    // The requested 6–10 half-width units mean 3–5 Chinese glyph widths.
+    // Use the rendered CJK font, rather than wide Latin M glyphs or encoded bytes.
+    internal static double ConversationMinimumWidth(TextBlock label) => TextWidth(label, "中中中");
+    internal static double ConversationWidth(TextBlock label) => Math.Clamp(TextWidth(label, label.Text), ConversationMinimumWidth(label), TextWidth(label, "中中中中中"));
     private static double TextWidth(TextBlock label, string text) => new FormattedText(text, System.Globalization.CultureInfo.CurrentUICulture,
         label.FlowDirection, new Typeface(label.FontFamily, label.FontStyle, label.FontWeight, label.FontStretch), label.FontSize,
         label.Foreground, VisualTreeHelper.GetDpi(label).PixelsPerDip).WidthIncludingTrailingWhitespace;

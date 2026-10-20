@@ -29,6 +29,9 @@ internal static class SharedMotionChecks
             var older = controller.NewTask(Lane.Action); await Task.Delay(180); FirstInput(older).Text = "待操作 · 共享草稿一";
             var front = controller.NewTask(Lane.Running); await Task.Delay(180); FirstInput(front).Text = "进行中 · 共享草稿二";
             var host = (DraftStackSurface)front.Host!;
+            // NewTask may expand the workspace. Hide its columns afterwards so
+            // both tint samples have the same uniform background underneath.
+            foreach (var column in controller.Columns) column.Reveal(false, false);
             await Task.Delay(400);
             var original = Native.ScreenBounds(host); var hideCount = host.NativeHideCount;
             var scale = original.Height / host.Height;
@@ -84,12 +87,18 @@ internal static class SharedMotionChecks
             var passed = !host.IsContentSwapping && controller.ActiveDraft == older.Session.Id && original == restored && host.NativeHideCount == hideCount && late.Length > 5 && maxDifference < 35 && preparationDifference < 35;
             var report = new { passed, transparencyDifference, upperGapFilled, lowerGapFilled, original = original.ToString(), restored = restored.ToString(), durationMs = DraftSwitchMotion.DurationMs,
                 host.LastContentSwapPreparationMs, preparationDifference, finishMs, sampledFrames = samples.Count, lateFrames = late.Length, finalHandoffMaxColorDifference = maxDifference,
-                host.UsesIndependentAnimation, mouseMoved = false, desktopShown = true, isolated = true,
+                host.UsesIndependentAnimation, mouseMoved = false, desktopShown = true, isolated = true, columnsHiddenForUniformBacking = true,
                 samples = samples.Select(x => new { x.Ms, x.Colors }), screenshots = frames };
-            File.WriteAllText(Path.Combine(controller.Store.DirectoryPath, "shared-motion-report.json"), JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
             if (!passed) throw new InvalidOperationException("共享抽牌实机采样未通过：" + JsonSerializer.Serialize(report));
-            controller.CloseDraftWindow(); await Task.Delay(180); controller.OpenNewEntry(Lane.Done); await Task.Delay(180);
-            if (controller.Editors.Count(x => x.Session.TaskId is null) != 2) throw new InvalidOperationException("跨列表重开未恢复两份共享草稿");
+            controller.CloseDraftWindow(); await Task.Delay(180); var fresh = controller.OpenNewEntry(Lane.Done);
+            await Ux0914Checks.Settled(fresh.Host!);
+            // Since 0.9.7 this entry restores saved drafts AND creates a fresh
+            // blank front card. Two saved cards alone is the obsolete rule.
+            if (controller.Editors.Count(x => x.Session.TaskId is null) != 3 || fresh.Session.Working.HasContent ||
+                !controller.Editors.Any(x => x.Session.Id == older.Session.Id) || !controller.Editors.Any(x => x.Session.Id == front.Session.Id))
+                throw new InvalidOperationException("跨列表重开须恢复两份共享草稿并新建空白卡片");
+            File.WriteAllText(Path.Combine(controller.Store.DirectoryPath, "shared-motion-report.json"), JsonSerializer.Serialize(new {
+                report, restoredSavedDrafts = true, newBlankFrontCard = true, passed = true }, new JsonSerializerOptions { WriteIndented = true }));
         }
         finally { background.Destroy(); }
     }

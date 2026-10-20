@@ -67,7 +67,9 @@ public static partial class Validation
         Require(item.PendingReasons!.All(x => x is not null), "待处理原因为空");
         var r = item.Reminder!;
         foreach (var c in item.Stages.Select(x => x.Codex).Append(item.Codex).OfType<CodexBinding>())
-            Require(c.BindingId != Guid.Empty && !string.IsNullOrWhiteSpace(c.ThreadId) && c.Generation > 0 && Enum.IsDefined(c.Phase) && c.PendingRequests is not null && c.PreviousThreads is not null, "阶段Codex关联字段无效");
+            Require(c.BindingId != Guid.Empty && !string.IsNullOrWhiteSpace(c.ThreadId) && c.Generation > 0 && Enum.IsDefined(c.Phase) &&
+                c.PendingRequests is { Count: <= 128 } && c.PendingRequests.All(x => !string.IsNullOrEmpty(x) && x.Length <= 256) &&
+                c.PendingApprovals is { Count: <= 128 } && c.PendingApprovals.All(x => c.PendingRequests!.Contains(x)) && c.PreviousThreads is not null, "阶段Codex关联字段无效");
         Require(Enum.IsDefined(r.Repeat) && Enum.IsDefined(r.Weekday) && r.Time >= TimeSpan.Zero && r.Time < TimeSpan.FromDays(1) && r.NextLocal != default, "提醒字段无效");
     }
 

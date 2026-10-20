@@ -40,6 +40,14 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     private Grid? cardPreview;
     private Guid? previewBefore;
     private long lastDragScroll;
+    private readonly System.Collections.Generic.Dictionary<Guid, (WorkItem Item, int Index)> outgoing = new();
+    private readonly System.Collections.Generic.HashSet<Guid> incoming = new();
+    internal void HoldAutomaticExit(WorkItem item)
+        => outgoing[item.Id] = (item, items.OfType<WorkItem>().TakeWhile(x => x.Id != item.Id).Count());
+    internal void HoldAutomaticEntry(Guid id) => incoming.Add(id);
+    internal void ReleaseAutomaticMove(Guid id) { outgoing.Remove(id); incoming.Remove(id); }
+    internal TaskCard? PrepareAutomaticEntry(Guid id)
+    { Refresh(); list.UpdateLayout(); return RenderedCard(id); }
     internal void RestartCardMarquees()
     {
         foreach (var item in items.OfType<WorkItem>()) RenderedCard(item.Id)?.SetMarquees(true);
@@ -160,7 +168,10 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     {
         InvalidateAnimation();
         if (cardPreview is not null) items.Remove(cardPreview);
-        var desired = controller.Engine.State.Tasks.Where(x => Definition.Contains(x) && x.Id != draggedTask && x.Id != inlineTask).ToArray();
+        var wanted = controller.Engine.State.Tasks.Where(x => Definition.Contains(x) && x.Id != draggedTask && x.Id != inlineTask && !incoming.Contains(x.Id)).ToList();
+        foreach (var retained in outgoing.Values.OrderBy(x => x.Index))
+            if (!wanted.Any(x => x.Id == retained.Item.Id)) wanted.Insert(Math.Min(retained.Index, wanted.Count), retained.Item);
+        var desired = wanted.ToArray();
         for (var i = items.Count - 1; i >= 0; i--) if (items[i] is WorkItem item && !desired.Any(x => x.Id == item.Id)) items.RemoveAt(i);
         for (var i = 0; i < desired.Length; i++)
         {
@@ -215,7 +226,7 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     public void RefreshCards(System.Collections.Generic.IReadOnlyCollection<Guid> ids)
     {
         InvalidateAnimation();
-        foreach (var item in items.OfType<WorkItem>().Where(x => ids.Contains(x.Id)))
+        foreach (var item in items.OfType<WorkItem>().Where(x => ids.Contains(x.Id) && !outgoing.ContainsKey(x.Id)))
             FindChild<TaskCard>(list.ItemContainerGenerator.ContainerFromItem(item))?.Rebuild();
     }
     internal TaskCard? RenderedCard(Guid id)
@@ -293,7 +304,8 @@ internal sealed partial class TaskCard : Border
     public TaskCard()
     {
         TaskCardLayout.Frame(this); Cursor = Cursors.Hand;
-        DataContextChanged += (_, _) => Build();
+        DataContextChanged += (_, _) => { RestoreAfterRemoval(); Build(); };
+        Unloaded += (_, _) => RestoreAfterRemoval();
         PreviewMouseDown += (_,_) =>
         {
             if (!ArchivedPreview && DataContext is WorkItem { TimerUnread: true } item)

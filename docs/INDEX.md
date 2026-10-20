@@ -1,3 +1,13 @@
+# Project documentation
+
+## Current release: 0.9.20 widthfix
+
+- [Release notes](RELEASE-NOTES-0.9.20.md), [current user guide](USER-GUIDE-0.9.20.md), [acceptance summary](ACCEPTANCE-0.9.20-widthfix.md), [verification](VERIFICATION-0.9.20-widthfix.json), [portable package manifest](BUILD-INFO-0.9.20-widthfix.json).
+- Latest stage-name rule: the conversation viewport uses 3–5 rendered Chinese glyph widths; overflowing text scrolls, and the stage name uses the remaining room.
+- Source release: [GitHub v0.9.20](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20).
+
+## Previous public docs
+
 # 项目文档索引
 
 ## 0.9.16当前入口（2026-10-19）

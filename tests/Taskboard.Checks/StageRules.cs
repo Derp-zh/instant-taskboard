@@ -37,8 +37,9 @@ internal static class StageRules
         check(CodexState.Apply(migrated, migrated.Stages[0].Id, signal, 1, 1, "test-stage", true) && migrated.Stages[0].Codex!.Phase == CodexPhase.Running && migrated.Lane == Lane.Action && migrated.CurrentCodex!.ThreadId == "old-thread", "暂无进程阶段更新自己的会话状态且不改变任务列表或其他阶段");
         migrated.Stages[0].IsRunning = true;
         var snapshot = JsonSerializer.SerializeToElement(new { method = "thread/status/changed", @params = new { threadId = "stage-zero", status = new { type = "active", activeFlags = Array.Empty<string>() } } });
-        check(CodexState.Apply(migrated, snapshot, 2, 1, "test-stage", true) && migrated.Lane == Lane.Running, "标记运行后的可信新信号驱动任务列表；历史来源阶段状态不参与聚合");
-        var wait = JsonSerializer.SerializeToElement(new { method = "tool/requestUserInput", @params = new { threadId = "old-thread" }, id = "question" });
+        migrated.TimerUnread = true;
+        check(CodexState.Apply(migrated, snapshot, 2, 1, "test-stage", true) && migrated.Lane == Lane.Running && migrated.TimerUnread, "标记运行后的可信新信号驱动任务列表；历史状态不参与聚合且重复运行不清红点");
+        var wait = JsonSerializer.SerializeToElement(new { method = "tool/requestUserInput", @params = new { threadId = "old-thread", turnId = "done-stage-1" }, id = "question" });
         check(CodexState.Apply(migrated, migrated.Stages[1].Id, wait, 3, 7, "test-stage", true) && migrated.Lane == Lane.Action, "多个运行阶段中有一个等待回答，优先进入待操作");
         CodexState.Apply(migrated, snapshot, 4, 1, "test-stage", true);
         check(migrated.Lane == Lane.Action, "其他运行阶段继续执行时不会盖过已有的待操作请求");
@@ -48,7 +49,7 @@ internal static class StageRules
         check(migrated.Lane == Lane.Action && migrated.Stages[1].Codex!.Phase == CodexPhase.ReadyForReview, "一个阶段结束待检查时，另一阶段执行仍保持待操作优先");
         migrated.Stages[1].IsRunning = false;
         CodexState.Apply(migrated, snapshot, 7, 1, "test-stage", true);
-        check(migrated.Lane == Lane.Running, "暂停阶段的待处理会话不再参与任务列表聚合");
+        check(migrated.Lane == Lane.Running && migrated.TimerUnread, "暂停阶段的待处理会话不再参与聚合；普通运行汇总不冒充恢复清红点");
         foreach (var stage in migrated.Stages) stage.IsRunning = false;
         var repaired = Copies.Of(migrated);
         check(repaired.Stages.Count(x => x.IsRunning == true) == 1 && repaired.Stages[1].IsRunning == true && repaired.Stages.Count == 2, "读取早期全暂停副本时恢复原定位阶段，至少保留一个运行阶段且不删信息");

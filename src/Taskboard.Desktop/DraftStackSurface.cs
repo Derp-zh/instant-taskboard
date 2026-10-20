@@ -48,7 +48,7 @@ internal sealed class DraftStackSurface : SurfaceWindow
     {
         var frame = canvas.Children.OfType<Border>().Single(x => x.Child is Grid grid && grid.Children.OfType<EditorSurface>().Contains(view));
         var snapshot = view.CreateSnapshot(); snapshot.Clip = preservePreview ? view.Clip : null;
-        var contents = new Grid(); if (includeTint) contents.Children.Add(new Border { Background = Ui.Surface, Opacity = 1 - GlassTransparency / 100 });
+        var contents = new Grid(); if (includeTint) contents.Children.Add(new Border { Background = GlassTintBrush });
         contents.Children.Add(snapshot);
         var capture = new Border { Width = frame.Width, Height = frame.Height, CornerRadius = frame.CornerRadius, BorderBrush = frame.BorderBrush, BorderThickness = frame.BorderThickness,
             Child = contents, Clip = new RectangleGeometry(new Rect(0, 0, frame.Width, frame.Height), 20, 20) };
@@ -69,7 +69,7 @@ internal sealed class DraftStackSurface : SurfaceWindow
         for (var i = 1; i < switchViews.Length; i++)
             if (point.X >= pane + (i - 1) * step && point.X < pane + i * step) { controller.ShowEditor(switchViews[i], true, pressedAt); return; }
     }
-    public DraftStackSurface(BoardController controller) : base(516, 650)
+    public DraftStackSurface(BoardController controller) : base(516, EditorSurface.DefaultHeight)
     {
         this.controller = controller; WindowLayer = 1; Title = "新建任务";
         ContentSwapCompleted += () =>
@@ -124,7 +124,9 @@ internal sealed class DraftStackSurface : SurfaceWindow
             view.SetDraftPresentation(i == 0, controller.DraftNumber(view.Session.Id));
             view.IsHitTestVisible = i == 0;
             view.Width = first.Width; view.Height = first.Height; view.Host = this;
-            var shade = new Border { Background = Ui.Surface, Opacity = 1 - GlassTransparency / 100, IsHitTestVisible = false };
+            // Use the same alpha brush as an editor, without a second opacity
+            // layer over a fully opaque brush. Snapshots use this same tint.
+            var shade = new Border { Background = GlassTintBrush, IsHitTestVisible = false };
             tints.Add(shade); var inner = new Grid(); inner.Children.Add(shade); inner.Children.Add(view);
             var frame = new Border { Width = first.Width, Height = first.Height, Background = Brushes.Transparent, CornerRadius = new CornerRadius(20), BorderBrush = Ui.Line, BorderThickness = new Thickness(1), Child = inner };
             var previousOffset = i == 0 ? 0 : bounds[i].Left - bounds[i - 1].Left;
@@ -154,7 +156,7 @@ internal sealed class DraftStackSurface : SurfaceWindow
     }
     internal override IEnumerable<GlassRegion> GlassRegions() => regions;
     protected override void ApplyGlassTint() => Root.Background = Ui.Brush("#01000000");
-    public override void RefreshGlass() { foreach (var tint in tints) tint.Opacity = 1 - GlassTransparency / 100; base.RefreshGlass(); }
+    public override void RefreshGlass() { foreach (var tint in tints) tint.Background = GlassTintBrush; base.RefreshGlass(); }
     public void ClearClosed()
     {
         pendingSwitch = null; clearWhenHidden = true; switchViews = []; DraftCount = 0;

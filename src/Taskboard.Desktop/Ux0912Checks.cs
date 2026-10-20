@@ -23,10 +23,10 @@ internal static class Ux0912Checks
         var menu = controller.EntryMenu;
         Check(menu.Items.Cast<System.Windows.Forms.ToolStripItem>().Select(x => x.Text).SequenceEqual(new[] { "隐藏悬浮球", "设置", "恢复窗口默认", "撤销", "恢复", "AI", "展开 / 收起看板", "退出程序" }), "悬浮球与托盘共用同一菜单，完整八项及顺序一致");
         Check(menu.Items.OfType<System.Windows.Forms.ToolStripMenuItem>().Single(x => x.Text == "AI").DropDownItems.Count > 0, "共用菜单保留AI子菜单");
-        foreach (var (value, factor) in new[] { ("未绑定", 1.0), ("MMMMMM", 1.0), ("MMMMMMMM", 8.0 / 6), ("MMMMMMMMMMMM", 10.0 / 6) })
+        foreach (var (value, factor) in new[] { ("未绑定", 1.0), ("中中中", 1.0), ("中中中中", 4.0 / 3), ("中中中中中中", 5.0 / 3) })
         {
             var label = Ui.Label(value, 11, Ui.Muted);
-            Check(Math.Abs(MarqueeText.ConversationWidth(label) - MarqueeText.SixCharacterWidth(label) * factor) < .1, "会话宽度按最小6最大10字符限制：" + value);
+            Check(Math.Abs(MarqueeText.ConversationWidth(label) - MarqueeText.ConversationMinimumWidth(label) * factor) < .1, "会话宽度按最小3最大5个中文字宽限制：" + value);
         }
         Check(StageFeatureChecks.Children<TextBlock>(StageRunIcon.Caption(false)).Any(x => x.Text == "未运行") && !StageFeatureChecks.Children<TextBlock>(StageRunIcon.Caption(false)).Any(x => x.Text == "暂无进程"), "暂停阶段显示未运行，运行中名称保持");
         var session = controller.Engine.NewSession(Lane.Action); session.Working.Title = "重复点击与刷新检查"; session.Working.Stages[0].Text = "正文";

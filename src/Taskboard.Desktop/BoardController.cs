@@ -77,7 +77,7 @@ internal sealed partial class BoardController : IDisposable
             if (task is null || binding?.ThreadId != watch.ThreadId || binding.BindingId != watch.BindingId) return;
             var before = task.Lane;
             if (CodexState.Apply(task,watch.StageId,message,sequence,watch.Generation,epoch,authoritative))
-            { if (before != task.Lane) { Engine.State.Tasks.Remove(task); Engine.State.Tasks.Add(task); } task.UpdatedUtc = DateTime.UtcNow; Engine.Notify([task.Id]); }
+                NotifyCodexChange(task, before);
         }));
     }
     private readonly DispatcherTimer saveTimer;
@@ -174,10 +174,11 @@ internal sealed partial class BoardController : IDisposable
         foreach (var column in VisibleColumns) column.WarmAnimation();
     }
     private void AttachEngine() { Engine.Changed += OnChanged; Engine.Dirty += OnDirty; }
-    private void DetachEngine() { retainedStages.Clear(); Engine.Changed -= OnChanged; Engine.Dirty -= OnDirty; }
+    private void DetachEngine() { CancelAutomaticMoves(); retainedStages.Clear(); Engine.Changed -= OnChanged; Engine.Dirty -= OnDirty; }
     private void OnDirty() { dirtyVersion++; if (saveTimer is not null) { saveTimer.Stop(); saveTimer.Start(); } }
     private void OnChanged(IReadOnlyCollection<Guid> ids)
     {
+        ReconcileAutomaticMoves();
         UpdateCodexWatches();
         if (Columns.Any(x => x.Definition.Deleted) || Engine.State.Preferences.Columns.Any(x => !x.Deleted && !Columns.Any(y => y.Definition.Id == x.Id))) SynchronizeColumns();
         foreach (var column in Columns) { column.Refresh(); column.RefreshCards(ids); }
@@ -246,6 +247,7 @@ internal sealed partial class BoardController : IDisposable
         if (expanded) foreach (var column in Columns) column.RestartCardMarquees();
         if (!expanded)
         {
+            CancelAutomaticMoves();
             hiddenDialogs.Clear(); hiddenDialogs.AddRange(Native.Dialogs()); foreach (var dialog in hiddenDialogs) Native.ShowWindow(dialog, 0);
             hiddenGroup.Clear(); hiddenGroup.AddRange(taskWindows.Values.Cast<SurfaceWindow>().Append(draftStack).Concat(auxiliary).Where(x => x.ShouldRestore).OrderBy(x => x.ActivationOrder));
             previouslyActive = hiddenGroup.LastOrDefault(x => x.IsActive);
@@ -331,7 +333,7 @@ internal sealed partial class BoardController : IDisposable
         var window = new TaskEditorWindow(editor); taskWindows.Add(session.Id, window);
         window.Closed += (_, _) => { hiddenGroup.Remove(window); if (previouslyActive == window) previouslyActive = null; };
         var key = "edit-" + session.Id;
-        if (Engine.State.Preferences.Positions.TryGetValue(key, out var position)) { window.Width = position.Width; window.Height = position.Height; }
+        if (Engine.State.Preferences.Positions.TryGetValue(key, out var position)) { window.Width = position.Width; window.Height = Math.Min(EditorSurface.DefaultHeight, position.Height); }
         PositionFloating(window);
         window.BeforeOpen += () => { if (!restoringGroup) PositionFloating(window); };
         Clamp(window); return editor;
@@ -373,7 +375,7 @@ internal sealed partial class BoardController : IDisposable
             var area = WorkArea(Ball);
             // Reserve one fifth to the right even on narrow displays for the new-window outline.
             var width = Math.Min(430, Math.Max(80, (area.Width - 24) / 1.4));
-            var height = Math.Min(650, Math.Max(80, area.Height - 24)); var step = width / 5;
+            var height = Math.Min(EditorSurface.DefaultHeight, Math.Max(80, area.Height - 24)); var step = width / 5;
             var left = area.Left + (area.Width - width) / 2; var top = area.Top + (area.Height - height) / 2;
             var opening = !draftStack.ShouldRestore && !restoringGroup;
             if (!opening && Engine.State.Preferences.Positions.TryGetValue("draft-stack", out var placement))
@@ -603,8 +605,7 @@ internal sealed partial class BoardController : IDisposable
     private async Task CheckReminders()
     {
         if (explicitSave > 0 || exiting || dataTransition) return;
-        var due = ReminderClock.Tick(Engine.State, DateTime.Now); if (due.Count == 0) return;
-        Engine.Notify(due);
+        var due = TickReminders(DateTime.Now); if (due.Count == 0) return;
         if (await Flush())
         {
             notified = due.ToArray();

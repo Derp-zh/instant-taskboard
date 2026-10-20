@@ -7,7 +7,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Taskboard</AssemblyName>
-    <Version>0.9.16</Version>
+    <Version>0.9.20</Version>
     <DraftSwitchSpeed Condition="'$(DraftSwitchSpeed)' == ''">1.35</DraftSwitchSpeed>
     <DefineConstants Condition="'$(DraftSwitchSpeed)' == '1.35'">$(DefineConstants);FAST_DRAFT_SWITCH</DefineConstants>
     <Product>即时任务看板</Product>

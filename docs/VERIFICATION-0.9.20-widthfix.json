@@ -1,0 +1,36 @@
+{
+  "version": "0.9.20",
+  "variant": "widthfix",
+  "date": "2026-10-21",
+  "runtime": "self-contained win-x64",
+  "layoutRule": "Conversation viewport: 3–5 rendered Chinese glyph widths; overflowing text scrolls. Stage name uses all remaining space.",
+  "checks": {
+    "layoutCombinations": 216,
+    "layoutAssertions": 1532,
+    "hintLayoutAssertions": 15,
+    "controlAndRoutingAssertions": 30,
+    "dpiScale": 1.5,
+    "isolatedData": true,
+    "windowsOffscreen": true,
+    "mouseMoved": false,
+    "keyboardInjected": false
+  },
+  "observations": [
+    "Very short names use the 3-glyph minimum; names wider than 5 glyphs scroll. English and mixed-script names are measured using their actual rendered width.",
+    "Tests include column resizing, scrolling, unbound stages, single-stage cards and the Ideas-list exception."
+  ],
+  "unverified": [
+    "No real mouse interaction or mixed-DPI multi-monitor run.",
+    "Real full-turn Codex failures and quota-exhaustion stops remain unverified.",
+    "A historical offscreen orb animation check still fails in both compared versions; it was outside this display-width change and is not counted as passing."
+  ],
+  "portableArchive": {
+    "name": "instant-taskboard-0.9.20-win-x64.zip",
+    "bytes": 79842142,
+    "sha256": "DEC7C187208F8090471BF9484550DA0B500B603E558616B0B5EC68E8403490FA",
+    "files": 485,
+    "allArchiveFilesVerified": true
+  },
+  "executableSha256": "D1842260F4DA44CDCA0A424757BA0564F504C185C4B300DD214206E2AB179558",
+  "license": "No LICENSE file is present; source reuse terms are not declared."
+}

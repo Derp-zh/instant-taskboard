@@ -15,7 +15,11 @@ if (-not (Test-Path -LiteralPath $defaultSound)) {
 $packageCache = Join-Path $repository 'test-output/nuget-packages'
 dotnet publish (Join-Path $repository 'src/Taskboard.Desktop/Taskboard.Desktop.csproj') -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:DebugType=None -p:DebugSymbols=false "-p:RestorePackagesPath=$packageCache" -o $destination --nologo
 if ($LASTEXITCODE -ne 0) { throw '发布失败。' }
-Copy-Item -LiteralPath (Join-Path $repository 'docs/USER-GUIDE.md') -Destination (Join-Path $destination '使用说明.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/USER-GUIDE-0.9.20.md') -Destination (Join-Path $destination '使用说明.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/RELEASE-NOTES-0.9.20.md') -Destination (Join-Path $destination '版本说明.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/CODEX-PENDING-BRIDGE-PUBLIC.md') -Destination (Join-Path $destination 'CODEX-PENDING-BRIDGE-PUBLIC.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/ACCEPTANCE-0.9.20-PUBLIC.md') -Destination (Join-Path $destination 'ACCEPTANCE-0.9.20-PUBLIC.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/ACCEPTANCE-0.9.19-public.md') -Destination (Join-Path $destination 'ACCEPTANCE-0.9.19.md')
 Copy-Item -LiteralPath (Join-Path $repository 'docs/THIRD-PARTY-NOTICES.txt') -Destination (Join-Path $destination 'THIRD-PARTY-NOTICES.txt')
 Move-Item -LiteralPath (Join-Path $destination 'Taskboard.exe') -Destination (Join-Path $destination '即时任务看板.exe') -Force
 Get-FileHash -LiteralPath (Join-Path $destination '即时任务看板.exe') -Algorithm SHA256 | Format-List

@@ -56,7 +56,6 @@ internal partial class SurfaceWindow
         Native.ClipLiveScroll(this, from);
         if (!IsVisible && visible) ShowImmediately();
         Native.ShowWindow(ContentHandle, 4); IsHitTestVisible = visible;
-        if (participant is not null) await participant.Ready();
         await Dispatcher.InvokeAsync(() => Root.UpdateLayout(), DispatcherPriority.Render);
         if (generation != motion) return;
         // Let the first live layout reach composition before starting the
@@ -70,6 +69,8 @@ internal partial class SurfaceWindow
         preparationDeadline.Start(); var ready = await prepared.Task; preparationDeadline.Stop();
         if (!ready || generation != motion) return;
         CompositionTarget.Rendering -= liveScrollFrame; liveScrollFrame = null; cancelLivePreparation = null;
+        if (participant is not null) await participant.Ready();
+        if (generation != motion) return;
         MotionDisplayStartTicks = Stopwatch.GetTimestamp(); scrollClock.Restart(); LiveScrollRevealCount++;
         UsesIndependentAnimation = false;
         void Finish()

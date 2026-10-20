@@ -12,7 +12,11 @@ $archive = Join-Path $repository ('release/即时任务看板-' + $releaseVersio
 $entryName = '即时任务看板.exe'
 if (-not (Test-Path -LiteralPath (Join-Path $folder $entryName))) { throw '必须先构建便携版。' }
 if (Test-Path -LiteralPath (Join-Path $folder 'data')) { throw '发布目录含业务数据，停止打包。' }
-Copy-Item -LiteralPath (Join-Path $repository 'docs/USER-GUIDE.md') -Destination (Join-Path $folder '使用说明.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/USER-GUIDE-0.9.20.md') -Destination (Join-Path $folder '使用说明.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/RELEASE-NOTES-0.9.20.md') -Destination (Join-Path $folder '版本说明.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/CODEX-PENDING-BRIDGE-PUBLIC.md') -Destination (Join-Path $folder 'CODEX-PENDING-BRIDGE-PUBLIC.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/ACCEPTANCE-0.9.20-PUBLIC.md') -Destination (Join-Path $folder 'ACCEPTANCE-0.9.20-PUBLIC.md')
+Copy-Item -LiteralPath (Join-Path $repository 'docs/ACCEPTANCE-0.9.19-public.md') -Destination (Join-Path $folder 'ACCEPTANCE-0.9.19.md')
 $files = @(Get-ChildItem -LiteralPath $folder -File -Recurse | Sort-Object FullName | ForEach-Object {
     [ordered]@{ Path = [System.IO.Path]::GetRelativePath($folder, $_.FullName).Replace('\','/'); Bytes = $_.Length; SHA256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash }
 })

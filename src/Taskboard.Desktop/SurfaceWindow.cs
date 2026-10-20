@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Threading;
@@ -236,7 +237,8 @@ internal partial class SurfaceWindow : Window
     public virtual void RefreshGlass() { imageDirty = true; if (GlassEnabled && new WindowInteropHelper(this).Handle != IntPtr.Zero) Native.TryGlass(this); }
     internal void EnsureLiveBackdrop()
     { backdrop ??= new LiveBackdrop(new WindowInteropHelper(this).Handle); ApplyGlassTint(); UpdateGlassGeometry(); }
-    protected virtual void ApplyGlassTint() => Root.Background = Ui.Brush($"#{(int)Math.Round(255 * (1 - GlassTransparency / 100)):X2}192333");
+    protected Brush GlassTintBrush => Ui.Brush($"#{(int)Math.Round(255 * (1 - GlassTransparency / 100)):X2}192333");
+    protected virtual void ApplyGlassTint() => Root.Background = GlassTintBrush;
     internal void UpdateGlassGeometry()
     {
         var bounds = new Rect(0,0,(this is BallSurface ? 370 : Width) + (this is BallSurface { IsEdgeDocked: true } ? GlassRadius : 0),Height);
@@ -340,8 +342,20 @@ internal partial class SurfaceWindow : Window
         Native.ShowWindow(ContentHandle, 4); IsHitTestVisible = visible;
         // Keep real controls and the same glass/tint visible throughout. Ending
         // a list reveal never swaps a texture for a differently rasterized UI.
-        if (participant is not null) await participant.Ready();
         await Dispatcher.InvokeAsync(() => Root.UpdateLayout(), DispatcherPriority.Render);
+        if (generation != motion) return;
+        // Cold controls and the restored workspace must reach a real rendered
+        // frame before the 100ms timeline starts, just as for floating windows.
+        var prepared = new TaskCompletionSource<bool>(); var rendered = 0;
+        var preparationDeadline = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(80) };
+        preparationDeadline.Tick += (_, _) => prepared.TrySetResult(true);
+        cancelLivePreparation = () => { preparationDeadline.Stop(); prepared.TrySetResult(false); };
+        liveListFrame = (_, _) => { if (++rendered >= 2) prepared.TrySetResult(true); };
+        CompositionTarget.Rendering += liveListFrame;
+        preparationDeadline.Start(); var ready = await prepared.Task; preparationDeadline.Stop();
+        if (!ready || generation != motion) return;
+        CompositionTarget.Rendering -= liveListFrame; liveListFrame = null; cancelLivePreparation = null;
+        if (participant is not null) await participant.Ready();
         if (generation != motion) return;
         MotionDisplayStartTicks = Stopwatch.GetTimestamp(); LiveListRevealCount++;
         var clock = Stopwatch.StartNew(); var target = visible ? Height : 0;

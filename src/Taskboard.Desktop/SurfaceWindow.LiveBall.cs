@@ -34,8 +34,9 @@ internal partial class SurfaceWindow
         if (!IsVisible) ShowImmediately();
         Native.ShowWindow(ContentHandle, 4);
         var right = Left + Width;
-        if (participant is not null) await participant.Ready();
         await Dispatcher.InvokeAsync(() => Root.UpdateLayout(), DispatcherPriority.Render);
+        if (generation != motion) return;
+        if (participant is not null) await participant.Ready();
         if (generation != motion) return;
         MotionDisplayStartTicks = Stopwatch.GetTimestamp(); LiveBallRevealCount++;
         var clock = Stopwatch.StartNew();

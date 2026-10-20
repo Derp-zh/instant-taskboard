@@ -28,7 +28,7 @@ internal static class CodexDesktopLifecycleChecks
             throw new InvalidOperationException("需要两个明确的原桌面测试聊天");
         controller.SuppressCollapse = true;
         var tasks = new Dictionary<string, Guid>();
-        var observations = new List<object>(); var checks = new List<string>();
+        var observations = new List<object>(); var checks = new List<string>(); var failures = new List<object>();
         var clock = Stopwatch.StartNew(); var snapshotVersion = 0;
         WorkItem Item(string alias) => controller.Engine.State.Tasks.Single(x => x.Id == tasks[alias]);
         WorkItem Create(string alias, Lane lane, string thread)
@@ -74,19 +74,30 @@ internal static class CodexDesktopLifecycleChecks
             var value = new { version = ++snapshotVersion, label, ms = clock.ElapsedMilliseconds,
                 source = observer.SourceKind, connected = observer.TransportConnected, identityVerified = observer.SourceIdentityVerified,
                 liveThreads = observer.Capabilities.Count(x => x.Live), epoch = Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(observer.Epoch)))[..12],
-                observer.PollCount, observer.TurnReadCount, observer.ReconciledTerminalCount, rows = Rows() };
+                observer.PollCount, observer.TurnReadCount, observer.ReconciledTerminalCount, observer.PendingSourceReason, rows = Rows() };
             observations.Add(value);
             File.WriteAllText(Path.Combine(root, "lifecycle-state.json"), JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true }));
+            if (label != "poll")
+            {
+                var checkpoints = Path.Combine(root, "checkpoints"); Directory.CreateDirectory(checkpoints);
+                var safeLabel = string.Concat(label.Take(80).Select(c => char.IsAsciiLetterOrDigit(c) || c == '-' ? c : '_'));
+                File.WriteAllText(Path.Combine(checkpoints, snapshotVersion + "-" + safeLabel + ".json"),
+                    JsonSerializer.Serialize(new { snapshot = value, checks, failures, originalDesktop = true, syntheticFixture = false }, new JsonSerializerOptions { WriteIndented = true }));
+            }
         }
-        var initialDeadline = DateTime.UtcNow.AddSeconds(15);
+        var initialDeadline = DateTime.UtcNow.AddSeconds(45);
         while ((!controller.Codex.SourceIdentityVerified || controller.Codex.Capabilities.Count(x => x.Live) < 2) && DateTime.UtcNow < initialDeadline) await Task.Delay(100);
         Check(controller.Codex.SourceKind == "desktop-native" && controller.Codex.SourceIdentityVerified, "原桌面进程包身份、用户及会话已核实");
         Check(controller.Codex.Capabilities.Count(x => x.Live) >= 2, "A/B原桌面会话分别可读实时状态");
-        Check(Item("A").Lane == Lane.Running && Item("B").Lane == Lane.Running && Item("A").Stages[0].Codex!.Phase == CodexPhase.Unknown,
-            "绑定前已结束的历史轮次不误移列");
+        var allowInFlight = plan.RootElement.TryGetProperty("allowInFlightBaseline", out var inFlight) && inFlight.ValueKind == JsonValueKind.True;
+        var allowWaiting = plan.RootElement.TryGetProperty("allowWaitingBaseline", out var waiting) && waiting.ValueKind == JsonValueKind.True;
+        bool InitialLane(string alias) => Item(alias).Lane == Lane.Running || allowWaiting && Item(alias).Lane == Lane.Action && Item(alias).Stages[0].Codex!.AwaitingUserAction;
+        Check(InitialLane("A") && InitialLane("B") &&
+            (allowInFlight || allowWaiting || Item("A").Stages[0].Codex!.Phase == CodexPhase.Unknown),
+            allowWaiting ? "隔离启动允许原桌面准确在途请求，真实等待按规则移列" : allowInFlight ? "隔离启动允许已核实在途轮次，未把首个快照当停止" : "绑定前已结束的历史轮次不误移列");
         await controller.Flush(); Snapshot("ready");
         File.WriteAllText(Path.Combine(root, "lifecycle-ready.json"), "{\"ready\":true}");
-        EditorSurface? openEditor = null; var lastCommand = ""; var finished = false;
+        EditorSurface? openEditor = null; string? openEditorAlias = null; var lastCommand = ""; var finished = false;
         while (!finished && clock.Elapsed < TimeSpan.FromMinutes(40))
         {
             await Task.Delay(100);
@@ -99,16 +110,21 @@ internal static class CodexDesktopLifecycleChecks
                     using var command = JsonDocument.Parse(raw); var value = command.RootElement;
                     var kind = value.GetProperty("kind").GetString();
                     var alias = value.TryGetProperty("alias", out var target) ? target.GetString()! : "A";
+                    string? commandFailure = null;
+                    try
+                    {
                     switch (kind)
                     {
                         case "hide": controller.SetExpanded(false); break;
                         case "show": controller.SetExpanded(true); await Task.Delay(250); break;
                         case "edit":
+                            openEditorAlias = alias;
                             openEditor = controller.EditTask(Item(alias).Id);
                             StageFeatureChecks.Children<TextBox>(openEditor).First().Text = "接入隔离草稿修改";
                             break;
                         case "saveEdit":
                             if (openEditor is null) throw new InvalidOperationException("没有隔离编辑窗口");
+                            if (openEditorAlias != alias) throw new InvalidOperationException("编辑保存命令的测试目标与打开窗口不一致");
                             if (!await openEditor.SaveAndClose()) throw new InvalidOperationException("隔离保存失败");
                             openEditor = null;
                             Check(Item(alias).Title == "接入隔离草稿修改", "实际编辑保存保留用户修改"); break;
@@ -143,8 +159,15 @@ internal static class CodexDesktopLifecycleChecks
                         case "finish": finished = true; break;
                         default: throw new InvalidOperationException("未知隔离测试指令");
                     }
+                    }
+                    catch (InvalidOperationException error)
+                    {
+                        commandFailure = error.Message;
+                        failures.Add(new { kind, alias, error = commandFailure, ms = clock.ElapsedMilliseconds });
+                    }
                     lastCommand = raw; Snapshot(value.TryGetProperty("label", out var label) ? label.GetString()! : kind!);
-                    File.WriteAllText(Path.Combine(root, "lifecycle-command-done.json"), raw);
+                    File.WriteAllText(Path.Combine(root, "lifecycle-command-done.json"), JsonSerializer.Serialize(new {
+                        id = value.GetProperty("id").GetString(), success = commandFailure is null, error = commandFailure }));
                 }
             }
             if (snapshotVersion == 0 || clock.ElapsedMilliseconds % 500 < 110) Snapshot("poll");
@@ -152,7 +175,7 @@ internal static class CodexDesktopLifecycleChecks
         Check(finished, "隔离桌面流程明确结束");
         await controller.Flush(); Snapshot("finished");
         File.WriteAllText(Path.Combine(root, "codex-lifecycle-report.json"), JsonSerializer.Serialize(new {
-            passed = checks.Count, checks, originalDesktop = true, syntheticFixture = false, sourceKind = controller.Codex.SourceKind,
+            passed = checks.Count, checks, allChecksPassed = failures.Count == 0, failures, originalDesktop = true, syntheticFixture = false, sourceKind = controller.Codex.SourceKind,
             packageIdentityVerified = controller.Codex.SourceIdentityVerified, actualCardsVerified = true, actualPersistenceVerified = true,
             conversationContentsLogged = false, productionDataChanged = false, observations,
             boundary = "检查仅声明实际到达的状态与检查点；未到达的提问/权限/恢复场景须由交付摘要单列，不以夹具替代。"

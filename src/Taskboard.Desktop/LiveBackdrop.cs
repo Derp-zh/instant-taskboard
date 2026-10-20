@@ -491,7 +491,14 @@ internal sealed class GlassContentHost : HwndHost
     }
     protected override void DestroyWindowCore(HandleRef hwnd) { source?.Dispose(); source = null; }
     protected override void OnWindowPositionChanged(Rect rectangle)
-    { base.OnWindowPositionChanged(rectangle); SynchronizeCanvas(); if (AnimationHidden && ContentHandle != IntPtr.Zero) ShowWindow(ContentHandle,0); }
+    {
+        // The default HwndHost placement briefly moves the full text canvas
+        // with the rolling shell before we right-anchor it again. Never submit
+        // that intermediate translation for a fixed canvas.
+        if (RightAnchoredCanvasWidth <= 0) base.OnWindowPositionChanged(rectangle);
+        SynchronizeCanvas();
+        if (AnimationHidden && ContentHandle != IntPtr.Zero) ShowWindow(ContentHandle,0);
+    }
     internal void SynchronizeCanvas()
     {
         if (RightAnchoredCanvasWidth <= 0 || ContentHandle == IntPtr.Zero || ownerHandle == IntPtr.Zero) return;

@@ -7,6 +7,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -23,14 +24,21 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     private const int MaximumRequestBytes = 4 * 1024 * 1024;
     private const int MaximumResponseBytes = 8 * 1024 * 1024;
     private const string DesktopPackage = "OpenAI.Codex_2p2nqsd0c76g0";
+    // Observed installed OpenAI-signed 26.1013.4894.0 artifact. Direct launch
+    // can lack an MSIX process identity; accept only this exact protected image
+    // while the user explicitly enables the loopback observer.
+    internal const string ObservedExecutable = @"C:\Program Files\WindowsApps\OpenAI.Codex_26.1013.4894.0_x64__2p2nqsd0c76g0\app\ChatGPT.exe";
+    internal const string ObservedExecutableHash = "2F61EAEB01DCEE7FD18D572FBB338C88B686C0D891427487FDD182AFDD64B4F6";
     private readonly NamedPipeClientStream pipe;
     private readonly SemaphoreSlim calls = new(1, 1);
     private int nextId;
     private int disposed;
     internal static string DiscoveryReason { get; private set; } = "not-attempted";
+    internal int ServerProcessId => GetNamedPipeServerProcessId(pipe.SafePipeHandle, out var id) ? checked((int)id) : 0;
+    internal string IdentityKind { get; }
     // Logical operation allowlist; tools/call is never an arbitrary public escape.
     internal static bool Allowed(string method) => method is "tools/list" or "read_thread";
-    private CodexDesktopBridge(NamedPipeClientStream pipe) => this.pipe = pipe;
+    private CodexDesktopBridge(NamedPipeClientStream pipe, string identityKind) { this.pipe = pipe; IdentityKind = identityKind; }
 
     internal static async Task<CodexDesktopBridge?> TryConnect(CancellationToken cancellation = default)
     {
@@ -56,7 +64,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
                     await stream.ConnectAsync(350, timeout.Token).ConfigureAwait(false);
                     if (!VerifyServer(stream.SafePipeHandle, out var identityReason)) { DiscoveryReason = identityReason; stream.Dispose(); continue; }
                     DiscoveryReason = "verified-peer-tools-unavailable";
-                    var bridge = new CodexDesktopBridge(stream); stream = null;
+                    var bridge = new CodexDesktopBridge(stream, identityReason); stream = null;
                     try
                     {
                         var result = await bridge.Exchange("tools/list", new { threadStartKind = "default" }, timeout.Token).ConfigureAwait(false);
@@ -105,7 +113,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
             {
                 var arguments = new Dictionary<string, object>
                 {
-                    ["threadId"] = threadId, ["turnLimit"] = page == 0 ? 1 : 10,
+                    ["threadId"] = threadId, ["hostId"] = "local", ["turnLimit"] = page == 0 ? 1 : 10,
                     ["includeOutputs"] = false, ["maxOutputCharsPerItem"] = 0
                 };
                 if (cursor is not null) arguments["cursor"] = cursor;
@@ -174,12 +182,20 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
         var safeStatus = JsonSerializer.SerializeToElement(new { type, activeFlags = safeFlags });
         var rawTurns = Object(data, "turns");
         if (rawTurns.ValueKind != JsonValueKind.Array) return Unavailable("unsupported-turn-metadata", host);
-        var turns = rawTurns.EnumerateArray().Select(x => new CodexTurnMetadata(Text(x, "id"), Text(x, "status")))
+        var newestFirst = Text(Object(data, "page"), "order") == "newest_first";
+        var turns = rawTurns.EnumerateArray().Select((x, index) => new CodexTurnMetadata(Text(x, "id"), Text(x, "status"),
+            CodexTurnMetadata.ReadStopReason(Object(x, "error")), newestFirst && index == 0 ? StartedAt(x) : null))
             .Where(x => x.Id.Length is > 0 and <= 256 && x.Status is "inProgress" or "completed" or "failed" or "interrupted").Take(10).ToArray();
         nextCursor = Text(Object(data, "page"), "nextCursor");
         if (nextCursor.Length > 8192) nextCursor = "";
         return new(safeStatus, turns, true, "live-original-desktop", host);
     }
+    private static long? StartedAt(JsonElement turn)
+    {
+        var value = Object(turn, "startedAt");
+        return value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out var timestamp) && timestamp is >= 0 and <= 253402300799 ? timestamp : null;
+    }
+
 
     private async Task<JsonElement> Exchange(string method, object parameters, CancellationToken cancellation)
     {
@@ -212,6 +228,11 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     private static JsonElement Object(JsonElement element, string name) => element.ValueKind == JsonValueKind.Object && element.TryGetProperty(name, out var value) ? value : default;
     internal static bool IsDesktopPipeName(string name) => name.StartsWith("codex-app-tools-", StringComparison.Ordinal) && Guid.TryParseExact(name[16..], "D", out _);
 
+    internal static bool MatchesObservedExecutable(int packageError, string path, string hash, string? inspector) =>
+        packageError == 15700 && CodexPendingBridge.ValidEndpoint(inspector ?? "", out _) &&
+        string.Equals(path, ObservedExecutable, StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(hash, ObservedExecutableHash, StringComparison.OrdinalIgnoreCase);
+
     private static bool VerifyServer(SafePipeHandle pipeHandle, out string reason)
     {
         reason = "server-identity-unavailable";
@@ -224,18 +245,38 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
             using var handle = OpenProcess(0x1000, false, processId);
             if (handle.IsInvalid) return false;
             var family = new StringBuilder(512); uint count = (uint)family.Capacity;
-            if (GetPackageFamilyName(handle, ref count, family) != 0 || family.ToString() != DesktopPackage) { reason = "desktop-package-identity-mismatch"; return false; }
+            var packageError = GetPackageFamilyName(handle, ref count, family);
+            var packageIdentity = packageError == 0 && family.ToString() == DesktopPackage;
+            if (!packageIdentity)
+            {
+                reason = "desktop-package-identity-mismatch";
+                if (packageError != 15700 || !CodexPendingBridge.ValidEndpoint(Environment.GetEnvironmentVariable(CodexPendingBridge.Setting) ?? "", out _)) return false;
+                var image = new StringBuilder(32768); uint imageLength = (uint)image.Capacity;
+                if (!QueryFullProcessImageName(handle, 0, image, ref imageLength)) return false;
+                using var executable = new FileStream(ObservedExecutable, FileMode.Open, FileAccess.Read, FileShare.Read);
+                // WindowsApps may be a volume junction (C: alias, D: image).
+                // Compare the process path to the final path of the pinned file
+                // handle, rather than trusting another supplied installation path.
+                var canonical = new StringBuilder(32768);
+                var finalLength = GetFinalPathNameByHandle(executable.SafeFileHandle, canonical, (uint)canonical.Capacity, 0);
+                if (finalLength == 0 || finalLength >= canonical.Capacity) return false;
+                var expectedImage = canonical.ToString();
+                if (expectedImage.StartsWith(@"\\?\", StringComparison.Ordinal)) expectedImage = expectedImage[4..];
+                if (!string.Equals(image.ToString(), expectedImage, StringComparison.OrdinalIgnoreCase)) return false;
+                var hash = Convert.ToHexString(SHA256.HashData(executable));
+                if (!MatchesObservedExecutable(packageError, ObservedExecutable, hash, Environment.GetEnvironmentVariable(CodexPendingBridge.Setting))) return false;
+            }
             if (!OpenProcessToken(handle, 0x0008, out var token)) { reason = "desktop-user-token-unavailable"; return false; }
             using (token)
             using (var identity = new WindowsIdentity(token.DangerousGetHandle()))
             using (var current = WindowsIdentity.GetCurrent())
             {
                 var valid = identity.User is not null && current.User is not null && identity.User.Equals(current.User);
-                reason = valid ? "verified-peer" : "different-desktop-user";
+                reason = valid ? (packageIdentity ? "verified-package-peer" : "verified-pinned-installed-image-peer") : "different-desktop-user";
                 return valid;
             }
         }
-        catch (Exception error) when (error is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception or System.Security.SecurityException)
+        catch (Exception error) when (error is ArgumentException or InvalidOperationException or IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception or System.Security.SecurityException)
         { return false; }
     }
 
@@ -252,6 +293,10 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     private static extern SafeProcessHandle OpenProcess(uint access, [MarshalAs(UnmanagedType.Bool)] bool inherit, uint processId);
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
     private static extern int GetPackageFamilyName(SafeProcessHandle process, ref uint length, StringBuilder family);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool QueryFullProcessImageName(SafeProcessHandle process, uint flags, StringBuilder path, ref uint length);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern uint GetFinalPathNameByHandle(SafeFileHandle file, StringBuilder path, uint length, uint flags);
     [DllImport("advapi32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool OpenProcessToken(SafeProcessHandle process, uint access, out SafeAccessTokenHandle token);
 }

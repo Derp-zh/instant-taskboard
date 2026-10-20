@@ -36,7 +36,7 @@ internal static class Program
         var featureDesktopVerify = false;
         var sharedVerify = false;
         var integrationVerify = false; var startupEntryVerify = false; var startupInvocation = false;
-        var ux0915Verify = false; var ux0915RenderVerify = false; var codexLifecycleVerify = false;
+        var ux0915Verify = false; var ux0915RenderVerify = false; var codexLifecycleVerify = false; var ux0917Verify = false; var ux0917GlassOnly = false; var ux0920Verify = false;
         var defaultData = DataPaths.DefaultDataDirectory;
         var data = defaultData; var isolated = false; var smoke = false; var startupCheck = false; var desktopVerify = false; var hasDataDirectory = false; var codexVerify = false; var animationVerify=false; var listeningVerify = false;
         for (var i = 0; i < args.Length; i++)
@@ -48,6 +48,8 @@ internal static class Program
             else if (args[i] == "--desktop-verify") desktopVerify = true;
             else if (args[i] == "--codex-verify") { codexVerify=true; startupCheck=true; }
             else if (args[i] == "--codex-lifecycle-verify") codexLifecycleVerify = true;
+            else if (args[i] == "--ux0917-verify") { ux0917Verify = true; stageVerify = true; desktopVerify = true; }
+            else if (args[i] == "--ux0917-glass-verify") { ux0917Verify = true; ux0917GlassOnly = true; stageVerify = true; desktopVerify = true; }
             else if (args[i] == "--animation-verify") animationVerify=true;
             else if (args[i] == "--performance-verify") performanceVerify=true;
             else if (args[i] == "--scroll-verify") scrollVerify=true;
@@ -71,6 +73,7 @@ internal static class Program
             else if (args[i] == "--ux0914-desktop-verify") { ux0914DesktopVerify = true; stageVerify = true; desktopVerify = true; }
             else if (args[i] == "--ux0914-verify") { ux0914Verify = true; stageVerify = true; startupCheck = true; }
             else if (args[i] == "--ux0915-verify") { ux0915Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0920-verify") { ux0920Verify = true; stageVerify = true; startupCheck = true; }
             else if (args[i] == "--ux0915-render-verify") { ux0915RenderVerify = true; stageVerify = true; startupCheck = true; }
             else if (args[i] == "--ux0913-verify") { ux0913Verify = true; stageVerify = true; startupCheck = true; }
             else if (args[i] == "--ux0912-verify") { ux0912Verify = true; stageVerify = true; startupCheck = true; }
@@ -154,11 +157,12 @@ internal static class Program
                 if (startupInvocation && !isolated) File.WriteAllText(Path.Combine(DataPaths.SystemRoot, "last-startup.json"), System.Text.Json.JsonSerializer.Serialize(new { utc = DateTime.UtcNow, version = typeof(Program).Assembly.GetName().Version!.ToString(), executable = Environment.ProcessPath }));
                 startupClock.Stop();
                 if (smoke || startupCheck) File.WriteAllText(Path.Combine(data, "startup-report.json"), System.Text.Json.JsonSerializer.Serialize(new { readyMs = startupClock.Elapsed.TotalMilliseconds, tasks = controller.Engine.State.Tasks.Count, draftsAndEdits = controller.Engine.State.Sessions.Count }));
-                if (codexLifecycleVerify) { await CodexDesktopLifecycleChecks.Run(controller); await controller.Exit(); }
+                if (ux0917Verify) { await Ux0917Checks.Run(controller, ux0917GlassOnly); await controller.Exit(); }
+                else if (codexLifecycleVerify) { await CodexDesktopLifecycleChecks.Run(controller); await controller.Exit(); }
                 else if (outsideObserverVerify) { if (featureDesktopVerify) await FeatureDesktopChecks.Run(controller); else if (workspaceVerify) await WorkspaceChecks.Run(controller, workspaceGeometryVerify); else if (floatingVerify) await FloatingInteractionChecks.Run(controller); else await OutsideObserverChecks.Run(controller, gameInputVerify); await controller.Exit(); }
                 else if (sharedVerify) { await SharedMotionChecks.Run(controller); await controller.Exit(); }
                 else if (compactVerify) { await CompactChecks.Run(controller); await controller.Exit(); }
-                else if (stageVerify) { if (ux0915RenderVerify) await Ux0915RenderChecks.Run(controller); else if (ux0915Verify) await Ux0915Checks.Run(controller); else if (ux0914DesktopVerify) await Ux0914DesktopChecks.Run(controller); else if (ux0914Verify) await Ux0914Checks.Run(controller); else if (ux0913RenderVerify) await Ux0913RenderChecks.Run(controller); else if (ux0913Verify) await Ux0913Checks.Run(controller); else if (ux0912Verify) await Ux0912Checks.Run(controller); else if (ux0912RenderVerify) await Ux0912RenderChecks.Run(controller); else if (ux0911Verify) await Ux0911Checks.Run(controller); else if (ux0910Verify) await Ux0910Checks.Run(controller, hintDisplayVerify); else if (ux099DesktopVerify) await Ux099DesktopChecks.Run(controller); else if (ux099Verify) await Ux099Checks.Run(controller); else if (ux098Verify) await Ux098Checks.Run(controller); else await StageFeatureChecks.Run(controller); await controller.Exit(); }
+                else if (stageVerify) { if (ux0920Verify) await Ux0920Checks.Run(controller); else if (ux0915RenderVerify) await Ux0915RenderChecks.Run(controller); else if (ux0915Verify) await Ux0915Checks.Run(controller); else if (ux0914DesktopVerify) await Ux0914DesktopChecks.Run(controller); else if (ux0914Verify) await Ux0914Checks.Run(controller); else if (ux0913RenderVerify) await Ux0913RenderChecks.Run(controller); else if (ux0913Verify) await Ux0913Checks.Run(controller); else if (ux0912Verify) await Ux0912Checks.Run(controller); else if (ux0912RenderVerify) await Ux0912RenderChecks.Run(controller); else if (ux0911Verify) await Ux0911Checks.Run(controller); else if (ux0910Verify) await Ux0910Checks.Run(controller, hintDisplayVerify); else if (ux099DesktopVerify) await Ux099DesktopChecks.Run(controller); else if (ux099Verify) await Ux099Checks.Run(controller); else if (ux098Verify) await Ux098Checks.Run(controller); else await StageFeatureChecks.Run(controller); await controller.Exit(); }
                 else if (integrationVerify) { await IntegrationChecks.Run(controller); await controller.Exit(); }
                 else if (appearanceVerify) { AppearanceChecks.Run(controller); await controller.Exit(); }
                 else if (scrollVerify) { await ScrollMotionChecks.Run(controller, scrollRestoreVerify, scrollStackVerify); await controller.Exit(); }

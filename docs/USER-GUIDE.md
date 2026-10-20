@@ -1,3 +1,7 @@
+# Current guide
+
+The current user guide is [0.9.20](USER-GUIDE-0.9.20.md). The remaining material below describes releases through 0.9.16.
+
 # 即时任务看板使用说明
 
 # 0.9.16 Codex接入修订

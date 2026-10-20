@@ -13,6 +13,8 @@ internal sealed partial class TaskCard
     private readonly Dictionary<Guid, FrameworkElement> stageSections = new();
     private int collapseScopes;
     private Thickness? beforeRemovalMargin;
+    private long wholeMotion;
+    internal int TaskExpandCount { get; private set; }
     internal int StageCollapseCount { get; private set; }
     internal int TaskCollapseCount { get; private set; }
     internal Task CollapseStages(IReadOnlyCollection<Guid> ids)
@@ -28,6 +30,7 @@ internal sealed partial class TaskCard
     }
     private async Task Collapse(FrameworkElement[] targets, bool whole)
     {
+        var generation = whole ? ++wholeMotion : 0;
         collapseScopes++;
         try
         {
@@ -41,14 +44,33 @@ internal sealed partial class TaskCard
                 if (whole) target.BeginAnimation(MarginProperty, new ThicknessAnimation(target.Margin, new Thickness(target.Margin.Left, 0, target.Margin.Right, 0), TimeSpan.FromMilliseconds(CollapseDurationMs)));
             }
             await Task.WhenAny(Task.WhenAll(completions), Task.Delay(CollapseDurationMs + 100));
-            foreach (var target in targets) { target.Height = 0; target.BeginAnimation(HeightProperty, null); }
+            if (!whole || generation == wholeMotion)
+                foreach (var target in targets) { target.Height = 0; target.BeginAnimation(HeightProperty, null); }
         }
         finally { collapseScopes--; }
     }
     internal void RestoreAfterRemoval()
     {
+        wholeMotion++;
         if (beforeRemovalMargin is not Thickness original) return;
         beforeRemovalMargin = null; BeginAnimation(MarginProperty, null); Margin = original;
         BeginAnimation(HeightProperty, null); Height = double.NaN; IsHitTestVisible = true; ClipToBounds = false; Rebuild();
+    }
+    internal async Task ExpandTask()
+    {
+        if (!Controller.CardAnimationsEnabled || !IsVisible || ActualHeight <= 0) return;
+        RestoreAfterRemoval();
+        var generation = ++wholeMotion; var height = ActualHeight; var margin = Margin;
+        beforeRemovalMargin = margin; TaskExpandCount++;
+        ClipToBounds = true; IsHitTestVisible = false; Height = 0;
+        Margin = new Thickness(margin.Left, 0, margin.Right, 0);
+        var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var animation = new DoubleAnimation(0, height, TimeSpan.FromMilliseconds(CollapseDurationMs))
+            { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut } };
+        animation.Completed += (_, _) => done.TrySetResult();
+        BeginAnimation(HeightProperty, animation);
+        BeginAnimation(MarginProperty, new ThicknessAnimation(Margin, margin, TimeSpan.FromMilliseconds(CollapseDurationMs)));
+        await Task.WhenAny(done.Task, Task.Delay(CollapseDurationMs + 100));
+        if (generation == wholeMotion) RestoreAfterRemoval();
     }
 }

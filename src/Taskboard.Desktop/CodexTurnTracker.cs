@@ -16,19 +16,25 @@ internal sealed class CodexTurnTracker(string threadId)
     private readonly HashSet<string> historicalOrFinished = new(StringComparer.Ordinal);
     private string? current;
     private long revision;
+    private string? metadataEpoch;
+    private long? latestStartedAt;
     internal long Revision { get { lock (gate) return revision; } }
     internal string? CurrentTurnId { get { lock (gate) return current; } }
+    internal bool CurrentTurnRunning { get { lock (gate) return current is not null && !historicalOrFinished.Contains(current); } }
 
     // Emit these messages BEFORE the corresponding active snapshot so a waiting flag
     // is retained. Only a trustworthy per-thread live source may set authoritative.
     internal JsonElement[] Reconcile(JsonElement status, IReadOnlyList<CodexTurnMetadata> turns,
-        bool authoritative, long? expectedRevision = null)
+        bool authoritative, long? expectedRevision = null, string? sourceEpoch = null)
     {
         lock (gate)
         {
             if (!authoritative || expectedRevision is { } expected && expected != revision) return [];
             var messages = new List<JsonElement>();
             var type = Text(status, "type");
+            if (metadataEpoch != sourceEpoch) { metadataEpoch = sourceEpoch; latestStartedAt = null; }
+            var newest = turns.FirstOrDefault();
+            var previousWatermark = latestStartedAt;
             if (type == "active")
             {
                 // Latest first is mandatory. Multiple active IDs are ambiguous, never
@@ -42,17 +48,30 @@ internal sealed class CodexTurnTracker(string threadId)
                     messages.Add(Message("turn/started", current, "inProgress"));
                 }
             }
+            else if (type == "idle" && current is not null && sourceEpoch is not null && previousWatermark is long baseline &&
+                newest is { Status: "failed" or "interrupted", StartedAt: long started } && started is >= 0 and <= 253402300799 && started > baseline &&
+                newest.Id != current && !historicalOrFinished.Contains(newest.Id))
+            {
+                // A new, strictly later latest turn can stop between polls. Do
+                // not invent a Running event or revive an initial history row.
+                historicalOrFinished.Add(current); current = newest.Id;
+                historicalOrFinished.Add(current); revision++;
+                messages.Add(JsonSerializer.SerializeToElement(new { method = "probe/currentTurnStopped", @params = new {
+                    threadId, baselineStartedAt = baseline, turn = new { id = newest.Id, status = newest.Status, startedAt = started } } }));
+            }
             else if (type == "idle" && current is not null && !historicalOrFinished.Contains(current))
             {
                 var matching = turns.FirstOrDefault(x => x.Id == current);
                 if (matching is not null && IsTerminal(matching.Status))
                 {
                     historicalOrFinished.Add(current); revision++;
-                    messages.Add(Message("turn/completed", current, matching.Status));
+                    messages.Add(Message("turn/completed", current, matching.Status, matching.StopReason));
                 }
             }
             foreach (var turn in turns)
                 if (turn.Id != current && IsTerminal(turn.Status)) historicalOrFinished.Add(turn.Id);
+            if (newest?.StartedAt is long timestamp && timestamp is >= 0 and <= 253402300799)
+                latestStartedAt = latestStartedAt is long old ? Math.Max(old, timestamp) : timestamp;
             return messages.ToArray();
         }
     }
@@ -88,8 +107,10 @@ internal sealed class CodexTurnTracker(string threadId)
         }
     }
 
-    private JsonElement Message(string method, string id, string status) => JsonSerializer.SerializeToElement(
-        new { method, @params = new { threadId, turn = new { id, status, items = Array.Empty<object>() } } });
+    private JsonElement Message(string method, string id, string status, string? stopReason = null) => JsonSerializer.SerializeToElement(
+        new { method, @params = new { threadId, turn = new { id, status,
+            error = stopReason is "usageLimitExceeded" or "rateLimitExceeded" ? new { codexErrorInfo = stopReason } : null,
+            items = Array.Empty<object>() } } });
     private static bool IsTerminal(string status) => status is "completed" or "failed" or "interrupted";
     private static string Text(JsonElement element, string name) => Object(element, name) is { ValueKind: JsonValueKind.String } value ? value.GetString()! : "";
     private static JsonElement Object(JsonElement element, string name) => element.ValueKind == JsonValueKind.Object && element.TryGetProperty(name, out var value) ? value : default;
@@ -114,7 +135,7 @@ internal sealed class CodexTurnTracker(string threadId)
             foreach (var item in data.EnumerateArray())
             {
                 var id = Text(item, "id");
-                if (id.Length > 0 && ids.Add(id)) turns.Add(new(id, Text(item, "status")));
+                if (id.Length > 0 && ids.Add(id)) turns.Add(new(id, Text(item, "status"), CodexTurnMetadata.ReadStopReason(Object(item, "error"))));
             }
             var next = Text(response, "nextCursor");
             var found = targetTurnId is not null && ids.Contains(targetTurnId);
@@ -127,5 +148,21 @@ internal sealed class CodexTurnTracker(string threadId)
     }
 }
 
-internal sealed record CodexTurnMetadata(string Id, string Status);
+internal sealed record CodexTurnMetadata(string Id, string Status, string? StopReason = null, long? StartedAt = null)
+{
+    // Retain only the protocol enum. Error prose, URLs, outputs and account
+    // quota snapshots never enter the metadata projection.
+    internal static string? ReadStopReason(JsonElement error)
+    {
+        if (error.ValueKind != JsonValueKind.Object || !error.TryGetProperty("codexErrorInfo", out var info)) return null;
+        if (info.ValueKind == JsonValueKind.String)
+            return info.GetString() is "usageLimitExceeded" or "rateLimitExceeded" ? info.GetString() : null;
+        if (info.ValueKind == JsonValueKind.Object)
+        {
+            var properties = info.EnumerateObject().Take(2).ToArray();
+            if (properties.Length == 1 && properties[0].Name is "usageLimitExceeded" or "rateLimitExceeded") return properties[0].Name;
+        }
+        return null;
+    }
+}
 internal sealed record CodexTurnPage(CodexTurnMetadata[] Turns, bool EndOfHistory, bool TargetFound, int Pages, bool CursorCycle);

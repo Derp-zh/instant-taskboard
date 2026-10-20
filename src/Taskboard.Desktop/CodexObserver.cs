@@ -13,7 +13,8 @@ namespace Taskboard.Desktop;
 internal sealed record CodexThread(string Id, string Name, long UpdatedAt)
 { public string DisplayName => string.IsNullOrWhiteSpace(Name) ? "未命名会话" : Name; public string Caption => DisplayName + " · " + Id; }
 internal sealed record CodexWatch(Guid TaskId, Guid StageId, Guid BindingId, string ThreadId, int Generation);
-internal sealed record CodexThreadCapability(string ThreadId, bool Live, string Reason, string StatusType);
+internal sealed record CodexThreadCapability(string ThreadId, bool Live, string Reason, string StatusType,
+    bool PendingAvailable = false, string PendingReason = "not-checked");
 internal sealed class CodexObserver : IAsyncDisposable
 {
     private sealed class BindingState(string threadId)
@@ -27,6 +28,9 @@ internal sealed class CodexObserver : IAsyncDisposable
     private CodexRpc? rpc;
     private CodexRpc? catalogRpc;
     private CodexDesktopBridge? desktop;
+    private CodexPendingBridge? pendingBridge;
+    private DateTime nextPendingDiscovery;
+    internal string PendingSourceReason { get; private set; } = "disabled";
     private Task? worker;
     private CodexWatch[] watches = [];
     private CodexThreadCapability[] capabilities = [];
@@ -145,8 +149,10 @@ internal sealed class CodexObserver : IAsyncDisposable
             {
                 var oldRpc = rpc; rpc = null;
                 var oldDesktop = desktop; desktop = null;
+                var oldPending = pendingBridge; pendingBridge = null;
                 if (oldRpc is not null) await oldRpc.DisposeAsync().ConfigureAwait(false);
                 if (oldDesktop is not null) await oldDesktop.DisposeAsync().ConfigureAwait(false);
+                if (oldPending is not null) await oldPending.DisposeAsync().ConfigureAwait(false);
                 Authoritative = false; TransportConnected = false; SourceIdentityVerified = false;
             }
             if (!lifetime.IsCancellationRequested) await Task.Delay(5000, lifetime.Token).ConfigureAwait(false);
@@ -163,8 +169,29 @@ internal sealed class CodexObserver : IAsyncDisposable
         var revision = state.Tracker.Revision;
         Interlocked.Increment(ref pollCount); Interlocked.Increment(ref turnReadCount);
         var snapshot = await bridge.Read(watch.ThreadId, state.Tracker.CurrentTurnId, lifetime.Token).ConfigureAwait(false);
+        var pendingAvailable = false;
+        var pendingReason = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(CodexPendingBridge.Setting)) ? "disabled" : "not-sampled";
+        if (snapshot.LiveCapable && CodexState.Text(snapshot.Status, "type") == "active" && snapshot.Turns.Count(x => x.Status == "inProgress") == 1 &&
+            Environment.GetEnvironmentVariable(CodexPendingBridge.Setting) is { Length: > 0 })
+        {
+            if (pendingBridge is null && DateTime.UtcNow >= nextPendingDiscovery) pendingBridge = new CodexPendingBridge();
+            if (pendingBridge is { } pendingSource)
+            {
+                var pending = await pendingSource.Read(watch.ThreadId, bridge.ServerProcessId, lifetime.Token).ConfigureAwait(false);
+                PendingSourceReason = pendingSource.Reason;
+                snapshot = snapshot with { Status = CodexPendingBridge.Merge(snapshot.Status, snapshot.Turns, pending) };
+                pendingAvailable = CodexState.Object(snapshot.Status, "pendingSourceVersion").ValueKind == JsonValueKind.Number;
+                pendingReason = pendingAvailable ? pendingSource.Reason : pending is null ? pendingSource.Reason : "pending-native-turn-not-confirmed";
+                if (pending is null && pendingSource.Reason != "thread-pending-unavailable")
+                {
+                    await pendingSource.DisposeAsync().ConfigureAwait(false); pendingBridge = null;
+                    nextPendingDiscovery = DateTime.UtcNow.AddSeconds(5);
+                }
+            }
+            else pendingReason = PendingSourceReason;
+        }
         if (!ApplyPoll(watch, state, revision, snapshot.Status, snapshot.Turns, snapshot.LiveCapable, sourceEpoch)) return PreviousCapability(watch);
-        return new(watch.ThreadId, snapshot.LiveCapable, snapshot.Reason, CodexState.Text(snapshot.Status, "type"));
+        return new(watch.ThreadId, snapshot.LiveCapable, snapshot.Reason, CodexState.Text(snapshot.Status, "type"), pendingAvailable, pendingReason);
     }
     private async Task<CodexThreadCapability> PollShared(CodexRpc connection, CodexWatch watch, string sourceEpoch, bool loaded)
     {
@@ -216,12 +243,25 @@ internal sealed class CodexObserver : IAsyncDisposable
                 else EmitUnknown(watch, sourceEpoch);
                 return true;
             }
-            foreach (var message in state.Tracker.Reconcile(status, turns, true, revision))
+            foreach (var message in state.Tracker.Reconcile(status, turns, true, revision, SourceKind == "desktop-native" ? sourceEpoch : null))
             {
-                if (CodexState.Text(message, "method") == "turn/completed") Interlocked.Increment(ref reconciledTerminalCount);
-                Emit(watch, message, true, sourceEpoch);
+                if (CodexState.Text(message, "method") is "turn/completed" or "probe/currentTurnStopped") Interlocked.Increment(ref reconciledTerminalCount);
+                // Observe start and its already-present requests atomically. A
+                // temporary Running event here would clear a reminder before the
+                // very next waiting snapshot puts the card back in Action.
+                var projected = CodexState.Text(message, "method") == "turn/started"
+                    ? JsonSerializer.SerializeToElement(new { method = "turn/started", @params = new {
+                        threadId = watch.ThreadId, turn = CodexState.Object(CodexState.Object(message, "params"), "turn"), status } })
+                    : message;
+                Emit(watch, projected, true, sourceEpoch);
             }
-            Emit(watch, JsonSerializer.SerializeToElement(new { method = "probe/snapshot", @params = new { threadId = watch.ThreadId, status } }), true, sourceEpoch);
+            var flags = CodexState.Object(status, "activeFlags");
+            var claimsExecution = CodexState.Text(status, "type") == "active" && flags.ValueKind == JsonValueKind.Array && flags.GetArrayLength() == 0;
+            var hasCurrentExecution = state.Tracker.CurrentTurnRunning && turns.Any(x => x.Id == state.Tracker.CurrentTurnId && x.Status == "inProgress");
+            // A late active status after a terminal, or an unavailable/ambiguous
+            // turn read, cannot falsely resume the finished turn and clear red dots.
+            if (claimsExecution && !hasCurrentExecution) EmitUnknown(watch, sourceEpoch);
+            else Emit(watch, JsonSerializer.SerializeToElement(new { method = "probe/snapshot", @params = new { threadId = watch.ThreadId, turnId = state.Tracker.CurrentTurnId, status } }), true, sourceEpoch);
             return true;
         }
     }
@@ -235,6 +275,7 @@ internal sealed class CodexObserver : IAsyncDisposable
     private void Receive(CodexRpc source, string sourceEpoch, JsonElement message, bool shared)
     {
         if (!shared || !ReferenceEquals(rpc, source) || sourceEpoch != epoch) return;
+        if (CodexState.Text(message, "method").StartsWith("probe/", StringComparison.Ordinal)) return;
         var parameters = CodexState.Object(message, "params"); var threadId = CodexState.Text(parameters, "threadId");
         if (threadId.Length == 0) threadId = CodexState.Text(CodexState.Object(parameters, "thread"), "id");
         if (!Capabilities.Any(x => x.ThreadId == threadId && x.Live)) return;
@@ -284,6 +325,7 @@ internal sealed class CodexObserver : IAsyncDisposable
         if (rpc is { } connection) await connection.DisposeAsync().ConfigureAwait(false);
         if (desktop is { } bridge) await bridge.DisposeAsync().ConfigureAwait(false);
         if (worker is not null) { try { await worker.ConfigureAwait(false); } catch (OperationCanceledException) { } }
+        if (pendingBridge is { } pendingSource) await pendingSource.DisposeAsync().ConfigureAwait(false);
         await catalogGate.WaitAsync().ConfigureAwait(false);
         try { if (catalogRpc is not null) { await catalogRpc.DisposeAsync().ConfigureAwait(false); catalogRpc = null; } }
         finally { catalogGate.Release(); }

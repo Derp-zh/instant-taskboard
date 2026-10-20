@@ -12,6 +12,7 @@ namespace Taskboard.Desktop;
 
 internal sealed class EditorSurface : Grid
 {
+    internal const double DefaultHeight = 650 * 11.0 / 13;
     public Grid Root => this;
     public SurfaceWindow? Host { get; internal set; }
     public bool IsActive => Host?.IsActive == true && (Session.TaskId is not null || controller.ActiveDraft == Session.Id);
@@ -338,6 +339,6 @@ internal sealed class TaskEditorWindow : SurfaceWindow
 {
     protected override bool ScrollEnabled => true;
     public EditorSurface View { get; }
-    public TaskEditorWindow(EditorSurface view) : base(430, 650)
+    public TaskEditorWindow(EditorSurface view) : base(430, EditorSurface.DefaultHeight)
     { View = view; WindowLayer = 1; Title = "编辑任务"; Root.Children.Add(view); view.Host = this; Closed += (_, _) => view.Destroy(); }
 }

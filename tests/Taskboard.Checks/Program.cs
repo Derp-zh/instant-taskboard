@@ -196,6 +196,8 @@ Assert(noColumnsJson.Deserialize<BoardState>()!.Preferences.Columns.Count==6,"�
 await StageRules.Run(root, Assert);
 await ArchivePolicyRules.Run(root, Assert);
 await CodexRecoveryRules.Run(root, Assert);
+await CodexStopRules.Run(root, Assert);
+await CodexQuickStopRules.Run(root, Assert);
 var codexTask = new WorkItem { Title="关联检查",Lane=Lane.Running,TimerUnread=true };
 codexTask.Stages[0].Codex = new CodexBinding { ThreadId="thread-1" };
 long eventSequence=0;

@@ -236,6 +236,7 @@ public sealed partial class BoardEngine(BoardState state)
     {
         binding.BindingId = Guid.NewGuid(); binding.Generation++; binding.Phase = CodexPhase.Unknown; binding.AwaitingUserAction = false;
         binding.SourceEpoch = ""; binding.TurnId = null; binding.PendingRequests.Clear(); binding.LastSequence = -1;
+        binding.PendingApprovals.Clear(); binding.PendingRequestOverflow = false;
     }
 
     public void Touch() => Dirty?.Invoke();
