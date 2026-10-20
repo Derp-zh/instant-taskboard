@@ -1,6 +1,6 @@
 # GitHub portable releases
 
-2026-10-21: [Instant Taskboard 0.9.20 widthfix](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20) is the latest release. Source/tag commit: `b7255e78559fcf29ce6ca0d3a727bd38d2819669`. Published source and documentation with a complete 485-file Windows x64 portable ZIP and SHA256 sidecar. The ZIP is 79,842,142 bytes, SHA256 `DEC7C187208F8090471BF9484550DA0B500B603E558616B0B5EC68E8403490FA`. Both public attachments were downloaded and checked against GitHub's recorded digests and sizes. The bilingual README pair passed the qiangshou skill validator. There is no `LICENSE` file; source reuse terms remain undeclared.
+2026-10-21: [Instant Taskboard 0.9.20 widthfix](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20) is the latest release. Source/tag commit: `b7255e78559fcf29ce6ca0d3a727bd38d2819669`. Published source and documentation with a complete 485-file Windows x64 portable ZIP and SHA256 sidecar. The final ZIP is 79,842,129 bytes, SHA256 `F2D9C67ABF2E4753DC6F5C93EB20A16BB8BD887665AF6048148623E9DAC88B2F`. After fixing a broken link in the bundled guide, the ZIP was rebuilt and the GitHub asset replaced. Both public attachments were downloaded again and checked against GitHub digests and sizes. The bilingual README pair passed the qiangshou skill validator. There is no `LICENSE` file; source reuse terms remain undeclared.
 
 See [release notes](RELEASE-NOTES-0.9.20.md), [release receipt](GITHUB-RELEASE-0.9.20.json), and [acceptance summary](ACCEPTANCE-0.9.20-widthfix.md).
 

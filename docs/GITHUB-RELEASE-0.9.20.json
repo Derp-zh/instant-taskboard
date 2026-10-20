@@ -11,16 +11,16 @@
   "assets": [
     {
       "name": "instant-taskboard-0.9.20-win-x64.zip",
-      "size": 79842142,
-      "sha256": "DEC7C187208F8090471BF9484550DA0B500B603E558616B0B5EC68E8403490FA",
-      "serverDigest": "sha256:dec7c187208f8090471bf9484550da0b500b603e558616b0b5ec68e8403490fa",
+      "size": 79842129,
+      "sha256": "F2D9C67ABF2E4753DC6F5C93EB20A16BB8BD887665AF6048148623E9DAC88B2F",
+      "serverDigest": "sha256:f2d9c67abf2e4753dc6f5c93eb20a16bb8bd887665af6048148623e9dac88b2f",
       "downloadedAndVerified": true
     },
     {
       "name": "instant-taskboard-0.9.20-win-x64.zip.sha256",
-      "size": 104,
-      "sha256": "20B1B3ED0220B4D58379BA3DB0ED61E7A1478DAA2834854FAF912B106B6086B2",
-      "serverDigest": "sha256:20b1b3ed0220b4d58379ba3db0ed61e7a1478daa2834854faf912b106b6086b2",
+      "size": 114,
+      "sha256": "67C95BFD0BBB49AE9EA538B779EE3D7B745D7AF9F97F31B4658B291CE55499D4",
+      "serverDigest": "sha256:67c95bfd0bbb49ae9ea538b779ee3d7b745d7af9f97f31b4658b291ce55499d4",
       "downloadedAndVerified": true
     }
   ],
