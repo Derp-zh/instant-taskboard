@@ -1,47 +1,88 @@
-<!-- README_SYNC: source=v0.9.20; updated=2026-10-21 -->
-<p align="center">简体中文 · <a href="./README_EN.md">English</a></p>
+<!-- README_SYNC: source=working-tree; updated=2026-10-21 -->
+简体中文 · [English](README_EN.md)
 
 # 即时任务看板
 
-面向需要同时推进多件事的人：用六个独立列表和阶段卡片管理任务，把每个阶段的进度与对应会话放在一起。
+一个常驻 Windows 桌面的任务看板，用来随手记灵感、整理任务进度，并把任务阶段与 Codex 会话对应起来。
 
-如果它对你有用，可以点亮 Star，方便以后回来，也让有相同需求的人发现它。<br>
-<a href="https://github.com/Derp-zh/instant-taskboard/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Derp-zh/instant-taskboard?style=flat-square&label=Stars"></a>
-<a href="https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20"><img alt="Latest release" src="https://img.shields.io/github/v/release/Derp-zh/instant-taskboard?style=flat-square&label=release"></a>
-<a href="https://github.com/Derp-zh/instant-taskboard/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Derp-zh/instant-taskboard?style=flat-square&label=issues"></a>
-<a href="https://github.com/Derp-zh/instant-taskboard"><img alt="Windows x64" src="https://img.shields.io/badge/platform-Windows%20x64-blue?style=flat-square"></a>
+适合同时推进多件事、经常需要在 AI 会话之间切换的人：把想做的事、正在做的事和需要自己处理的事放到桌面上，随时查看和继续。
 
-## 下载使用
+如果这个工具对你有用，欢迎到[项目首页](https://github.com/Derp-zh/instant-taskboard)点一个 Star，方便收藏。
 
-下载 [0.9.20 Windows x64 完整便携包](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20)及同页的 SHA256 文件，解压后运行 `即时任务看板.exe`。无需单独安装 .NET。升级前先从托盘退出旧版本；请保留完整解压目录。
+[下载 Windows 版本](https://github.com/Derp-zh/instant-taskboard/releases/latest) · [反馈问题](https://github.com/Derp-zh/instant-taskboard/issues)
 
-默认任务与配置放在当前 Windows 用户目录下，可在设置中查看或更改。程序提供备份与恢复入口；升级不会要求你把任务上传到云端。
+## 用它做什么
 
-## 它适合怎么用
+比如你在同时做几个项目：有些还只是想法，有些正在让 AI 执行，有些等你回答问题或检查结果。你可以把这些事分别放进看板，给每件事写下步骤和对应会话，需要接手时直接找到它。
 
-- **六个独立窗口**：灵感库、完善中、进行中、待操作、暂搁置、已完成，可按当前工作习惯摆放。
-- **按阶段记录一件事**：一张任务卡可以有多个阶段，各阶段分别关联会话；正在运行的阶段可显示状态，待处理事项优先呈现。
-- **把想法快速放进流程**：暂存池、灵感快捷录入、搜索、提醒、归档和撤销，帮助任务从记录走到完成。
-- **让看板贴近桌面工作区**：列表窗口、悬浮球和托盘入口；窗口展开使用真实控件裁切，繁忙时动画可能掉帧。
+默认提供六个列表，每个都是可以单独移动、调整大小的窗口：
 
-## AI 会话观察边界
+| 列表 | 放什么 |
+| --- | --- |
+| 灵感库 | 随手想到的点子、以后可能做的事 |
+| 完善中 | 还在补充需求、整理思路的任务 |
+| 进行中 | 正在推进的任务 |
+| 待操作 | 需要你回答、确认、检查或继续处理的任务 |
+| 暂搁置 | 暂时不推进，但希望保留的任务 |
+| 已完成 | 已经由你确认完成的任务 |
 
-可选的 Codex 观察模式默认关闭。它通过本机观察入口读取有限的会话状态；不会替你回答问题或批准操作，也不读取聊天正文来猜任务状态。它依赖兼容版本的 Codex 和手动启动步骤，具体适用范围及已知未验收情形见[观察说明](docs/CODEX-PENDING-BRIDGE-PUBLIC.md)。这不是对所有 AI 应用的通用接入。
+列表支持改名、新增和隐藏，部分列表可在清空后删除；任务可以拖到其他列表，也可以在列表内调整顺序。
 
-飞书云端同步尚未接入。任务内容默认存于本机；请按你的设备备份习惯保护数据。
+## 主要功能
 
-## 从源码构建
+| 功能 | 能做什么 |
+| --- | --- |
+| 快速记事 | 在灵感库直接输入想法；也可以打开完整新建窗口，填写名称、详情和分类 |
+| 多份草稿 | 同时暂存多件还没整理好的事，在堆叠卡片间切换；未提交的草稿可在重启后继续 |
+| 分阶段任务 | 给一件任务拆出多个阶段，分别命名、写详情、标记运行状态和绑定会话 |
+| 标签与优先级 | 给任务选择多个 AI 平台标签和一个优先级；选项名称、颜色可以自定义 |
+| 搜索定位 | 搜索任务名称和所有阶段详情，点击结果直接找到对应卡片 |
+| 定时提醒 | 设置一次性、每天或每周提醒；到期后任务进入待操作，并给出提醒 |
+| 待操作预览 | 悬浮球显示待操作数量；收起看板时，悬停即可预览，点击任务展开定位 |
+| 撤销恢复 | 撤销、恢复本次运行最近 20 步正式修改，找回误删、误移动或误改的任务 |
+| 任务归档 | 手动归档已完成或暂搁置的任务，也可按设定天数自动归档已完成任务；归档后可以恢复 |
+| 悬浮入口 | 用悬浮球、托盘或全局快捷键展开收起；悬浮球支持贴靠桌面右边缘并自动隐藏 |
+| 桌面布局 | 独立摆放列表、调整尺寸、整组缩放、记住位置，并分别调节列表、编辑窗口和悬浮球的透明度 |
 
-需要 Windows、.NET 8 SDK、PowerShell 7 和 NuGet 网络连接。构建脚本会把 Windows 系统提供的默认提示音复制到运行目录；源码仓库不携带这份系统音频。
+面板收起后，程序仍在后台运行，提醒和未提交输入会保留。从托盘选择“退出程序”才会完全退出。
 
-```powershell
-pwsh -NoProfile -File tools/Build-Portable.ps1 -Output release/portable
-```
+## 关联 Codex 会话
 
-完整需求和使用方式见[使用说明](docs/USER-GUIDE-0.9.20.md)、[需求文档](docs/PRD.md)与[任务清单](docs/TASKS.md)。第三方组件声明见[NOTICE](docs/THIRD-PARTY-NOTICES.txt)。
+可以为**每个阶段分别关联一个已有的 Codex 会话**，在卡片上查看对应会话名称和状态。一个任务的不同阶段可以对应不同会话。
 
-## 授权与反馈
+启用可选的本机状态观察后，进行中和待操作之间可以自动流转：
 
-当前仓库没有 `LICENSE` 文件，因此源码复用、修改和再分发的授权条款尚未声明；不要仅凭代码公开推定许可证。运行包中的第三方组件依各自声明适用。
+- 会话等待你回答、批准操作，或正常执行结束需要检查结果时，任务进入待操作。
+- 会话实际恢复执行后，任务回到进行中；有多个运行阶段时，仍在等待处理的阶段优先。
+- AI 执行结束不会自动把任务标成已完成，最终完成由你确认。
 
-遇到问题或希望讨论改进，可开一个 [Issue](https://github.com/Derp-zh/instant-taskboard/issues)。如果这个工具适合你的工作流，也欢迎在顶部点 Star 收藏。
+**状态观察默认关闭，需要兼容的 Codex 版本和额外启动步骤。** 它只读取结构化状态，不会替你回答、批准操作或发送消息。真实整轮失败及额度耗尽停止仍有待实机验收。启用方法和兼容范围见[Codex 状态观察说明](docs/CODEX-PENDING-BRIDGE-PUBLIC.md)。
+
+AI 平台标签也可以用于一般分类；选择某个标签不代表已经连接那个平台。飞书双向同步、DSH 和 WorkBuddy 的实际接入尚未实现。
+
+## 自定义通知提示音
+
+设置中的“监听”可以按应用配置 Windows 通知提示音，使用内置声音或自选音频，并支持试听。此模块与 Codex 会话状态观察分开，通知本身不会驱动任务移列。
+
+监听默认关闭；实际通知捕获、原系统提示音替换与恢复仍需在目标应用和系统环境下单独验证。
+
+## 下载与开始使用
+
+适用于 Windows 10（2004 或更新版本）及 Windows 11，64 位。
+
+1. 打开[最新版本下载页](https://github.com/Derp-zh/instant-taskboard/releases/latest)，下载 Windows x64 ZIP。
+2. 完整解压，运行 `即时任务看板.exe`。运行包已包含 .NET，无需单独安装；请保留解压后的整个目录。
+3. 点击悬浮球展开看板，在灵感库直接记一条想法，或从任意列表的新建入口建立任务。
+4. 在任务中设置需要的提醒；窗口、快捷键和开机启动可在设置中调整，默认全局快捷键为 `Ctrl+~`。
+
+升级前先从旧版本托盘退出，再完整解压新版。更多操作见[使用说明](docs/USER-GUIDE-0.9.20.md)。
+
+## 数据保存在本机
+
+任务、阶段和草稿保存在本地。默认任务目录为 `%LOCALAPPDATA%/InstantTaskboard/data`，配置目录为 `%LOCALAPPDATA%/InstantTaskboard/config`，可在设置中分别更改。
+
+程序文件和数据目录分开保存。换电脑时需要同时带走实际使用的数据、配置目录；设置中的“配置备份”只备份设置，**不包含任务和草稿**。
+
+问题与建议欢迎提交到 [Issues](https://github.com/Derp-zh/instant-taskboard/issues)，也可以在[项目首页](https://github.com/Derp-zh/instant-taskboard)点 Star 收藏，方便以后找到。
+
+仓库目前未提供 LICENSE 文件，源码的使用与再分发授权条款尚未声明。

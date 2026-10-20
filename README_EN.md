@@ -1,47 +1,88 @@
-<!-- README_SYNC: source=v0.9.20; updated=2026-10-21 -->
-<p align="center"><a href="./README.md">简体中文</a> · English</p>
+<!-- README_SYNC: source=working-tree; updated=2026-10-21 -->
+[简体中文](README.md) · English
 
 # Instant Taskboard
 
-A Windows desktop board for people juggling several projects: move work through six independent lists and keep each task stage beside its associated conversation.
+A Windows desktop task board for capturing ideas, organizing work, and linking individual task stages to Codex conversations.
 
-If it fits your workflow, a Star is an easy way to bookmark the project and help others find it too.<br>
-<a href="https://github.com/Derp-zh/instant-taskboard/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Derp-zh/instant-taskboard?style=flat-square&label=Stars"></a>
-<a href="https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20"><img alt="Latest release" src="https://img.shields.io/github/v/release/Derp-zh/instant-taskboard?style=flat-square&label=release"></a>
-<a href="https://github.com/Derp-zh/instant-taskboard/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Derp-zh/instant-taskboard?style=flat-square&label=issues"></a>
-<a href="https://github.com/Derp-zh/instant-taskboard"><img alt="Windows x64" src="https://img.shields.io/badge/platform-Windows%20x64-blue?style=flat-square"></a>
+Built for people juggling several tasks and AI conversations: keep your ideas, ongoing work, and tasks that need your attention visible on the desktop, ready to pick up again.
 
-## Get the app
+Find it useful? [Star the project](https://github.com/Derp-zh/instant-taskboard) to keep it handy.
 
-Download the [0.9.20 Windows x64 portable package](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20) and its SHA256 file from the release page. Extract the full archive and run `即时任务看板.exe`. The package is self-contained; no separate .NET installation is needed. Exit an older version from the tray before upgrading, and keep the extracted folder intact.
+[Download for Windows](https://github.com/Derp-zh/instant-taskboard/releases/latest) · [Report an issue](https://github.com/Derp-zh/instant-taskboard/issues)
 
-Tasks and settings are stored under the current Windows user profile by default. You can inspect or change the location in settings. The app includes backup and restore controls; it does not require uploading your task board to a cloud service.
+## What is it for?
 
-## What it helps you do
+Suppose you have several projects underway. Some are still ideas, some are being worked on by AI, and others need an answer or a review from you. Put them on the board, record the steps and related conversations, and find the right task when you need to step in.
 
-- **Keep six work areas separate:** Ideas, Refining, In Progress, Needs Attention, Paused, and Done each have an independent window you can arrange around your workspace.
-- **Track work by stage:** A task can contain multiple stages, each with its own conversation binding. Running stages show their status, while actionable items receive priority.
-- **Move ideas into a workflow:** Use the shared draft pool, quick idea capture, search, reminders, archiving, and undo as work changes.
-- **Keep the board near your desktop:** Use list windows, a floating orb, or the tray. Window transitions reveal real controls through clipping; heavy UI activity can drop animation frames.
+The default board has six lists. Each is a separate window you can move and resize:
 
-## Optional Codex observation
+| List | What goes here |
+| --- | --- |
+| Ideas | Quick notes and things you might do later |
+| Refining | Tasks whose requirements or approach still need work |
+| In progress | Work currently underway |
+| Needs action | Tasks waiting for your answer, approval, review, or next step |
+| On hold | Work you want to keep but are not pursuing right now |
+| Done | Tasks you have personally confirmed as complete |
 
-The optional Codex observation mode is off by default. It reads a limited set of session state through a local observation endpoint. It does not answer prompts or approve actions, and it does not infer task state from chat text. It depends on a compatible Codex version and manual startup steps; see the [observation guide](docs/CODEX-PENDING-BRIDGE-PUBLIC.md) for scope and unverified cases. This is not a general integration for every AI app.
+Rename, add, or hide lists; some lists can also be deleted once empty. Drag tasks between lists or reorder them within a list.
 
-Feishu cloud sync is not implemented. Task data is stored locally by default; protect it with your usual device backup practices.
+## Features
 
-## Build from source
+| Feature | What you can do |
+| --- | --- |
+| Quick capture | Type directly into the Ideas list, or open the full editor to add a name, details, and categories |
+| Multiple drafts | Keep several unfinished entries in a stack, switch between them, and resume drafts after restarting |
+| Task stages | Split a task into named stages, each with its own notes, running flag, and conversation link |
+| Labels and priority | Assign multiple AI platform labels and one priority; customize option names and colors |
+| Search | Search task names and all stage details, then jump straight to the matching card |
+| Scheduled reminders | Set a one-time, daily, or weekly reminder; when due, the task moves to Needs action and you receive a notification |
+| Needs-action preview | See the pending count on the floating button; hover while the board is collapsed to preview tasks, then click to locate one |
+| Undo and redo | Reverse or reapply the last 20 committed edits in the current session, including accidental deletions, moves, and field changes |
+| Task archive | Manually archive Done or On hold tasks, or automatically archive Done tasks after a configurable number of days; archived tasks can be restored |
+| Floating controls | Toggle the board from the floating button, tray, or global shortcut; dock the floating button to the right edge of the desktop with auto-hide |
+| Desktop layout | Position and resize lists independently, scale the group, remember positions, and adjust transparency separately for lists, editors, and the floating button |
 
-You need Windows, the .NET 8 SDK, PowerShell 7, and network access to NuGet. On Windows, the build script copies the system-provided default alert sound into the output folder; that system audio file is not included in the source repository.
+Collapsing the board keeps the app running, with reminders and unsubmitted input preserved. Choose Exit from the system tray to quit completely.
 
-```powershell
-pwsh -NoProfile -File tools/Build-Portable.ps1 -Output release/portable
-```
+## Link Codex conversations
 
-See the [user guide](docs/USER-GUIDE-0.9.20.md), [product requirements](docs/PRD.md), and [task list](docs/TASKS.md). Third-party notices are in [NOTICE](docs/THIRD-PARTY-NOTICES.txt).
+**Each stage can link to an existing Codex conversation**, with its name and status shown on the card. Different stages of the same task can use different conversations.
 
-## License and feedback
+With optional local status observation enabled, tasks can move automatically between In progress and Needs action:
 
-This repository currently has no `LICENSE` file, so terms for reusing, modifying, and redistributing the source have not been declared. Publicly visible source code does not by itself establish a license. Third-party components in the app remain subject to their respective notices.
+- Waiting for your answer or approval, or finishing a run that needs review, moves the task to Needs action.
+- Actual execution resuming moves it back to In progress. If several stages are active, a stage still waiting for attention takes priority.
+- A completed AI run never marks the task Done automatically. You decide when the task is finished.
 
-For questions or proposed improvements, open an [Issue](https://github.com/Derp-zh/instant-taskboard/issues). If the board works for you, the Star link above is a good way to bookmark it.
+**Status observation is off by default and requires a compatible Codex version plus additional startup steps.** It reads structured status signals and does not answer questions, approve actions, or send messages for you. Real full-turn failures and quota-exhaustion stops still await desktop validation. See the [Codex status observation guide](docs/CODEX-PENDING-BRIDGE-PUBLIC.md) for setup and compatibility.
+
+AI platform labels can also serve as ordinary categories; choosing one does not connect that platform. Feishu two-way sync and live DSH or WorkBuddy integration are not implemented.
+
+## Custom notification sounds
+
+The notification-listening settings let you configure a Windows notification sound for each application, using the built-in sound or your own audio, with playback previews. This module is separate from Codex status observation; notifications do not move tasks between lists.
+
+Listening is off by default. Actual notification capture, replacement of the original system sound, and restoration still need separate validation for the target application and Windows environment.
+
+## Download and get started
+
+For 64-bit Windows 10 (version 2004 or later) and Windows 11.
+
+1. Open the [latest release](https://github.com/Derp-zh/instant-taskboard/releases/latest) and download the Windows x64 ZIP.
+2. Extract the entire archive and run `即时任务看板.exe`. The package includes .NET, so no separate runtime installation is needed. Keep the extracted folder intact.
+3. Click the floating button to open the board. Capture an idea directly in the Ideas list, or create a task from any list.
+4. Add reminders to individual tasks. Adjust windows, the shortcut, and startup at sign-in in Settings. The default global shortcut is `Ctrl+~`.
+
+Before upgrading, exit the old version from its tray menu, then extract the new version in full. See the [user guide](docs/USER-GUIDE-0.9.20.md) for more.
+
+## Local data
+
+Tasks, stages, and drafts are stored locally. The default task directory is `%LOCALAPPDATA%/InstantTaskboard/data`; configuration is in `%LOCALAPPDATA%/InstantTaskboard/config`. Both locations can be changed independently in Settings.
+
+App files and data are stored separately. When moving to another computer, take the actual data and configuration directories with you. The configuration-backup feature saves settings only: **it does not include tasks or drafts**.
+
+Report problems or suggestions through [Issues](https://github.com/Derp-zh/instant-taskboard/issues), or [star the project](https://github.com/Derp-zh/instant-taskboard) to find it again later.
+
+The repository currently has no LICENSE file. Terms for using and redistributing the source have not been declared.

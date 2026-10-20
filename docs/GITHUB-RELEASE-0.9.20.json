@@ -18,15 +18,15 @@
     },
     {
       "name": "instant-taskboard-0.9.20-win-x64.zip.sha256",
-      "size": 114,
-      "sha256": "67C95BFD0BBB49AE9EA538B779EE3D7B745D7AF9F97F31B4658B291CE55499D4",
-      "serverDigest": "sha256:67c95bfd0bbb49ae9ea538b779ee3d7b745d7af9f97f31b4658b291ce55499d4",
+      "size": 104,
+      "sha256": "4AA27450723E1D11F995FE54315950A894CB73A51B6426AAB30CD7E1C7E30E7E",
+      "serverDigest": "sha256:4aa27450723e1d11f995fe54315950a894cb73a51b6426aab30cd7e1c7e30e7e",
       "downloadedAndVerified": true
     }
   ],
   "portableFiles": 485,
   "archiveManifestChecked": true,
-  "readmePair": "README.md + README_EN.md; qiangshou skill validator passed",
+  "readmePair": "README.md + README_EN.md rewritten around purpose and features; qiangshou validator passed",
   "license": "No LICENSE file; README discloses that reuse terms are not declared.",
   "mainCommitAtRelease": "b7255e78559fcf29ce6ca0d3a727bd38d2819669"
 }
