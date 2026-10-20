@@ -4,7 +4,7 @@
 
 - [Release notes](RELEASE-NOTES-0.9.20.md), [current user guide](USER-GUIDE-0.9.20.md), [acceptance summary](ACCEPTANCE-0.9.20-widthfix.md), [verification](VERIFICATION-0.9.20-widthfix.json), [portable package manifest](BUILD-INFO-0.9.20-widthfix.json).
 - Latest stage-name rule: the conversation viewport uses 3–5 rendered Chinese glyph widths; overflowing text scrolls, and the stage name uses the remaining room.
-- Source release: [GitHub v0.9.20](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20).
+- Source release: [GitHub v0.9.20](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20); source commit and package checks are in the [release receipt](GITHUB-RELEASE-0.9.20.json).
 
 ## Previous public docs
 

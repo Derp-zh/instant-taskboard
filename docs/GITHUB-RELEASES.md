@@ -1,3 +1,9 @@
+# GitHub portable releases
+
+2026-10-21: [Instant Taskboard 0.9.20 widthfix](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20) is the latest release. Source/tag commit: `b7255e78559fcf29ce6ca0d3a727bd38d2819669`. Published source and documentation with a complete 485-file Windows x64 portable ZIP and SHA256 sidecar. The ZIP is 79,842,142 bytes, SHA256 `DEC7C187208F8090471BF9484550DA0B500B603E558616B0B5EC68E8403490FA`. Both public attachments were downloaded and checked against GitHub's recorded digests and sizes. The bilingual README pair passed the qiangshou skill validator. There is no `LICENSE` file; source reuse terms remain undeclared.
+
+See [release notes](RELEASE-NOTES-0.9.20.md), [release receipt](GITHUB-RELEASE-0.9.20.json), and [acceptance summary](ACCEPTANCE-0.9.20-widthfix.md).
+
 # GitHub运行包发布记录
 
 2026-10-19已发布[即时任务看板0.9.16](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.16)，同步源码/文档及完整476文件ZIP、SHA256。源码标签提交`0a8e923e64983c515a89b24dfb503b6c65f1a53c`；两个附件实际下载及逐文件校验通过，确认为latest。原桌面执行/结束/双向移列已实测；异步提问仍缺信号，计划模式提问及权限等待/批准恢复未验收，不宣称完整接入通过。
