@@ -127,6 +127,21 @@ public sealed partial class BoardEngine(BoardState state)
         session.Working.Stages.Add(stage); StageSession(session); return stage;
     }
 
+    public const string LastStageMessage = "至少保留一个阶段";
+    public bool RemoveStage(EditSession session, Guid stageId, out string? message)
+    {
+        var item = session.Working;
+        var stage = item.Stages.FirstOrDefault(x => x.Id == stageId);
+        message = null;
+        if (stage is null) return false;
+        if (item.Stages.Count <= 1) { message = LastStageMessage; return false; }
+        if (stage.IsRunning == true && !CanSetStageRunning(item, stageId, false))
+        { message = LastRunningStageMessage; return false; }
+        item.Stages.Remove(stage);
+        if (item.CurrentStageId == stageId) item.CurrentStageId = item.Stages.First(x => x.IsRunning == true).Id;
+        StageSession(session); return true;
+    }
+
     public static IReadOnlyList<Stage> CardStages(WorkItem item)
     {
         if (item.Stages.Count == 1) return item.Stages;

@@ -35,6 +35,7 @@ internal sealed class CodexObserver : IAsyncDisposable
     private CodexWatch[] watches = [];
     private CodexThreadCapability[] capabilities = [];
     private string executable = "";
+    private string inspector = "";
     private long sequence, pollCount, turnReadCount, reconciledTerminalCount;
     private string epoch = "";
     internal string Epoch => epoch;
@@ -55,19 +56,13 @@ internal sealed class CodexObserver : IAsyncDisposable
         foreach (var watch in values) trackers.GetOrAdd(watch, value => new BindingState(value.ThreadId));
         foreach (var removed in trackers.Keys.Where(x => !values.Contains(x))) trackers.TryRemove(removed, out _);
     }
-    internal void Start(string executable, string endpoint)
+    internal void Start(string executable, string endpoint, string? inspector = null)
     {
         this.executable = executable;
+        this.inspector = inspector ?? Environment.GetEnvironmentVariable(CodexPendingBridge.Setting) ?? "";
         if (worker is null) worker = Task.Run(() => Run(executable, endpoint));
     }
-    internal static string FindExecutable()
-    {
-        foreach (var directory in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator))
-        { var candidate = Path.Combine(directory.Trim('"'), "codex.exe"); if (File.Exists(candidate)) return candidate; }
-        var known = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OpenAI", "Codex", "bin");
-        if (Directory.Exists(known)) return Directory.EnumerateFiles(known, "codex.exe", SearchOption.AllDirectories).FirstOrDefault() ?? "";
-        return "";
-    }
+    internal static string FindExecutable() => CodexInstallationDiscovery.FindCliExecutable();
     private void SetStatus(string value) { Status = value; Changed?.Invoke(); }
     private void PublishCapabilities(IEnumerable<CodexThreadCapability> values)
     {
@@ -87,7 +82,7 @@ internal sealed class CodexObserver : IAsyncDisposable
             try
             {
                 SetStatus("正在连接 · 状态待确认");
-                if (endpoint.Length == 0) desktop = await CodexDesktopBridge.TryConnect(lifetime.Token).ConfigureAwait(false);
+                if (endpoint.Length == 0) desktop = await CodexDesktopBridge.TryConnect(lifetime.Token, inspector).ConfigureAwait(false);
                 var shared = false;
                 if (desktop is null)
                 {
@@ -132,7 +127,7 @@ internal sealed class CodexObserver : IAsyncDisposable
                     if (SourceKind == "historical" && endpoint.Length == 0 && DateTime.UtcNow >= nextDesktopDiscovery)
                     {
                         nextDesktopDiscovery = DateTime.UtcNow.AddSeconds(10);
-                        var candidate = await CodexDesktopBridge.TryConnect(lifetime.Token).ConfigureAwait(false);
+                        var candidate = await CodexDesktopBridge.TryConnect(lifetime.Token, inspector).ConfigureAwait(false);
                         if (candidate is not null) { await candidate.DisposeAsync().ConfigureAwait(false); break; }
                     }
                     await Task.Delay(desktop is null ? 750 : 300, lifetime.Token).ConfigureAwait(false);
@@ -170,11 +165,11 @@ internal sealed class CodexObserver : IAsyncDisposable
         Interlocked.Increment(ref pollCount); Interlocked.Increment(ref turnReadCount);
         var snapshot = await bridge.Read(watch.ThreadId, state.Tracker.CurrentTurnId, lifetime.Token).ConfigureAwait(false);
         var pendingAvailable = false;
-        var pendingReason = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(CodexPendingBridge.Setting)) ? "disabled" : "not-sampled";
+        var pendingReason = string.IsNullOrWhiteSpace(inspector) ? "disabled" : "not-sampled";
         if (snapshot.LiveCapable && CodexState.Text(snapshot.Status, "type") == "active" && snapshot.Turns.Count(x => x.Status == "inProgress") == 1 &&
-            Environment.GetEnvironmentVariable(CodexPendingBridge.Setting) is { Length: > 0 })
+            inspector.Length > 0)
         {
-            if (pendingBridge is null && DateTime.UtcNow >= nextPendingDiscovery) pendingBridge = new CodexPendingBridge();
+            if (pendingBridge is null && DateTime.UtcNow >= nextPendingDiscovery) pendingBridge = new CodexPendingBridge(inspector);
             if (pendingBridge is { } pendingSource)
             {
                 var pending = await pendingSource.Read(watch.ThreadId, bridge.ServerProcessId, lifetime.Token).ConfigureAwait(false);

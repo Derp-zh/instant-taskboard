@@ -1,5 +1,7 @@
 # 原桌面只读桥接检查
 
+0.9.19-preview新增`--pending`：配合`--discover --targets <获准测试目标文件>`和显式环境变量`INSTANT_TASKBOARD_CODEX_INSPECTOR`，只读尝试页面观察桥。报告只含别名、可用性、轮次是否匹配、请求/批准数量和执行标志，不存编号或内容。此模式须在用户协调启用调试后使用；当前本轮没有对原桌面运行它。端口发现或请求读取都不能代替实际卡片与回答恢复验收。
+
 `dotnet run --project tools/CodexDesktopBridgeChecks -c Release -- test-output/codex-desktop-bridge-checks/report.json`运行合成解析、身份匹配和允许操作检查。加`--discover`可验证本机已安装原桌面的进程包身份、同桌面会话、同用户SID，并检查其公开`read_thread`工具。受工具沙箱限制时，发现测试需要在已授权的本机执行环境运行。
 
 默认及`--discover`不读取聊天。可再加`--targets <隔离测试目标JSON>`，仅只读核实显式指定测试聊天的当前状态及轮次元数据，并测试无效目标不会破坏其他目标；目标文件格式为`[{"alias":"A","threadId":"测试聊天编号"}]`。报告只保存别名、状态和轮次哈希，不保存正文或真实编号。工具不会创建、发消息、回答、批准或修改聊天。

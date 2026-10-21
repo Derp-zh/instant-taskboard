@@ -87,7 +87,7 @@ internal static class Ux0913Checks
         Check(ball.IsEdgeHidden && ball.IsEdgeAnimating && Math.Abs(from - (-8058)) < 1, "收起从完整显示位置启动动画");
         while (ball.IsEdgeAnimating) { await Task.Delay(7); poses.Add(ball.Left); }
         Check(poses.Any(x => x > from + 1 && x < -8015) && Math.Abs(ball.Left - (-8014.5)) < .1 && Math.Abs(ball.EdgeVisibleClip.Width - 14.5) < .1, "收起动画有中间位置且最终显示1/4");
-        Check(ball.EdgeDot.Visibility == Visibility.Visible && ball.CountBubble.Visibility == Visibility.Collapsed && ReferenceEquals(ball.EdgeDot.Fill, ball.CountBubble.BorderBrush) && ball.EdgeDot.RenderTransform is TranslateTransform { Y: -10 }, "隐藏红点上移10并使用待操作气泡边框同色");
+        Check(ball.EdgeDot.Visibility == Visibility.Visible && ball.CountBubble.Opacity == 0 && ReferenceEquals(ball.EdgeDot.Fill, ball.CountBubble.BorderBrush) && ball.EdgeDot.RenderTransform is TranslateTransform { Y: -10 }, "隐藏红点上移10并使用待操作气泡边框同色，数字预布局但不可见");
         ball.RestoreFromEdge(animate: true); var opacities = new List<double>();
         while (ball.IsEdgeRestoring) { await Task.Delay(7); opacities.Add(ball.EdgeDot.Opacity); }
         Check(opacities.Any(x => x > 0 && x < 1) && !ball.IsEdgeHidden && ball.EdgeDot.Visibility == Visibility.Collapsed && Math.Abs(ball.Left - from) < .1, "100毫秒弹出时红点渐隐，最终恢复完整显示");

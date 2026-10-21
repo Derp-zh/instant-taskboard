@@ -27,7 +27,6 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     // Observed installed OpenAI-signed 26.1013.4894.0 artifact. Direct launch
     // can lack an MSIX process identity; accept only this exact protected image
     // while the user explicitly enables the loopback observer.
-    internal const string ObservedExecutable = @"C:\Program Files\WindowsApps\OpenAI.Codex_26.1013.4894.0_x64__2p2nqsd0c76g0\app\ChatGPT.exe";
     internal const string ObservedExecutableHash = "2F61EAEB01DCEE7FD18D572FBB338C88B686C0D891427487FDD182AFDD64B4F6";
     private readonly NamedPipeClientStream pipe;
     private readonly SemaphoreSlim calls = new(1, 1);
@@ -40,8 +39,9 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     internal static bool Allowed(string method) => method is "tools/list" or "read_thread";
     private CodexDesktopBridge(NamedPipeClientStream pipe, string identityKind) { this.pipe = pipe; IdentityKind = identityKind; }
 
-    internal static async Task<CodexDesktopBridge?> TryConnect(CancellationToken cancellation = default)
+    internal static async Task<CodexDesktopBridge?> TryConnect(CancellationToken cancellation = default, string? inspector = null)
     {
+        inspector ??= Environment.GetEnvironmentVariable(CodexPendingBridge.Setting);
         if (!OperatingSystem.IsWindows()) return null;
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
         timeout.CancelAfter(4000);
@@ -62,7 +62,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
                     stream = new NamedPipeClientStream(".", Path.GetFileName(path), PipeDirection.InOut,
                         PipeOptions.Asynchronous, TokenImpersonationLevel.Identification);
                     await stream.ConnectAsync(350, timeout.Token).ConfigureAwait(false);
-                    if (!VerifyServer(stream.SafePipeHandle, out var identityReason)) { DiscoveryReason = identityReason; stream.Dispose(); continue; }
+                    if (!VerifyServer(stream.SafePipeHandle, inspector, out var identityReason)) { DiscoveryReason = identityReason; stream.Dispose(); continue; }
                     DiscoveryReason = "verified-peer-tools-unavailable";
                     var bridge = new CodexDesktopBridge(stream, identityReason); stream = null;
                     try
@@ -228,12 +228,12 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     private static JsonElement Object(JsonElement element, string name) => element.ValueKind == JsonValueKind.Object && element.TryGetProperty(name, out var value) ? value : default;
     internal static bool IsDesktopPipeName(string name) => name.StartsWith("codex-app-tools-", StringComparison.Ordinal) && Guid.TryParseExact(name[16..], "D", out _);
 
-    internal static bool MatchesObservedExecutable(int packageError, string path, string hash, string? inspector) =>
+    internal static bool MatchesObservedExecutable(int packageError, string path, string hash, string? inspector, string registeredExecutable) =>
         packageError == 15700 && CodexPendingBridge.ValidEndpoint(inspector ?? "", out _) &&
-        string.Equals(path, ObservedExecutable, StringComparison.OrdinalIgnoreCase) &&
+        registeredExecutable.Length > 0 && string.Equals(path, registeredExecutable, StringComparison.OrdinalIgnoreCase) &&
         string.Equals(hash, ObservedExecutableHash, StringComparison.OrdinalIgnoreCase);
 
-    private static bool VerifyServer(SafePipeHandle pipeHandle, out string reason)
+    private static bool VerifyServer(SafePipeHandle pipeHandle, string? inspector, out string reason)
     {
         reason = "server-identity-unavailable";
         try
@@ -250,21 +250,25 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
             if (!packageIdentity)
             {
                 reason = "desktop-package-identity-mismatch";
-                if (packageError != 15700 || !CodexPendingBridge.ValidEndpoint(Environment.GetEnvironmentVariable(CodexPendingBridge.Setting) ?? "", out _)) return false;
+                if (packageError != 15700 || !CodexPendingBridge.ValidEndpoint(inspector ?? "", out _)) return false;
                 var image = new StringBuilder(32768); uint imageLength = (uint)image.Capacity;
                 if (!QueryFullProcessImageName(handle, 0, image, ref imageLength)) return false;
-                using var executable = new FileStream(ObservedExecutable, FileMode.Open, FileAccess.Read, FileShare.Read);
-                // WindowsApps may be a volume junction (C: alias, D: image).
-                // Compare the process path to the final path of the pinned file
-                // handle, rather than trusting another supplied installation path.
-                var canonical = new StringBuilder(32768);
-                var finalLength = GetFinalPathNameByHandle(executable.SafeFileHandle, canonical, (uint)canonical.Capacity, 0);
-                if (finalLength == 0 || finalLength >= canonical.Capacity) return false;
-                var expectedImage = canonical.ToString();
-                if (expectedImage.StartsWith(@"\\?\", StringComparison.Ordinal)) expectedImage = expectedImage[4..];
-                if (!string.Equals(image.ToString(), expectedImage, StringComparison.OrdinalIgnoreCase)) return false;
-                var hash = Convert.ToHexString(SHA256.HashData(executable));
-                if (!MatchesObservedExecutable(packageError, ObservedExecutable, hash, Environment.GetEnvironmentVariable(CodexPendingBridge.Setting))) return false;
+                var matched = false;
+                // Resolve the current registration; never embed a versioned WindowsApps path.
+                foreach (var registered in CodexInstallationDiscovery.RegisteredDesktops())
+                {
+                    using var executable = new FileStream(registered, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    var canonical = new StringBuilder(32768);
+                    var finalLength = GetFinalPathNameByHandle(executable.SafeFileHandle, canonical, (uint)canonical.Capacity, 0);
+                    if (finalLength == 0 || finalLength >= canonical.Capacity) continue;
+                    var expectedImage = canonical.ToString();
+                    if (expectedImage.StartsWith(@"\\?\", StringComparison.Ordinal)) expectedImage = expectedImage[4..];
+                    if (!string.Equals(image.ToString(), expectedImage, StringComparison.OrdinalIgnoreCase)) continue;
+                    var hash = Convert.ToHexString(SHA256.HashData(executable));
+                    matched = MatchesObservedExecutable(packageError, registered, hash, inspector, registered);
+                    if (matched) break;
+                }
+                if (!matched) return false;
             }
             if (!OpenProcessToken(handle, 0x0008, out var token)) { reason = "desktop-user-token-unavailable"; return false; }
             using (token)

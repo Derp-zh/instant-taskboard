@@ -1,4 +1,4 @@
-<!-- README_SYNC: source=working-tree; updated=2026-10-21 -->
+<!-- README_SYNC: source=working-tree; updated=2026-10-22 -->
 [简体中文](README.md) · English
 
 # Instant Taskboard
@@ -10,6 +10,8 @@ Built for people juggling several tasks and AI conversations: keep your ideas, o
 Find it useful? [Star the project](https://github.com/Derp-zh/instant-taskboard) to keep it handy.
 
 [Download for Windows](https://github.com/Derp-zh/instant-taskboard/releases/latest) · [Report an issue](https://github.com/Derp-zh/instant-taskboard/issues)
+
+Current version **0.9.22** adds stage deletion, protection for all six built-in lists, settings layout/save improvements, a synchronized badge transition, and Codex initialization. See the [release notes](docs/RELEASE-NOTES-0.9.22.md).
 
 ## What is it for?
 
@@ -26,7 +28,7 @@ The default board has six lists. Each is a separate window you can move and resi
 | On hold | Work you want to keep but are not pursuing right now |
 | Done | Tasks you have personally confirmed as complete |
 
-Rename, add, or hide lists; some lists can also be deleted once empty. Drag tasks between lists or reorder them within a list.
+Rename, add, or hide lists. All six built-in lists are protected from deletion; empty custom lists can still be deleted. Drag tasks between lists or reorder them within a list.
 
 ## Features
 
@@ -34,7 +36,7 @@ Rename, add, or hide lists; some lists can also be deleted once empty. Drag task
 | --- | --- |
 | Quick capture | Type directly into the Ideas list, or open the full editor to add a name, details, and categories |
 | Multiple drafts | Keep several unfinished entries in a stack, switch between them, and resume drafts after restarting |
-| Task stages | Split a task into named stages, each with its own notes, running flag, and conversation link |
+| Task stages | Split a task into named stages, each with its own notes, running flag, and conversation link; delete with X while retaining at least one stage and one running stage |
 | Labels and priority | Assign multiple AI platform labels and one priority; customize option names and colors |
 | Search | Search task names and all stage details, then jump straight to the matching card |
 | Scheduled reminders | Set a one-time, daily, or weekly reminder; when due, the task moves to Needs action and you receive a notification |
@@ -56,7 +58,7 @@ With optional local status observation enabled, tasks can move automatically bet
 - Actual execution resuming moves it back to In progress. If several stages are active, a stage still waiting for attention takes priority.
 - A completed AI run never marks the task Done automatically. You decide when the task is finished.
 
-**Status observation is off by default and requires a compatible Codex version plus additional startup steps.** It reads structured status signals and does not answer questions, approve actions, or send messages for you. Real full-turn failures and quota-exhaustion stops still await desktop validation. See the [Codex status observation guide](docs/CODEX-PENDING-BRIDGE-PUBLIC.md) for setup and compatibility.
+**Initialize or recheck from the first-run prompt or Settings → AI platform integration, without manual scripts. Full observation requires a compatible version: the fixed profile is 26.1013.4894.0; the inspected 26.1016.6573.0 is currently incompatible and remains pending. Listing chats is not proof of full monitoring.** It reads structured status signals and does not answer questions, approve actions, or send messages for you. Real full-turn failures and quota-exhaustion stops still await desktop validation. See the [Codex status observation guide](docs/CODEX-PENDING-BRIDGE-PUBLIC.md) for setup and compatibility.
 
 AI platform labels can also serve as ordinary categories; choosing one does not connect that platform. Feishu two-way sync and live DSH or WorkBuddy integration are not implemented.
 
@@ -75,7 +77,7 @@ For 64-bit Windows 10 (version 2004 or later) and Windows 11.
 3. Click the floating button to open the board. Capture an idea directly in the Ideas list, or create a task from any list.
 4. Add reminders to individual tasks. Adjust windows, the shortcut, and startup at sign-in in Settings. The default global shortcut is `Ctrl+~`.
 
-Before upgrading, exit the old version from its tray menu, then extract the new version in full. See the [user guide](docs/USER-GUIDE-0.9.20.md) for more.
+Before upgrading, exit the old version from its tray menu, then extract the new version in full. See the [user guide](docs/USER-GUIDE-0.9.22.md) for more.
 
 ## Local data
 

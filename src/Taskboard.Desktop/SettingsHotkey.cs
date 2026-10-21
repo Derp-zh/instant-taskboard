@@ -30,7 +30,7 @@ internal sealed partial class SettingsSurface
             pending = candidate; enabled.IsChecked = true; input.Text = GlobalHotkey.Caption(pending); note.Text = "点击应用后生效。";
         };
         panel.Children.Add(enabled); panel.Children.Add(input);
-        var buttons = new StackPanel { Orientation = Orientation.Horizontal };
+        var buttons = new WrapPanel();
         buttons.Children.Add(Ui.Button("应用快捷键", () =>
         { pending.Enabled = enabled.IsChecked == true; note.Text = controller.ConfigureHotkey(pending, out var error) ? controller.HotkeyStatus : error; }));
         buttons.Children.Add(Ui.Button("恢复Ctrl+~", () =>

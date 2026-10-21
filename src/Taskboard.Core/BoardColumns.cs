@@ -8,7 +8,7 @@ public sealed class BoardColumn
     public bool Visible { get; set; } = true;
     // Retain the identity so an undo in this run can safely restore its list.
     public bool Deleted { get; set; }
-    [System.Text.Json.Serialization.JsonIgnore] public bool Protected => BuiltinLane is Lane.Inspiration or Lane.Running or Lane.Action;
+    [System.Text.Json.Serialization.JsonIgnore] public bool Protected => BuiltinLane is not null;
     [System.Text.Json.Serialization.JsonIgnore] public string PositionKey => BuiltinLane is Lane lane ? "lane-"+(int)lane : "column-"+Id.ToString("N");
     public bool Contains(WorkItem item) => BuiltinLane is Lane lane ? item.ColumnId is null && item.Lane == lane : item.ColumnId == Id;
     public void Assign(WorkItem item) { item.ColumnId = BuiltinLane is null ? Id : null; item.Lane = BuiltinLane ?? Lane.Refining; }
@@ -24,7 +24,7 @@ public static class BoardColumns
         !state.Sessions.Any(s => (s.StatusSelected && s.Working.HasContent && column.Contains(s.Working)) || (s.TaskId is not null && column.Contains(s.Original)));
     public static void Delete(BoardState state, BoardColumn column)
     {
-        if (column.Protected) throw new InvalidOperationException("灵感库、进行中和待操作可改名或隐藏，不能删除。");
+        if (column.Protected) throw new InvalidOperationException("六个内置列表可改名或隐藏，不能删除。");
         if (!IsEmpty(state,column)) throw new InvalidOperationException("列表中还有任务或非空草稿，请先清空或移走。");
         column.Deleted = true; column.Visible = false;
     }

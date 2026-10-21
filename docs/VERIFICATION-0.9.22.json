@@ -1,0 +1,56 @@
+{
+  "userDate": "2026-10-22",
+  "version": "0.9.22",
+  "entrySHA256": "43ad23c5b4cb20a61b088f1a1f4d03d0b435fcd703dbdbaabe72806822bc0b01",
+  "packageFilesVerified": 476,
+  "selfContained": true,
+  "checks": {
+    "newOffscreenControlsSaveAndDeterministicFrames": 38,
+    "coreRulesPersistence": 334,
+    "aiInitializationRegression": 37,
+    "configurationIntegration": 17,
+    "documentationIntegrity": true
+  },
+  "sourceSHA256": {
+    "src/Taskboard.Core/BoardColumns.cs": "0bf7f3c59677723371fbd521822ebab36395391eb07d0893915f6c5ac6c5316a",
+    "src/Taskboard.Core/Models.cs": "79151c8b8bc864efff5f3e371830e913a9f3ff4cd2877e789164b8cdfcc6b606",
+    "src/Taskboard.Core/Validation.cs": "d0a05b3788375b39ab38687807699df14b4319d6c70eb1b09c5c08e40255fc15",
+    "src/Taskboard.Core/BoardEngine.cs": "2f0fda4d6d4e4853963dedda98f43d59e7d953385a831725879dc2bc3de7b4e7",
+    "src/Taskboard.Desktop/EditorSurface.cs": "3b15f954bb757b5d7911c54723a0da13d97a0fb92ac5ee30fdd6191f496a0363",
+    "src/Taskboard.Desktop/BallSurface.EdgeHide.cs": "aac3c378c237bc362fe4abfa555a198a74c43902e68afdd96eec7a73cc454834",
+    "src/Taskboard.Desktop/SettingsSurface.cs": "b71745aeffd072f5d3d416bb9e942fd5684a1ffd919b2833a077142ac3be82b9",
+    "src/Taskboard.Desktop/SettingsLayout.cs": "330e1ebad8aab12b0d70cd4ede6cf524293d71b24995db7a7b8318a2c0440d87",
+    "src/Taskboard.Desktop/SettingsHotkey.cs": "d0298b501f87ea83a0b8bf40885b9d86072d0a57488dab4e9155c0c815b04d27",
+    "src/Taskboard.Desktop/Ux0922Checks.cs": "fe9214e136a9fc2d7e44c27d47f6ee4d0bbf294deb5d73d47e559a77f30eaec1",
+    "src/Taskboard.Desktop/Program.cs": "ff6447361702a67c4c7a1f8290cccedd32f5128dc3ab80c298d9e81d55e503bf",
+    "src/Taskboard.Desktop/Taskboard.Desktop.csproj": "3c07a67c03f541d16974792051dc614d550c87bcc8ea56b459fe48d7d023bff0"
+  },
+  "mouseMoved": false,
+  "foregroundOperated": false,
+  "productionDataChanged": false,
+  "codexStartedOrStopped": false,
+  "notVerified": [
+    "physical mouse and system hit actions",
+    "real display compositor pixels and perceived hover smoothness",
+    "multi-monitor DPI",
+    "old Ux0913 offscreen translation failure remains separate"
+  ],
+  "entry": "即时任务看板.exe",
+  "scope": "Isolated checks before publication; physical mouse and real compositor not verified.",
+  "publicSourceCoreRecheck": {
+    "passed": 334,
+    "isolated": true
+  },
+  "publicDocumentationReview": {
+    "activeDocuments": 31,
+    "localLinksChecked": 129,
+    "passed": true
+  },
+  "publicSourceBuild": {
+    "passed": true,
+    "runtime": "win-x64",
+    "selfContained": true,
+    "dependencyResolution": "Existing verified NuGet cache after network restore failure",
+    "testedReleaseBinary": "Original isolated-tested package; source copy verified before commit"
+  }
+}

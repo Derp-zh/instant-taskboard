@@ -24,6 +24,15 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         Root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(64) }); Root.RowDefinitions.Add(new RowDefinition());
         var header = new DockPanel { Margin = new Thickness(18, 8, 18, 8), Background = Brushes.Transparent };
         var close = Ui.Button("×", Hide); DockPanel.SetDock(close, Dock.Right); header.Children.Add(close); header.Children.Add(Ui.Label("设置", 18));
+        var saved = Ui.Label("", 11, Ui.Muted); DockPanel.SetDock(saved, Dock.Right); header.Children.Insert(1, saved);
+        var save = Ui.Button("保存设置", () => { }, true); save.Tag = "SettingsSave"; DockPanel.SetDock(save, Dock.Right); header.Children.Insert(1, save);
+        save.ToolTip = "设置仍自动保存；也可点击立即保存到本机。快捷键继续使用其原有应用按钮。";
+        save.Click += async (_, _) =>
+        {
+            save.IsEnabled = false;
+            try { saved.Text = await controller.Flush() ? "上次保存：成功" : "保存失败，请重试"; }
+            finally { save.IsEnabled = true; }
+        };
         Root.Children.Add(header); MoveWith(header);
         var body = new Grid { Margin = new Thickness(12, 0, 16, 16) }; body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(166) }); body.ColumnDefinitions.Add(new ColumnDefinition());
         var sidebar = new StackPanel { Margin = new Thickness(0, 0, 12, 0) };
@@ -42,6 +51,7 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         if (!pages.TryGetValue(name, out var page))
         {
             var panel = name switch { "主设置" => MainSettings(), "窗口" => WindowSettings(), "监听" => ListeningSettings(), "归档" => ArchiveSettings(), "数据与备份" => DataSettings(), "AI平台接入情况" => PlatformSettings(false), _ => PlatformSettings(true) };
+            OrganizeSettingsPage(name, panel);
             page = new ScrollViewer { Content = panel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, Padding = new Thickness(10, 0, 4, 10) }; pages.Add(name, page);
         }
         content.Children.Clear(); content.Children.Add(page);
@@ -66,7 +76,7 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         panel.Children.Add(edgeHide);
         panel.Children.Add(Ui.Label("吸附在屏幕右边缘，只能上下拖动。面板收起、鼠标离开2秒后收起，露出1/4；移上弹出，双向动画均为0.1秒。后台任务照常运行。", 12, Ui.Muted));
         panel.Children.Add(HotkeySettings());
-        var startup = new CheckBox { Content = "开机启动", IsChecked = controller.Engine.State.Preferences.AutoStart, Margin = new Thickness(0, 10, 0, 14), IsEnabled = !controller.Isolated };
+        var startup = new CheckBox { Content = "开机启动", Tag = "SettingsAutoStart", IsChecked = controller.Engine.State.Preferences.AutoStart, Margin = new Thickness(0, 10, 0, 14), IsEnabled = !controller.Isolated };
         startup.Click += (_, _) =>
         {
             try { StartupLinks.SetAutoStart(startup.IsChecked == true); controller.Engine.State.Preferences.AutoStart = startup.IsChecked == true; controller.Engine.Touch(); }
@@ -81,7 +91,7 @@ internal sealed partial class SettingsSurface : SurfaceWindow
             panel.Children.Add(Ui.Label(StartupLinks.AutoStartStatus(), 12, Ui.Muted));
             panel.Children.Add(Ui.Button("Windows启动应用设置", () => Try(() => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("ms-settings:startupapps") { UseShellExecute = true }))));
         }
-        panel.Children.Add(Ui.Label("即时任务看板 0.9.12 · " + DraftSwitchMotion.VariantLabel + "。", 12, Ui.Muted)); return panel;
+        panel.Children.Add(Ui.Label("即时任务看板 " + typeof(Program).Assembly.GetName().Version!.ToString(3) + " · " + DraftSwitchMotion.VariantLabel + "。", 12, Ui.Muted)); return panel;
     }
     private StackPanel WindowSettings()
     {
@@ -98,14 +108,16 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         var ballCaption = Ui.Label($"悬浮球透明度 {controller.Engine.State.Preferences.BallTransparency:0}%", 14); panel.Children.Add(ballCaption);
         var ballSlider = new Slider { Minimum = 0, Maximum = 100, Value = controller.Engine.State.Preferences.BallTransparency, TickFrequency = 1, IsSnapToTickEnabled = true, Margin = new Thickness(6, 12, 6, 18), ToolTip = "悬浮球透明度" };
         ballSlider.ValueChanged += (_, _) => { ballCaption.Text = $"悬浮球透明度 {ballSlider.Value:0}%"; controller.SetBallTransparency(ballSlider.Value); }; panel.Children.Add(ballSlider);
-        var resize = new CheckBox { Content = "显示各列右下角独立尺寸入口", IsChecked = controller.Engine.State.Preferences.ResizeCorner, Margin = new Thickness(0, 8, 0, 14) };
+        var resize = new CheckBox { Content = "显示各列右下角独立尺寸入口", Tag = "SettingsResize", IsChecked = controller.Engine.State.Preferences.ResizeCorner, Margin = new Thickness(0, 8, 0, 14) };
         resize.Click += (_, _) => { controller.Engine.State.Preferences.ResizeCorner = resize.IsChecked == true; controller.ApplySettings(); controller.Engine.Touch(); }; panel.Children.Add(resize);
         panel.Children.Add(Ui.Button("恢复窗口默认", controller.RestoreDefaults)); panel.Children.Add(Ui.Label("恢复整组的默认大小和位置。列表右键可只恢复该窗口，并保留当前最大范围的缩放。", 12, Ui.Muted)); return panel;
     }
     private StackPanel ListSettings()
     {
         var panel = new StackPanel(); panel.Children.Add(Ui.Label("多列表独立窗口",15));
-        var countRow = new DockPanel(); var number = Ui.Input(controller.VisibleColumns.Length.ToString()); number.Width = 80; number.ToolTip = "显示的窗口数量（隐藏不计入）";
+        var countRow = new WrapPanel { VerticalAlignment = VerticalAlignment.Center }; var number = Ui.Input(controller.VisibleColumns.Length.ToString()); number.Width = 80; number.ToolTip = "显示的窗口数量（隐藏不计入）";
+        var countCaption = Ui.Label("显示窗口数", 12); countCaption.VerticalAlignment = VerticalAlignment.Center; countRow.Children.Add(countCaption);
+        number.Margin = new Thickness(8, 0, 8, 0);
         var note = Ui.Label("",11,Ui.Accent);
         void ApplyCount(int count)
         {
@@ -114,19 +126,24 @@ internal sealed partial class SettingsSurface : SurfaceWindow
             BoardColumns.SetVisibleCount(controller.Engine.State.Preferences,count); controller.ColumnsChanged(); RefreshSection();
         }
         var apply = Ui.Button("应用数量",() => { if (int.TryParse(number.Text,out var count)) ApplyCount(count); else note.Text = "请输入非负整数。"; });
-        DockPanel.SetDock(apply,Dock.Right); countRow.Children.Add(apply); countRow.Children.Add(number); panel.Children.Add(countRow);
+        countRow.Children.Add(number); countRow.Children.Add(apply); panel.Children.Add(countRow);
         panel.Children.Add(Ui.Label("隐藏列表不计入数量，任务仍保留。改名不影响提醒及Codex流转。",12,Ui.Muted));
+        panel.Children.Add(Ui.Label("六个内置列表均不可删除；可随时隐藏或重新显示。", 11, Ui.Muted));
         foreach (var column in controller.Engine.State.Preferences.Columns.Where(x => !x.Deleted).ToArray())
         {
-            var row = new DockPanel(); var remove = Ui.Button("删除",() =>
+            var row = new DockPanel { Margin = new Thickness(0, 2, 0, 2) }; var remove = Ui.Button(column.Protected ? "内置" : "删除",() =>
             { try { BoardColumns.Delete(controller.Engine.State,column); controller.ColumnsChanged(); RefreshSection(); } catch (InvalidOperationException e) { note.Text = e.Message; } });
+            remove.Tag = "ListDelete"; remove.DataContext = column; remove.MinWidth = 54;
             remove.IsEnabled = !column.Protected; remove.ToolTip = column.Protected ? "此列表可改名或隐藏，不能删除" : "有任务或非空草稿时不能删除";
             DockPanel.SetDock(remove,Dock.Right); row.Children.Add(remove);
             var visible = new CheckBox { IsChecked = column.Visible, Content = "显示", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(4) };
             visible.Click += (_,_) => { column.Visible = visible.IsChecked == true; controller.ColumnsChanged(); RefreshSection(); };
             DockPanel.SetDock(visible,Dock.Right); row.Children.Add(visible);
-            var name = Ui.Input(column.Name); name.ToolTip = column.BuiltinLane is Lane role ? "原列表："+Names.Lanes[(int)role] : "自定义列表";
-            name.LostKeyboardFocus += (_,_) => { if (string.IsNullOrWhiteSpace(name.Text)) { name.Text = column.Name; return; } column.Name = name.Text.Trim(); controller.ColumnsChanged(false); };
+            var name = Ui.Input(column.Name); name.Tag = "ListName"; name.DataContext = column; name.ToolTip = column.BuiltinLane is Lane role ? "原列表："+Names.Lanes[(int)role] : "自定义列表";
+            name.MinHeight = 30; name.Margin = new Thickness(0, 2, 0, 2); name.Padding = new Thickness(9, 4, 9, 4);
+            void CommitName() { if (string.IsNullOrWhiteSpace(name.Text)) { name.Text = column.Name; return; } column.Name = name.Text.Trim(); controller.ColumnsChanged(false); }
+            name.LostKeyboardFocus += (_,_) => CommitName();
+            name.KeyDown += (_, e) => { if (e.Key == System.Windows.Input.Key.Enter) { CommitName(); e.Handled = true; } };
             row.Children.Add(name); panel.Children.Add(row);
         }
         panel.Children.Add(Ui.Button("＋ 新增列表",() =>
@@ -199,17 +216,19 @@ internal sealed partial class SettingsSurface : SurfaceWindow
         return panel;
     }
     private TextBlock? codexStatus;
-    internal void RefreshCodexStatus() { if (codexStatus is not null) codexStatus.Text = "Codex · "+controller.CodexStatus; }
+    internal void RefreshCodexStatus()
+    {
+        if (codexStatus is not null)
+        {
+            codexStatus.Text = "Codex · " + controller.CodexStatus;
+            codexStatus.Foreground = controller.AiSetupReport.SourceReady && controller.Codex.SourceIdentityVerified ? Ui.Accent : Ui.Muted;
+        }
+        RefreshAiInitialization();
+    }
     private Border CodexSettings()
     {
-        var body = new StackPanel(); codexStatus = Ui.Label("Codex · "+controller.CodexStatus,14,Ui.Accent); body.Children.Add(codexStatus);
-        body.Children.Add(Ui.Label("在新建或编辑任务中关联准确会话。历史可读不代表实时连通；未连通时不会自动移列。",12,Ui.Muted));
-        foreach (var (key,caption,initial) in new[] { ("codex.executable","Codex程序路径",CodexObserver.FindExecutable()), ("codex.endpoint","已有本机服务地址（可空）","") })
-        {
-            body.Children.Add(Ui.Label(caption,12,Ui.Muted)); var input = Ui.Input(controller.Engine.State.Preferences.ConnectionConfigs.GetValueOrDefault(key,initial));
-            input.TextChanged += (_,_) => { controller.Engine.State.Preferences.ConnectionConfigs[key] = input.Text.Trim(); controller.Engine.Touch(); }; body.Children.Add(input);
-        }
-        var reconnect = Ui.Button("重新连接",async () => { await controller.RestartCodex(); RefreshCodexStatus(); }); reconnect.IsEnabled = !controller.Isolated; body.Children.Add(reconnect);
+        var body = new StackPanel(); codexStatus = Ui.Label("Codex · "+controller.CodexStatus,14,Ui.Muted); body.Children.Add(codexStatus);
+        body.Children.Add(AiInitializationSettings());
         return Ui.Panel(body);
     }
     private static void Try(Action action) { try { action(); } catch (Exception e) { Ui.Error(e.Message); } }

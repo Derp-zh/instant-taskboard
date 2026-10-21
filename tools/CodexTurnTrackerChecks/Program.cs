@@ -72,7 +72,28 @@ var baseline = await CodexTurnTracker.ReadTurnsAsync((_, _) => { baselineCalls++
 Check(baselineCalls == 1 && !baseline.EndOfHistory, "initial baseline reads only the newest page rather than all history");
 var malformed = await CodexTurnTracker.ReadTurnsAsync((_, _) => Task.FromResult(JsonSerializer.SerializeToElement(new { nextCursor = "more" })), "A", "absent");
 Check(!malformed.TargetFound && !malformed.EndOfHistory, "malformed response is inconclusive");
-var output = Path.GetFullPath(args.FirstOrDefault() ?? "test-output/codex-turn-tracker-0916/report.json");
+var fast = new CodexTurnTracker("A");
+Check(fast.Reconcile(Status("idle"), [new("old", "failed", StartedAt: 100)], true, sourceEpoch: "desktop-epoch").Length == 0, "initial failed metadata is history, not a new fast stop");
+fast.Reconcile(Status("active"), [new("observed", "inProgress", StartedAt: 200)], true, sourceEpoch: "desktop-epoch");
+Check(fast.CurrentTurnRunning, "a verified in-progress turn establishes current execution");
+fast.Reconcile(Status("idle"), [new("observed", "completed", StartedAt: 200)], true, sourceEpoch: "desktop-epoch");
+Check(!fast.CurrentTurnRunning, "a finished current turn cannot later pretend to be running");
+var fastStop = fast.Reconcile(Status("idle"), [new("quick-failed", "failed", "usageLimitExceeded", 300)], true, sourceEpoch: "desktop-epoch");
+Check(fastStop.Length == 1 && fastStop[0].GetProperty("method").GetString() == "probe/currentTurnStopped" &&
+    fastStop[0].GetProperty("params").GetProperty("baselineStartedAt").GetInt64() == 200, "strictly newer stopped metadata emits an internal stop without inventing a started event");
+Check(!fast.CurrentTurnRunning && fast.CurrentTurnId == "quick-failed", "fast stop remains terminal and retains exact current identity");
+Check(fast.Reconcile(Status("idle"), [new("quick-failed", "failed", StartedAt: 300)], true, sourceEpoch: "desktop-epoch").Length == 0, "fast stop is idempotent");
+Check(fast.Reconcile(Status("idle"), [new("same-second", "failed", StartedAt: 300)], true, sourceEpoch: "desktop-epoch").Length == 0, "same-second ambiguous failure remains inconclusive");
+Check(fast.Reconcile(Status("idle"), [new("another-old", "interrupted", StartedAt: 50)], true, sourceEpoch: "desktop-epoch").Length == 0, "older unseen metadata cannot replay a stop");
+Check(fast.Reconcile(Status("idle"), [new("wrong-unit", "failed", StartedAt: 1790000000000)], true, sourceEpoch: "desktop-epoch").Length == 0, "invalid timestamp cannot create a stopped turn");
+Check(fast.Reconcile(Status("idle"), [new("new-epoch-fast", "failed", StartedAt: 400)], true, sourceEpoch: "new-desktop-epoch").Length == 0, "source reconnect resets the chronological baseline");
+var nonDesktop = new CodexTurnTracker("B");
+nonDesktop.Reconcile(Status("active"), [new("live", "inProgress", StartedAt: 100)], true);
+nonDesktop.Reconcile(Status("idle"), [new("live", "completed", StartedAt: 100)], true);
+Check(nonDesktop.Reconcile(Status("idle"), [new("new-stop", "failed", StartedAt: 200)], true).Length == 0, "shared unverified chronology cannot use original-desktop fast-stop inference");
+var output = args.Length == 2 && args[0] == "--data-dir"
+    ? Path.Combine(Path.GetFullPath(args[1]), "report.json")
+    : Path.GetFullPath(args.FirstOrDefault() ?? "test-output/codex-turn-tracker-0916/report.json");
 Directory.CreateDirectory(Path.GetDirectoryName(output)!);
 await File.WriteAllTextAsync(output, JsonSerializer.Serialize(new { passed = true, count = checks.Count, checks, scope = "Synthetic metadata and notification fixtures; not original desktop lifecycle acceptance", protocol = "codex-cli 0.163.0-alpha.10.2 local generated schema; desc/notLoaded/cursor" }, new JsonSerializerOptions { WriteIndented = true }));
 Console.WriteLine($"PASS {checks.Count}: {output}");

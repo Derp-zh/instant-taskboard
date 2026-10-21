@@ -202,7 +202,21 @@ internal sealed class EditorSurface : Grid
             DockPanel.SetDock(current, Dock.Right); heading.Children.Add(current);
             var name = Ui.Input(stage.Name); name.MinHeight = 28; name.MaxWidth = 155; name.Padding = new Thickness(9, 4, 9, 4);
             name.Margin = new Thickness(0, 3, 3, 3); name.HorizontalAlignment = HorizontalAlignment.Left; name.Foreground = Ui.Accent;
-            name.ToolTip = "阶段名称"; name.TextChanged += (_, _) => { stage.Name = name.Text; Changed(); }; heading.Children.Add(name);
+            name.ToolTip = "阶段名称"; name.TextChanged += (_, _) => { stage.Name = name.Text; Changed(); };
+            var remove = Ui.Button("×", () => { }); remove.Tag = "StageRemove"; remove.DataContext = stage;
+            remove.Width = remove.Height = 24; remove.Padding = new Thickness(0); remove.Margin = new Thickness(1, 3, 4, 3);
+            remove.VerticalAlignment = VerticalAlignment.Center; remove.ToolTip = "删除此阶段";
+            remove.HorizontalContentAlignment = HorizontalAlignment.Center;
+            System.Windows.Automation.AutomationProperties.SetName(remove, "删除阶段：" + stage.Name);
+            remove.Click += (_, _) =>
+            {
+                if (snapshotMode || submitting || closing) return;
+                if (!controller.Engine.RemoveStage(Session, stage.Id, out var message))
+                { if (message is not null) Ui.Hint(remove, message, !controller.Smoke); return; }
+                RenderStages(); Changed();
+            };
+            var nameRow = new StackPanel { Orientation = Orientation.Horizontal };
+            nameRow.Children.Add(name); nameRow.Children.Add(remove); heading.Children.Add(nameRow);
             panel.Children.Add(heading); panel.Children.Add(bindingPanel);
             var text = Ui.Input(stage.Text, true); text.Style = (Style)FindResource("StageBodyInput"); text.Background = Brushes.Transparent;
             text.BorderThickness = new Thickness(0); text.Margin = new Thickness(0); text.Padding = new Thickness(10, 5, 10, 10);

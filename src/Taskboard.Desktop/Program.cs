@@ -15,6 +15,7 @@ internal static class Program
     {
         var startupClock = Stopwatch.StartNew();
         var performanceVerify=false;
+        var aiInitializationVerify = false; var aiEnvironmentVerify = false; var ux0922Verify = false;
         var scrollVerify = false;
         var scrollRestoreVerify = false;
         var scrollStackVerify = false;
@@ -45,6 +46,9 @@ internal static class Program
             else if (args[i] == "--no-integrations") isolated = true;
             else if (args[i] == "--ui-smoke") smoke = true;
             else if (args[i] == "--startup-check") startupCheck = true;
+            else if (args[i] == "--ai-init-verify") { aiInitializationVerify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ux0922-verify") { ux0922Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--ai-init-environment-verify") { aiEnvironmentVerify = true; startupCheck = true; }
             else if (args[i] == "--desktop-verify") desktopVerify = true;
             else if (args[i] == "--codex-verify") { codexVerify=true; startupCheck=true; }
             else if (args[i] == "--codex-lifecycle-verify") codexLifecycleVerify = true;
@@ -93,6 +97,12 @@ internal static class Program
             if (string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)) return 2;
             try { return CodexChecks.Run(data).GetAwaiter().GetResult() ? 0 : 3; }
             catch (Exception error) { Directory.CreateDirectory(data); File.WriteAllText(Path.Combine(data, "codex-error.txt"), error.ToString()); return 1; }
+        }
+        if (aiEnvironmentVerify)
+        {
+            if (string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)) return 2;
+            try { AiInitializationChecks.InspectEnvironment(data).GetAwaiter().GetResult(); return 0; }
+            catch (Exception error) { Directory.CreateDirectory(data); File.WriteAllText(Path.Combine(data, "ai-environment-error.txt"), error.ToString()); return 1; }
         }
         if (startupEntryVerify)
         {
@@ -157,7 +167,9 @@ internal static class Program
                 if (startupInvocation && !isolated) File.WriteAllText(Path.Combine(DataPaths.SystemRoot, "last-startup.json"), System.Text.Json.JsonSerializer.Serialize(new { utc = DateTime.UtcNow, version = typeof(Program).Assembly.GetName().Version!.ToString(), executable = Environment.ProcessPath }));
                 startupClock.Stop();
                 if (smoke || startupCheck) File.WriteAllText(Path.Combine(data, "startup-report.json"), System.Text.Json.JsonSerializer.Serialize(new { readyMs = startupClock.Elapsed.TotalMilliseconds, tasks = controller.Engine.State.Tasks.Count, draftsAndEdits = controller.Engine.State.Sessions.Count }));
-                if (ux0917Verify) { await Ux0917Checks.Run(controller, ux0917GlassOnly); await controller.Exit(); }
+                if (ux0922Verify) { await Ux0922Checks.Run(controller); await controller.Exit(); }
+                else if (aiInitializationVerify) { await AiInitializationChecks.Run(controller); await controller.Exit(); }
+                else if (ux0917Verify) { await Ux0917Checks.Run(controller, ux0917GlassOnly); await controller.Exit(); }
                 else if (codexLifecycleVerify) { await CodexDesktopLifecycleChecks.Run(controller); await controller.Exit(); }
                 else if (outsideObserverVerify) { if (featureDesktopVerify) await FeatureDesktopChecks.Run(controller); else if (workspaceVerify) await WorkspaceChecks.Run(controller, workspaceGeometryVerify); else if (floatingVerify) await FloatingInteractionChecks.Run(controller); else await OutsideObserverChecks.Run(controller, gameInputVerify); await controller.Exit(); }
                 else if (sharedVerify) { await SharedMotionChecks.Run(controller); await controller.Exit(); }

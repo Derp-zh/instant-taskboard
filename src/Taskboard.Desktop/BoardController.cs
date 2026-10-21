@@ -52,8 +52,17 @@ internal sealed partial class BoardController : IDisposable
         .Select(stage => new CodexWatch(task.Id, stage.Id, stage.Codex!.BindingId, stage.Codex.ThreadId, stage.Codex.Generation))).ToArray());
     public async Task RestartCodex()
     {
-        await Codex.DisposeAsync(); Codex = new CodexObserver(); AttachCodex(); UpdateCodexWatches();
-        Codex.Start(Engine.State.Preferences.ConnectionConfigs.GetValueOrDefault("codex.executable",CodexObserver.FindExecutable()),Engine.State.Preferences.ConnectionConfigs.GetValueOrDefault("codex.endpoint",""));
+        await codexRestartGate.WaitAsync();
+        try
+        {
+            conversationLoad = null; conversationLoadedAt = default;
+            await Codex.DisposeAsync();
+            if (exiting) return;
+            Codex = new CodexObserver(); AttachCodex(); UpdateCodexWatches();
+            var config = Engine.State.Preferences.ConnectionConfigs;
+            Codex.Start(config.GetValueOrDefault("codex.executable",CodexObserver.FindExecutable()), config.GetValueOrDefault("codex.endpoint",""), CodexInitialization.Inspector(config));
+        }
+        finally { codexRestartGate.Release(); }
     }
     private void AttachCodex()
     {
@@ -106,6 +115,8 @@ internal sealed partial class BoardController : IDisposable
         Isolated = isolated; Smoke = smoke; Store = new AtomicStore(dataDirectory, isolated ? Path.Combine(dataDirectory, "configuration") : DataPaths.ConfigurationDirectory());
         pathSelectionFile = isolated ? Path.Combine(Path.GetFullPath(dataDirectory), "launch-settings.json") : DataPaths.SelectionFile;
         Engine = new BoardEngine(Store.Load()); AttachEngine();
+        if (Engine.State.Preferences.ConnectionConfigs.ContainsKey(CodexInitialization.InspectorKey))
+            AiSetupReport = new(CodexSetupState.NotStarted, "上次配置已保留，等待重新检查", "重新检查当前连接；上次成功不代表本次 Codex 仍在运行或版本仍兼容。");
         Listening = new NotificationListeningService(Application.Current.Dispatcher, () => Engine.State.Preferences.Listening, isolated,
             isolated ? Path.Combine(dataDirectory, "notification-sound-restore.json") :
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InstantTaskboard", "notification-sound-restore.json"));
@@ -172,6 +183,7 @@ internal sealed partial class BoardController : IDisposable
         await Listening.Apply();
         RefreshHotkey();
         foreach (var column in VisibleColumns) column.WarmAnimation();
+        if (!Smoke) await PromptAiInitialization();
     }
     private void AttachEngine() { Engine.Changed += OnChanged; Engine.Dirty += OnDirty; }
     private void DetachEngine() { CancelAutomaticMoves(); retainedStages.Clear(); Engine.Changed -= OnChanged; Engine.Dirty -= OnDirty; }

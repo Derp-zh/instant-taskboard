@@ -138,7 +138,7 @@ public sealed class WindowPosition
     public double Height { get; set; }
 }
 
-public sealed class Preferences
+public sealed class Preferences : System.Text.Json.Serialization.IJsonOnDeserialized
 {
     public bool AutoArchiveCompleted { get; set; } = true;
     public int AutoArchiveAfterDays { get; set; } = 5;
@@ -164,6 +164,18 @@ public sealed class Preferences
     public Dictionary<string, string> ConnectionConfigs { get; set; } = [];
     [System.Text.Json.Serialization.JsonRequired]
     public Dictionary<string, string> MachineMarkers { get; set; } = [];
+    void System.Text.Json.Serialization.IJsonOnDeserialized.OnDeserialized()
+    {
+        if (Columns is null) return;
+        // These three built-ins could be deleted in previous versions. Preserve
+        // the saved identity/name and the user's choice not to show the window.
+        foreach (var lane in new[] { Lane.Refining, Lane.Paused, Lane.Done })
+        {
+            var column = Columns.FirstOrDefault(x => x.BuiltinLane == lane);
+            if (column is null) { column = BoardColumn.Defaults().Single(x => x.BuiltinLane == lane); column.Visible = false; Columns.Add(column); }
+            else if (column.Deleted) { column.Deleted = false; column.Visible = false; }
+        }
+    }
 }
 
 public sealed class ArchivedTask

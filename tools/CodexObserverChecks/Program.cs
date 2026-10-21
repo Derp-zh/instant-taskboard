@@ -98,6 +98,11 @@ await Until(() => observer.Epoch != priorEpoch && observer.TransportConnected, "
 await Until(() => task.CurrentCodex!.Phase == CodexPhase.ReadyForReview, "重连后已观察当前轮次终态未对账");
 Check(task.Lane == Lane.Action && observer.ReconciledTerminalCount == 2,
     "重连保留绑定当前轮次、补查准确终态且不重放旧轮次");
+await fixture.Notify(new { method = "probe/currentTurnStopped", @params = new { threadId = "fixture-a", baselineStartedAt = 1,
+    turn = new { id = "injected-failed", status = "failed", startedAt = 2 } } });
+await Task.Delay(350);
+Check(task.CurrentCodex!.TurnId == "next-a" && !events.Any(x => x.Method == "probe/currentTurnStopped"),
+    "外部共享通知不能伪造观察器内部快停止事件");
 Check(fixture.Requests.All(x => CodexRpc.Allowed(x)) && !fixture.Requests.Contains("turn/start"),
     "观察器只读、未接管聊天或启动轮次");
 Check(fixture.TurnArguments.All(x => x.Direction == "desc" && x.View == "notLoaded"),
@@ -134,13 +139,56 @@ await using (var race = new CodexObserver())
     apply.Invoke(race, [watch, state, tracker.Revision, status, Array.Empty<CodexTurnMetadata>(), true, "race-epoch"]);
     Check(count == 0 && dictionary.Count == 0, "解绑删除Tracker并拒绝解绑前已在途的轮询");
 }
+// Native chronology is exercised with synthetic polls only. This is not a
+// claim that the original desktop's quota rejection has been observed.
+await using (var native = new CodexObserver())
+{
+    var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+    var type = typeof(CodexObserver);
+    var item = new WorkItem { Title = "合成本机元数据", Lane = Lane.Running, TimerUnread = true };
+    item.Stages[0].IsRunning = true; item.Stages[0].Codex = new CodexBinding { ThreadId = "fixture-native" };
+    var watch = Watch(item); native.Watch([watch]);
+    type.GetField("epoch", flags)!.SetValue(native, "native-fixture-epoch");
+    type.GetProperty("SourceKind", flags)!.SetValue(native, "desktop-native");
+    var dictionary = (System.Collections.IDictionary)type.GetField("trackers", flags)!.GetValue(native)!;
+    var state = dictionary[watch]!;
+    var tracker = (CodexTurnTracker)state.GetType().GetField("Tracker", flags)!.GetValue(state)!;
+    var emitted = new List<string>();
+    native.Event += (_, message, sequence, epoch, live) => {
+        emitted.Add(CodexState.Text(message, "method"));
+        CodexState.Apply(item, watch.StageId, message, sequence, watch.Generation, epoch, live);
+    };
+    var apply = type.GetMethod("ApplyPoll", flags)!;
+    void Poll(string status, params CodexTurnMetadata[] turns) => apply.Invoke(native, [watch, state, tracker.Revision,
+        JsonSerializer.SerializeToElement(new { type = status, activeFlags = Array.Empty<string>() }), turns, true, "native-fixture-epoch"]);
+    Poll("active", new CodexTurnMetadata("known-native", "inProgress", StartedAt: 100));
+    Check(item.CurrentCodex!.Phase == CodexPhase.Running && item.TimerUnread, "观察到运行不等于从待处理真实恢复");
+    Poll("idle", new CodexTurnMetadata("known-native", "failed", "usageLimitExceeded", 100));
+    Check(item.Lane == Lane.Action && item.CurrentCodex!.Phase == CodexPhase.Failed && item.CurrentCodex.AwaitingUserAction && item.TimerUnread,
+        "合成准确当前失败经观察器整链入待操作并保留红点");
+    Poll("active", new CodexTurnMetadata("known-native", "failed", StartedAt: 100));
+    Check(item.Lane == Lane.Action && item.CurrentCodex!.Phase == CodexPhase.Unknown && item.CurrentCodex.AwaitingUserAction && item.TimerUnread,
+        "终态之后的迟到active不能伪造恢复或清提醒");
+    Poll("idle", new CodexTurnMetadata("fast-native", "failed", "usageLimitExceeded", 200));
+    Check(item.CurrentCodex!.TurnId == "fast-native" && item.CurrentCodex.Phase == CodexPhase.Failed && item.CurrentCodex.AwaitingUserAction,
+        "同epoch准确递增最新失败经观察器快停止分支保护");
+    Check(emitted.Count(x => x == "turn/started") == 1 && emitted.Count(x => x == "probe/currentTurnStopped") == 1 && item.TimerUnread,
+        "快停止不伪造开始也不清提醒");
+    Poll("idle", new CodexTurnMetadata("fast-native", "failed", StartedAt: 200));
+    Check(native.ReconciledTerminalCount == 2 && emitted.Count(x => x == "probe/currentTurnStopped") == 1, "快停止重复快照幂等");
+    Poll("active", new CodexTurnMetadata("recovered-native", "inProgress", StartedAt: 300));
+    Check(item.Lane == Lane.Running && !item.TimerUnread && !item.CurrentCodex!.AwaitingUserAction,
+        "之后实际新轮次恢复才回进行中并清提醒");
+}
+await PendingChecks.Run(Check, output);
+await PendingTransportChecks.Run(Check);
 File.WriteAllText(Path.Combine(output, "report.json"), JsonSerializer.Serialize(new
 {
     passed = checks.Count, checks, syntheticFixture = true, desktopLifecycleVerified = false,
     observer.SourceKind, observer.TransportConnected, observer.SourceIdentityVerified, observer.PollCount,
     observer.TurnReadCount, observer.ReconciledTerminalCount,
     readOnlyRequests = fixture.Requests.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count()),
-    sourceHashes = new[] { "CodexObserver.cs", "CodexRpc.cs", "CodexTurnTracker.cs", "CodexDesktopBridge.cs" }.ToDictionary(x => x,
+    sourceHashes = new[] { "CodexObserver.cs", "CodexRpc.cs", "CodexTurnTracker.cs", "CodexDesktopBridge.cs", "CodexPendingBridge.cs" }.ToDictionary(x => x,
         x => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine("src/Taskboard.Desktop", x)))))
 }, new JsonSerializerOptions { WriteIndented = true }));
 Console.WriteLine(JsonSerializer.Serialize(new { passed = checks.Count, syntheticFixture = true, desktopLifecycleVerified = false }));

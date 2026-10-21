@@ -41,7 +41,7 @@ public static partial class Validation
         Require(p.Columns is not null, "列表配置为空"); Unique(p.Columns!, x => x.Id);
         Require(p.Columns!.All(x => !string.IsNullOrWhiteSpace(x.Name) && (x.BuiltinLane is null || Enum.IsDefined(x.BuiltinLane.Value)) && (!x.Protected || !x.Deleted)), "列表名称或角色无效");
         Require(p.Columns.Where(x => x.BuiltinLane is not null).Select(x => x.BuiltinLane).Distinct().Count() == p.Columns.Count(x => x.BuiltinLane is not null), "列表角色重复");
-        Require(new[] { Lane.Inspiration,Lane.Running,Lane.Action }.All(lane => p.Columns.Any(x => x.BuiltinLane == lane && !x.Deleted)), "缺少受保护列表");
+        Require(Enum.GetValues<Lane>().All(lane => p.Columns.Any(x => x.BuiltinLane == lane && !x.Deleted)), "缺少受保护列表");
         foreach (var item in state.Tasks.Concat(state.Sessions.SelectMany(x => x.TaskId is null ? (x.StatusSelected ? new[] { x.Working } : Array.Empty<WorkItem>()) : new[] { x.Original,x.Working })))
             Require(p.Columns.Any(x => !x.Deleted && x.Contains(item)), "任务列表引用无效");
         Require(double.IsFinite(p.GlassTransparency) && p.GlassTransparency >= 0 && p.GlassTransparency <= 100, "毛玻璃透明度应为0至100%");
@@ -61,7 +61,7 @@ public static partial class Validation
         Unique(item.Stages!, x => x.Id);
         Require(item.Stages!.All(x => x.Number >= 0 && x.Name is not null && x.Text is not null) && item.Stages.Select(x => x.Number).Distinct().Count() == item.Stages.Count, "阶段字段无效");
         Require(item.Stages.Any(x => x.IsRunning == true), BoardEngine.LastRunningStageMessage);
-        Require(item.Stages.Any(x => x.Number == 0) && item.Stages.Any(x => x.Id == item.CurrentStageId), "当前阶段指针无效");
+        Require(item.Stages.Any(x => x.Id == item.CurrentStageId), "当前阶段指针无效");
         Require(item.Stages.Select(x => x.Number).SequenceEqual(item.Stages.Select(x => x.Number).Order()), "阶段顺序无效");
         Require(item.AiIds!.All(ai.Contains) && item.AiIds.Distinct().Count() == item.AiIds.Count && (item.PriorityId is null || priority.Contains(item.PriorityId.Value)), "字段选项引用无效");
         Require(item.PendingReasons!.All(x => x is not null), "待处理原因为空");

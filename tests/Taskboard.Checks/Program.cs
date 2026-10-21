@@ -20,7 +20,8 @@ try { unassignedEngine.Submit(unassigned); throw new Exception("未选择状态�
 catch (InvalidOperationException error) { Assert(error.Message.Contains("当前状态"), "未选择状态保存时提示先选择"); }
 var roundTrip = Copies.Of(unassigned);
 Assert(!roundTrip.StatusSelected, "未选择状态跨序列化保留");
-var unassignedColumn = unassignedEngine.State.Preferences.Columns.Single(x => x.BuiltinLane == Lane.Refining);
+var unassignedColumn = new BoardColumn { Name = "未占用自定义列表" };
+unassignedEngine.State.Preferences.Columns.Add(unassignedColumn);
 Assert(BoardColumns.IsEmpty(unassignedEngine.State, unassignedColumn), "未选择状态的共享草稿不占用任何列表");
 BoardColumns.Delete(unassignedEngine.State, unassignedColumn);
 var unassignedStore = new AtomicStore(Path.Combine(root, "unassigned-column")); await unassignedStore.SaveAsync(unassignedEngine.State);
@@ -194,6 +195,7 @@ Assert(lists.State.Preferences.Columns.All(x=>!x.Visible) && lists.State.Tasks.C
 var noColumnsJson = JsonSerializer.SerializeToNode(new BoardState())!; noColumnsJson["Preferences"]!.AsObject().Remove("Columns");
 Assert(noColumnsJson.Deserialize<BoardState>()!.Preferences.Columns.Count==6,"旧数据无列配置时兼容六列");
 await StageRules.Run(root, Assert);
+await StageDeletionRules.Run(root, Assert);
 await ArchivePolicyRules.Run(root, Assert);
 await CodexRecoveryRules.Run(root, Assert);
 await CodexStopRules.Run(root, Assert);

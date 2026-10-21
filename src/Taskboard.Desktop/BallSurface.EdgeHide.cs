@@ -109,12 +109,13 @@ internal sealed partial class BallSurface
         StopEdgeMotion(); edgeRevealing = revealing;
         var from = Left; var dotFrom = edgeDot.Opacity;
         if (!revealing) { dotFrom = 0; edgeDot.Opacity = 0; }
+          ApplyEdgeBadgeFrame(0, revealing, dotFrom);
         edgeClock.Restart();
         edgeFrame = (_, _) =>
         {
             var fraction = Math.Clamp(edgeClock.Elapsed.TotalMilliseconds / 100, 0, 1);
             Left = from + (target - from) * (1 - Math.Pow(1 - fraction, 3));
-            edgeDot.Opacity = revealing ? dotFrom * (1 - fraction) : fraction;
+              ApplyEdgeBadgeFrame(fraction, revealing, dotFrom);
             Native.ClipWindow(this, Height);
             if (fraction < 1) return;
             StopEdgeMotion();
@@ -129,8 +130,16 @@ internal sealed partial class BallSurface
     }
     private void UpdateEdgeBadge(int count)
     {
-        if (IsEdgeHidden) countBubble.Visibility = Visibility.Collapsed;
+          // Keep the number measured while hidden. Switching Collapsed back to
+          // Visible at the end used to defer its layout beyond the dot's frame.
+          countBubble.Opacity = IsEdgeHidden && !(IsEdgeRestoring && edgeDot.Opacity <= 0) ? 0 : 1;
         edgeDot.Visibility = IsEdgeHidden && count > 0 ? Visibility.Visible : Visibility.Collapsed;
         if (!IsEdgeAnimating) edgeDot.Opacity = 1;
     }
+      internal void ApplyEdgeBadgeFrame(double fraction, bool revealing, double dotFrom = 1)
+      {
+          fraction = Math.Clamp(fraction, 0, 1);
+          edgeDot.Opacity = revealing ? dotFrom * (1 - fraction) : fraction;
+          countBubble.Opacity = revealing && (fraction >= 1 || dotFrom <= 0) ? 1 : 0;
+      }
 }

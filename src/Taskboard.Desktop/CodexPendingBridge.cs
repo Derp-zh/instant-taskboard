@@ -25,6 +25,14 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
     private const string BaseModuleUrl = "app://-/assets/" + BaseModuleName;
     private readonly ClientWebSocket socket = new();
     private readonly SemaphoreSlim gate = new(1, 1);
+    private readonly string setting;
+    internal CodexPendingBridge(string? endpoint = null) => setting = endpoint ?? Environment.GetEnvironmentVariable(Setting) ?? "";
+    internal bool Ready => managers is not null && moduleScriptId is not null && baseScriptId is not null && socket.State == WebSocketState.Open;
+    internal async Task<bool> Probe(int verifiedDesktopPid, CancellationToken cancellation = default)
+    {
+        await Read("", verifiedDesktopPid, cancellation).ConfigureAwait(false);
+        return Ready;
+    }
     private string? managers;
     private string? moduleScriptId;
     private string? baseScriptId;
@@ -46,7 +54,6 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
 
     internal async Task<CodexPendingSnapshot?> Read(string threadId, int verifiedDesktopPid, CancellationToken cancellation)
     {
-        var setting = Environment.GetEnvironmentVariable(Setting);
         if (string.IsNullOrWhiteSpace(setting)) { Reason = "disabled"; return null; }
         if (!ValidEndpoint(setting, out var endpoint)) { Reason = "invalid-loopback-endpoint"; return null; }
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
@@ -96,6 +103,17 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
             }
             if (processId != verifiedDesktopPid) { Reason = "desktop-process-changed"; return null; }
             if (managers is null) return null;
+            // Setup verifies the pinned observation source without selecting,
+            // hydrating, or reading any conversation, even when none are bound.
+            if (threadId.Length == 0)
+            {
+                var available = await Call("Runtime.callFunctionOn", new { objectId = managers,
+                    functionDeclaration = "function(){return this.some(m => m.constructor?.name === 'Hfn' && m.disposed === false && m.getHostId?.() === 'local' && typeof m.getConversation === 'function' && typeof m.threadStore?.stateReaders?.getListState === 'function');}",
+                    returnByValue = true, silent = true }, timeout.Token).ConfigureAwait(false);
+                if (Object(Object(available, "result"), "value").ValueKind != JsonValueKind.True)
+                { managers = null; Reason = "manager-unavailable"; return null; }
+                Reason = "connection-ready-no-thread-tested"; return null;
+            }
             var result = await Call("Runtime.callFunctionOn", new
             {
                 objectId = managers, functionDeclaration = Projection,
