@@ -10,3 +10,6 @@
 - 检查：Core `StageDeletionRules.cs`；Desktop `Ux0922Checks.cs`/`AiInitializationChecks.cs`；实际覆盖见[验收](ACCEPTANCE-0.9.22-PUBLIC.md)。
 
 共享层消费者和保持范围见[影响表](architecture/SHARED-CODE.md)。源码构建使用`tools/Build-Portable.ps1`；该脚本保留Windows系统提示音构建回填，系统音频不随源码提供。
+
+
+发布完成：源码提交`a2735c9`及tag `v0.9.22`已核对；公开ZIP/SHA256重新下载后全部479文件验证一致。详见[发布回执](GITHUB-RELEASE-0.9.22.json)。

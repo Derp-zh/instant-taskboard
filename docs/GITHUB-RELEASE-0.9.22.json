@@ -1,0 +1,32 @@
+{
+  "repository": "Derp-zh/instant-taskboard",
+  "tag": "v0.9.22",
+  "releaseUrl": "https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.22",
+  "sourceCommit": "a2735c9cb59a86978add58f21526ecfd42543727",
+  "remoteMainAtVerification": "a2735c9cb59a86978add58f21526ecfd42543727",
+  "tagCommitVerified": true,
+  "remoteSourceFilesVerified": 129,
+  "publishedAt": "2026-10-21T22:49:04Z",
+  "selfContained": true,
+  "portableFiles": 479,
+  "everyDownloadedEntryVerified": true,
+  "assets": [
+    {
+      "name": "instant-taskboard-0.9.22-win-x64.zip",
+      "bytes": 77382985,
+      "sha256": "f871bc1a598228352054f22d023e16fdc0161298c44abecb48950b26a04a7e2b",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.22/instant-taskboard-0.9.22-win-x64.zip",
+      "serverDigestMatches": true,
+      "downloadVerified": true
+    },
+    {
+      "name": "instant-taskboard-0.9.22-win-x64.zip.sha256",
+      "bytes": 104,
+      "sha256": "a4f27ac576e8a01d5c4af2e42f15476545de8b7deb7749fc784ea2ed5fd9b1f3",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.22/instant-taskboard-0.9.22-win-x64.zip.sha256",
+      "serverDigestMatches": true,
+      "downloadVerified": true
+    }
+  ],
+  "scope": "Published source tree and downloaded assets verified; no physical desktop input or production data access."
+}
