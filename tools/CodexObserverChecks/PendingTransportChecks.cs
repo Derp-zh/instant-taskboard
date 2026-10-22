@@ -30,6 +30,15 @@ internal static class PendingTransportChecks
             check(snapshot is not null && fixture.Queries == queries && queries == 1, "连续采样复用经理对象，仅首次queryObjects避免每轮触发GC");
             check(fixture.Evaluations.All(x => x.Contains(CodexPendingBridge.BaseModuleName) && x.Contains("m.Dot?.prototype")) &&
                 fixture.Functions.All(x => x == CodexPendingBridge.Projection), "协议只发送固定进程/版本核验和固定投影，不接受外部脚本");
+            fixture.Selected = CodexPendingBridge.Profiles[1];
+            await using (var upgraded = new CodexPendingBridge())
+            {
+                check(await upgraded.Probe(Environment.ProcessId), "新版结构通过真实TCP归属和精确模块匹配后，空绑定可验证观察源");
+                var updated = await upgraded.Read("transport-fixture", Environment.ProcessId, CancellationToken.None);
+                check(updated is { Executing: true, Requests.Length: 1 } && fixture.Evaluations.Last().Contains("m.nct?.prototype") &&
+                    fixture.Functions.Last() == CodexPendingBridge.ProjectionFor(fixture.Selected), "新版使用已核实的nct导出与imn管理器，保留原准确聊天投影");
+            }
+            fixture.Selected = CodexPendingBridge.Profiles[0];
             fixture.FailProjection = true;
             check(await bridge.Read("transport-fixture", Environment.ProcessId, CancellationToken.None) is null && bridge.Reason == "pending-source-unavailable",
                 "CDP异常导致观察源不可用，不产生空pending或恢复信号");
@@ -56,6 +65,7 @@ internal static class PendingTransportChecks
         internal string Endpoint { get; }
         internal int Connections, Queries;
         internal bool FailProjection, HashMatches = true;
+        internal CodexPendingBridge.Profile Selected = CodexPendingBridge.Profiles[0];
         internal readonly List<string> Evaluations = [], Functions = [];
         internal InspectorFixture()
         {
@@ -116,9 +126,9 @@ internal static class PendingTransportChecks
                         if (method == "Debugger.enable")
                         {
                             await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { method = "Debugger.scriptParsed", @params = new {
-                                url = "app://-/assets/" + CodexPendingBridge.ModuleName, hash = HashMatches ? CodexPendingBridge.ModuleHash : "wrong-version", isModule = true, scriptId = "fixture-module" } }).AsMemory(), WebSocketMessageType.Text, true, lifetime.Token);
+                                url = "app://-/assets/" + Selected.Module, hash = HashMatches ? Selected.ModuleHash : "wrong-version", isModule = true, scriptId = "fixture-module" } }).AsMemory(), WebSocketMessageType.Text, true, lifetime.Token);
                             await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { method = "Debugger.scriptParsed", @params = new {
-                                url = "app://-/assets/" + CodexPendingBridge.BaseModuleName, hash = CodexPendingBridge.BaseModuleHash, isModule = true, scriptId = "fixture-base-module" } }).AsMemory(), WebSocketMessageType.Text, true, lifetime.Token);
+                                url = "app://-/assets/" + Selected.BaseModule, hash = Selected.BaseHash, isModule = true, scriptId = "fixture-base-module" } }).AsMemory(), WebSocketMessageType.Text, true, lifetime.Token);
                             result = new { };
                         }
                         else if (method == "Debugger.disable") result = new { };
@@ -132,10 +142,15 @@ internal static class PendingTransportChecks
                         else if (method == "Runtime.callFunctionOn")
                         {
                             Functions.Add(parameters.GetProperty("functionDeclaration").GetString()!);
+                            if (!parameters.TryGetProperty("arguments", out _))
+                            { result = new { result = new { type = "boolean", value = true } }; }
+                            else
+                            {
                             if (parameters.GetProperty("arguments")[0].GetProperty("value").GetString() != "transport-fixture") throw new InvalidOperationException("Wrong thread");
                             result = FailProjection ? new { exceptionDetails = new { text = "fixture error" } } : (object)new {
                                 result = new { type = "object", value = new { schemaVersion = 1, threadId = "transport-fixture", hostId = "local", turnId = "transport-turn",
                                     status = "inProgress", executing = true, complete = true, overflow = false, pending = new[] { new { id = "question:transport", approval = false } } } } };
+                            }
                         }
                         else throw new InvalidOperationException("Non-read method sent");
                         // Notifications have no id; the client must not mistake

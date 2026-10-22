@@ -36,6 +36,7 @@ internal sealed class CodexObserver : IAsyncDisposable
     private CodexThreadCapability[] capabilities = [];
     private string executable = "";
     private string inspector = "";
+    private bool discoverDesktop = true;
     private long sequence, pollCount, turnReadCount, reconciledTerminalCount;
     private string epoch = "";
     internal string Epoch => epoch;
@@ -56,10 +57,11 @@ internal sealed class CodexObserver : IAsyncDisposable
         foreach (var watch in values) trackers.GetOrAdd(watch, value => new BindingState(value.ThreadId));
         foreach (var removed in trackers.Keys.Where(x => !values.Contains(x))) trackers.TryRemove(removed, out _);
     }
-    internal void Start(string executable, string endpoint, string? inspector = null)
+    internal void Start(string executable, string endpoint, string? inspector = null, bool discoverDesktop = true)
     {
         this.executable = executable;
         this.inspector = inspector ?? Environment.GetEnvironmentVariable(CodexPendingBridge.Setting) ?? "";
+        this.discoverDesktop = discoverDesktop;
         if (worker is null) worker = Task.Run(() => Run(executable, endpoint));
     }
     internal static string FindExecutable() => CodexInstallationDiscovery.FindCliExecutable();
@@ -82,7 +84,7 @@ internal sealed class CodexObserver : IAsyncDisposable
             try
             {
                 SetStatus("正在连接 · 状态待确认");
-                if (endpoint.Length == 0) desktop = await CodexDesktopBridge.TryConnect(lifetime.Token, inspector).ConfigureAwait(false);
+                if (discoverDesktop) desktop = await CodexDesktopBridge.TryConnect(lifetime.Token, inspector).ConfigureAwait(false);
                 var shared = false;
                 if (desktop is null)
                 {
@@ -95,7 +97,7 @@ internal sealed class CodexObserver : IAsyncDisposable
                         continue;
                     }
                     try { rpc = await CodexRpc.Start(executable, true, endpoint).ConfigureAwait(false); shared = true; }
-                    catch when (!lifetime.IsCancellationRequested && endpoint.Length == 0)
+                    catch when (!lifetime.IsCancellationRequested && executable.Length > 0)
                     { rpc = await CodexRpc.Start(executable, false, "").ConfigureAwait(false); }
                 }
                 epoch = Guid.NewGuid().ToString("N"); sequence = 0;
@@ -124,7 +126,7 @@ internal sealed class CodexObserver : IAsyncDisposable
                     PublishCapabilities(values.Where(x => bound.Contains(x.ThreadId)).DistinctBy(x => x.ThreadId));
                     // The board may start before the desktop. A healthy history
                     // reader must not prevent later discovery of the real source.
-                    if (SourceKind == "historical" && endpoint.Length == 0 && DateTime.UtcNow >= nextDesktopDiscovery)
+                    if (discoverDesktop && desktop is null && DateTime.UtcNow >= nextDesktopDiscovery)
                     {
                         nextDesktopDiscovery = DateTime.UtcNow.AddSeconds(10);
                         var candidate = await CodexDesktopBridge.TryConnect(lifetime.Token, inspector).ConfigureAwait(false);

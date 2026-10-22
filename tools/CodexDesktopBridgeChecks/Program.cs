@@ -6,14 +6,9 @@ try
 const string registeredExecutable = @"D:\RegisteredCodex\app\ChatGPT.exe";
 var checks = new List<string>();
 void Check(bool passed, string name) { if (!passed) throw new InvalidOperationException(name); checks.Add(name); }
-Check(CodexDesktopBridge.MatchesObservedExecutable(15700, registeredExecutable, CodexDesktopBridge.ObservedExecutableHash, "http://127.0.0.1:9339", registeredExecutable), "explicit observer accepts only the exact-hash registered installation image when MSIX process identity is absent");
-foreach (var invalidIdentity in new[] {
-    (0, registeredExecutable, CodexDesktopBridge.ObservedExecutableHash, "http://127.0.0.1:9339"),
-    (15700, @"C:\Temp\ChatGPT.exe", CodexDesktopBridge.ObservedExecutableHash, "http://127.0.0.1:9339"),
-    (15700, registeredExecutable, "wrong-hash", "http://127.0.0.1:9339"),
-    (15700, registeredExecutable, CodexDesktopBridge.ObservedExecutableHash, ""),
-    (15700, registeredExecutable, CodexDesktopBridge.ObservedExecutableHash, "http://remote.invalid:9339") })
-    Check(!CodexDesktopBridge.MatchesObservedExecutable(invalidIdentity.Item1, invalidIdentity.Item2, invalidIdentity.Item3, invalidIdentity.Item4, registeredExecutable), "direct launch identity fails closed for wrong error, location, artifact or observer configuration");
+Check(CodexDesktopBridge.MatchesRegisteredExecutable(15700, registeredExecutable, registeredExecutable, true), "registered signed desktop transport is independent of version hashes or inspector availability");
+foreach (var invalidIdentity in new[] { (0, registeredExecutable, true), (15700, @"C:\Temp\ChatGPT.exe", true), (15700, registeredExecutable, false) })
+    Check(!CodexDesktopBridge.MatchesRegisteredExecutable(invalidIdentity.Item1, invalidIdentity.Item2, registeredExecutable, invalidIdentity.Item3), "direct launch identity rejects wrong error, unregistered location or untrusted signature");
 JsonElement Reply(string id = "A", string type = "active", string host = "local", string kind = "codex", int schemaVersion = 1,
     bool success = true, string turnStatus = "inProgress", string[]? flags = null) => JsonSerializer.SerializeToElement(new
 {

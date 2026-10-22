@@ -7,6 +7,8 @@ using System.Security.Cryptography;
 using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32;
 using Windows.Management.Deployment;
 
@@ -17,8 +19,58 @@ internal sealed record CodexInstallation(string Desktop, string Cli, string Vers
 // Installation metadata only. Never enumerates chat files or starts the desktop.
 internal static class CodexInstallationDiscovery
 {
+    // App updates change executable hashes. Trust the registered, signed
+    // installation for the read-only transport; validate observation bundles
+    // separately before accessing any internal object.
+    internal static bool TrustedDesktop(string path)
+    {
+        if (!Exists(path) || !RegisteredDesktops().Contains(path, StringComparer.OrdinalIgnoreCase)) return false;
+        try
+        {
+            using var certificate = new X509Certificate2(X509Certificate.CreateFromSignedFile(path));
+            if (certificate.GetNameInfo(X509NameType.SimpleName, false) != "OpenAI OpCo, LLC") return false;
+            var file = new TrustFile { Size = (uint)Marshal.SizeOf<TrustFile>(), Path = path };
+            var memory = Marshal.AllocHGlobal(Marshal.SizeOf<TrustFile>());
+            try
+            {
+                Marshal.StructureToPtr(file, memory, false);
+                var data = new TrustData { Size = (uint)Marshal.SizeOf<TrustData>(), Ui = 2, Union = 1, File = memory, Flags = 0x1000 };
+                var policy = new Guid("00AAC56B-CD44-11d0-8CC2-00C04FC295EE");
+                return WinVerifyTrust(new IntPtr(-1), ref policy, ref data) == 0;
+            }
+            finally { Marshal.DestroyStructure<TrustFile>(memory); Marshal.FreeHGlobal(memory); }
+        }
+        catch (Exception e) when (e is CryptographicException or IOException or UnauthorizedAccessException) { return false; }
+    }
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct TrustFile { internal uint Size; [MarshalAs(UnmanagedType.LPWStr)] internal string Path; internal IntPtr Handle, KnownSubject; }
+    [StructLayout(LayoutKind.Sequential)]
+    private struct TrustData
+    {
+        internal uint Size; internal IntPtr Policy, Sip; internal uint Ui, Revocation, Union; internal IntPtr File;
+        internal uint StateAction; internal IntPtr State, Url; internal uint Flags, Context;
+    }
+    [DllImport("wintrust.dll", ExactSpelling = true)]
+    private static extern int WinVerifyTrust(IntPtr window, ref Guid policy, ref TrustData data);
     internal static bool Exists(string? path) => !string.IsNullOrWhiteSpace(path) &&
         string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase) && File.Exists(path);
+
+    internal static bool ReplacedStorePath(string previous, string current)
+    {
+        // Only repair paths inside this registered package family. Arbitrary
+        // invalid manual paths still require a user choice and are retained.
+        string? Relative(string value)
+        {
+            var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WindowsApps") + Path.DirectorySeparatorChar;
+            var full = Path.GetFullPath(value);
+            if (!full.StartsWith(root, StringComparison.OrdinalIgnoreCase)) return null;
+            var parts = full[root.Length..].Split(Path.DirectorySeparatorChar, 2);
+            return parts.Length == 2 && parts[0].StartsWith("OpenAI.Codex_", StringComparison.OrdinalIgnoreCase) &&
+                parts[0].EndsWith("_2p2nqsd0c76g0", StringComparison.OrdinalIgnoreCase) ? parts[1] : null;
+        }
+        try { var relative = Relative(previous); return relative is not null && string.Equals(relative, Relative(current), StringComparison.OrdinalIgnoreCase); }
+        catch (Exception e) when (e is ArgumentException or NotSupportedException) { return false; }
+    }
 
     internal static async Task<CodexInstallation> Find(string desktop, string cli)
     {

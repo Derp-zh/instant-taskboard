@@ -11,7 +11,7 @@ Find it useful? [Star the project](https://github.com/Derp-zh/instant-taskboard)
 
 [Download for Windows](https://github.com/Derp-zh/instant-taskboard/releases/latest) · [Report an issue](https://github.com/Derp-zh/instant-taskboard/issues)
 
-Current version **0.9.22** adds stage deletion, protection for all six built-in lists, settings layout/save improvements, a synchronized badge transition, and Codex initialization. See the [release notes](docs/RELEASE-NOTES-0.9.22.md).
+Current version **0.9.23** adds connection-first Codex checks, read-only tests for linked chats, Store upgrade path repair, and a new observation adapter. See the [release notes](docs/RELEASE-NOTES-0.9.23.md).
 
 ## What is it for?
 
@@ -58,7 +58,7 @@ With optional local status observation enabled, tasks can move automatically bet
 - Actual execution resuming moves it back to In progress. If several stages are active, a stage still waiting for attention takes priority.
 - A completed AI run never marks the task Done automatically. You decide when the task is finished.
 
-**Initialize or recheck from the first-run prompt or Settings → AI platform integration, without manual scripts. Full observation requires a compatible version: the fixed profile is 26.1013.4894.0; the inspected 26.1016.6573.0 is currently incompatible and remains pending. Listing chats is not proof of full monitoring.** It reads structured status signals and does not answer questions, approve actions, or send messages for you. Real full-turn failures and quota-exhaustion stops still await desktop validation. See the [Codex status observation guide](docs/CODEX-PENDING-BRIDGE-PUBLIC.md) for setup and compatibility.
+**Initialize or recheck from Settings → AI platform integration, then run a read-only test of linked chats. No scripts are required. An app update alone does not block connection: chat search, the live connection, and question/approval observation are checked separately.** The installed 26.1016.8120.0 passed catalog and original-desktop transport checks. A new observation adapter is included; its endpoint is not enabled, so real question/approval/recovery lifecycle validation remains pending. No messages, answers or approvals are sent. See the [Codex observation guide](docs/CODEX-PENDING-BRIDGE-PUBLIC.md).
 
 AI platform labels can also serve as ordinary categories; choosing one does not connect that platform. Feishu two-way sync and live DSH or WorkBuddy integration are not implemented.
 
@@ -77,7 +77,7 @@ For 64-bit Windows 10 (version 2004 or later) and Windows 11.
 3. Click the floating button to open the board. Capture an idea directly in the Ideas list, or create a task from any list.
 4. Add reminders to individual tasks. Adjust windows, the shortcut, and startup at sign-in in Settings. The default global shortcut is `Ctrl+~`.
 
-Before upgrading, exit the old version from its tray menu, then extract the new version in full. See the [user guide](docs/USER-GUIDE-0.9.22.md) for more.
+Before upgrading, exit the old version from its tray menu, then extract the new version in full. See the [user guide](docs/USER-GUIDE-0.9.23.md) for more.
 
 ## Local data
 

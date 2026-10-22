@@ -43,7 +43,7 @@ observer.Event += (watch, message, sequence, epoch, live) =>
     }
 };
 observer.Watch(items.Select(Watch).ToArray());
-observer.Start("", fixture.Endpoint);
+observer.Start("", fixture.Endpoint, discoverDesktop: false);
 await Until(() => observer.Capabilities.Length == 3, "首次逐会话能力未就绪");
 lock (gate)
 {

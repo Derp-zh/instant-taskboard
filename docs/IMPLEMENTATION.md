@@ -1,15 +1,11 @@
-# 当前实施入口
+# 当前实施
 
-0.9.22源码对应桌面项目Version 0.9.22，公开ZIP采用已隔离验证的自包含win-x64构建。
+0.9.23修改安装发现、CodexInitialization、BoardController.AiInitialization、SettingsAiInitialization及原Observer/DesktopBridge/PendingBridge。
 
-- 阶段X及原保存链：`EditorSurface.cs`、Core `BoardEngine.cs`/`Validation.cs`。
-- 六内置列保护与旧配置：Core `BoardColumns.cs`/`Models.cs`。
-- 设置分组/保存：`SettingsSurface.cs`/`SettingsLayout.cs`/`SettingsHotkey.cs`，保留原控件和事件。
-- 球提示交接：`BallSurface.EdgeHide.cs`，数字预布局，统一帧回调交接opacity；原位移/命中不改。
-- 初始化：`CodexInstallationDiscovery.cs`、`CodexInitialization.cs`、`BoardController.AiInitialization.cs`、`SettingsAiInitialization.cs`；准确兼容profile检查沿用观察桥，不猜新对象。
-- 检查：Core `StageDeletionRules.cs`；Desktop `Ux0922Checks.cs`/`AiInitializationChecks.cs`；实际覆盖见[验收](ACCEPTANCE-0.9.22-PUBLIC.md)。
+先尝试只读连接，来源验证与协议检查独立于版本号。非打包进程核对系统登记最终路径、有效OpenAI签名及同用户/Session；旧服务地址保留，桌面连接与目录按实际可用性自动选择。商店升级同包同相对路径修复并备份，任意失效手动路径仍需选择。
 
-共享层消费者和保持范围见[影响表](architecture/SHARED-CODE.md)。源码构建使用`tools/Build-Portable.ps1`；该脚本保留Windows系统提示音构建回填，系统音频不随源码提供。
+内部观察仍匹配精确模块内容哈希后才使用固定投影，支持Hfn/Dot旧合同与imn/nct新合同。没有未知对象猜测、安装修改、自动重启或聊天写操作。只读测试不发布任务事件，检查期间改绑/配置变化拒绝旧结果。
 
+影响消费者与保持范围见[共享影响](architecture/SHARED-CODE.md)，实际结果见[验收](ACCEPTANCE-0.9.23.md)。Codebase Memory实际检查/定点读取后已刷新；部分PowerShell解析缺口用源码补证，摘要写工具缺失不冒称同步。
 
-发布完成：源码提交`a2735c9`及tag `v0.9.22`已核对；公开ZIP/SHA256重新下载后全部479文件验证一致。详见[发布回执](GITHUB-RELEASE-0.9.22.json)。
+独立构建便携包，不替换正式运行文件。用户本轮明确要求GitHub更新，源码、完整ZIP与SHA256同步，发布后重新下载并逐文件校验。

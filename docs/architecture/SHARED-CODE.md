@@ -1,6 +1,6 @@
 # 共享代码职责、影响范围与回归选择
 
-核对日期2026-10-22，本地开发0.9.22-ux，原公开0.9.20-widthfix。依据为源码定点读取和实际索引调用；路径metadata_changed及疑似同名误边由源码补证。职责定位不代替产品实测，本轮阶段/设置/提示交接结果见0.9.22验收。
+核对日期2026-10-22，当前公开0.9.23。依据为源码定点读取和实际索引调用；路径metadata_changed及疑似同名误边由源码补证。职责定位不代替产品实测，本轮阶段/设置/提示交接结果见0.9.22验收。
 
 ## 阅读方法
 
@@ -19,7 +19,7 @@
 | [OutsideClicks](../../src/Taskboard.Desktop/BoardController.OutsideClicks.cs)、[GameInput](../../src/Taskboard.Desktop/BoardController.GameInput.cs)、[GlobalHotkey](../../src/Taskboard.Desktop/GlobalHotkey.cs)、[StageConversationPicker](../../src/Taskboard.Desktop/StageConversationPicker.cs) | 捕获物理按下/前台归属、钩子及原始输入去重、系统阈值双击、菜单/阶段区边界；分派到保存、暂存或整组隐藏 | 只实际外部点击收起，不因失焦/Alt+Tab；列表卡片不当外点；不吞其他应用输入；阶段内外收起层级不同 |
 | [CardPresentation](../../src/Taskboard.Desktop/BoardController.CardPresentation.cs)、[AutomaticMoves](../../src/Taskboard.Desktop/BoardController.AutomaticMoves.cs)、[TaskCardMotion](../../src/Taskboard.Desktop/TaskCardMotion.cs)、[WorkspaceRevealBatch](../../src/Taskboard.Desktop/WorkspaceRevealBatch.cs) | 暂留阶段及人为操作整理、自动移列的退出/进入动画、共同开合准备屏障 | 人为整理与后台自动更新不同；自动状态/保存不等180ms动画；取消/反向/隐藏恢复不留重复/零高卡片；准备超时不锁死组 |
 | [CodexState](../../src/Taskboard.Core/CodexState.cs)、[Observer](../../src/Taskboard.Desktop/CodexObserver.cs)、[TurnTracker](../../src/Taskboard.Desktop/CodexTurnTracker.cs)、[DesktopBridge](../../src/Taskboard.Desktop/CodexDesktopBridge.cs)、[PendingBridge](../../src/Taskboard.Desktop/CodexPendingBridge.cs) | 原身份/传输/准确轮次、结构化请求、聚合、代次/epoch和重连保护；Controller分派事件、通知卡片与保存 | 来源验证不在控件里猜；已确认等待不被Unknown/另一运行盖过；真实恢复整卡才清红点；不扩大只读操作 |
-| [安装发现](../../src/Taskboard.Desktop/CodexInstallationDiscovery.cs)、[初始化流程](../../src/Taskboard.Desktop/CodexInitialization.cs)、[控制器入口](../../src/Taskboard.Desktop/BoardController.AiInitialization.cs)、[设置控件](../../src/Taskboard.Desktop/SettingsAiInitialization.cs) | 首次一次提示、系统登记/CLI核验、观察配置保存、兼容检查、诊断与用户确认后的主动打开；消费者为启动、设置、Observer及阶段目录 | 不清原有效路径/服务、不自动选聊天/发消息、不重启用户Codex；目录与观察源/具体聊天分开；配置变更冲突拒绝旧结果；普通六列及共享表面不改 |
+| [安装发现](../../src/Taskboard.Desktop/CodexInstallationDiscovery.cs)、[初始化流程](../../src/Taskboard.Desktop/CodexInitialization.cs)、[控制器入口](../../src/Taskboard.Desktop/BoardController.AiInitialization.cs)、[设置控件](../../src/Taskboard.Desktop/SettingsAiInitialization.cs) | 首次一次提示、实际连接优先、动态登记与签名身份、升级路径修复备份、观察模块合同、只读关联聊天测试；消费者为启动、设置、Observer及阶段目录 | 原服务不清空、不自动选聊天/发消息、不重启Codex；测试不发任务事件、旧绑定结果丢弃；分项能力和原桌面生命周期分开；六列、共享背景/命中/动画不改 |
 | [ReminderClock](../../src/Taskboard.Core/ReminderClock.cs)、[Archives](../../src/Taskboard.Desktop/BoardController.Archives.cs)、[AtomicStore](../../src/Taskboard.Core/AtomicStore.cs)、[ConfigurationBackup](../../src/Taskboard.Core/ConfigurationBackup.cs)、[DataPaths](../../src/Taskboard.Desktop/DataPaths.cs) | 日历到期、完成天数/归档上限、串行写入/备份、配置隔离/路径互斥；由Controller协调定时和Flush | 到期原因和周期配置分开；未提交编辑保护；配置不含任务；数据写入不依赖动画完成；路径切换不自动合并/覆盖 |
 | [NotificationListeningService](../../src/Taskboard.Desktop/NotificationListeningService.cs)、[NotificationSoundLease](../../src/Taskboard.Desktop/NotificationSoundLease.cs)、[StartupLinks](../../src/Taskboard.Desktop/StartupLinks.cs) | 外部通知/原音租约和系统启动入口，涉及真实电脑环境 | 与纯UI、隔离数据测试分开；不误改真实声音、自启或用户Codex；真实系统效果需专项证据 |
 
@@ -48,7 +48,7 @@
 | 编辑/草稿/保存 | M04动作表全部分支、全字段暂存、未选状态、空草稿、重复保存、写入失败、后台并发、重启独立回读 | Taskboard.Checks、StageFeatureChecks、DraftDealChecks、FloatingInteractionChecks | 新建/已建分别检查，真实双击需协调 |
 | 阶段/拖动/归档 | 至少一运行、多运行暂留/全局整理、后台不整理、拖动取消、20步撤销恢复、完成天数及40条确认、未提交编辑保护 | StageRules、ArchivePolicyRules、Ux098Checks、CardPresentation、CardDragSession | 真实手势和列表滚动，不滚用户列表凑动画 |
 | Codex/提醒/合并 | 多阶段等待优先、跨重连、旧终态隔离、改绑/归档恢复、ID更换、整卡恢复清点、编辑合并、实际卡片/保存 | CodexRecoveryRules/CodexStopRules/CodexQuickStopRules、CodexTurnTrackerChecks、CodexObserverChecks、CodexDesktopLifecycleChecks | 获准原桌面完整生命周期，真实failed/额度仍缺；不耗尽额度、不重启当前Codex |
-| AI初始化/设置/连接保存 | 首次/稍后/重开、重检、原路径/服务、目录可读但观察不可用、未知版本、端口冲突、选择器及配置落盘 | `--ai-init-verify`离屏夹具；`--ai-init-environment-verify`实际登记和CLI版本检查；[本地验收](../ACCEPTANCE-0.9.22-PUBLIC.md) | 不将离屏事件当物理鼠标；不将准备好当具体聊天生命周期；用户确认后实际打开及原桌面问答/批准仍待协调 |
+| AI初始化/设置/连接保存 | 首次/稍后/重开、重检、原路径/服务、目录可读但观察不可用、未知版本、端口冲突、选择器及配置落盘 | `--ai-init-verify`离屏夹具；`--ai-init-environment-verify`实际登记和CLI版本检查；[本地验收](../ACCEPTANCE-0.9.23.md) | 不将离屏事件当物理鼠标；不将准备好当具体聊天生命周期；用户确认后实际打开及原桌面问答/批准仍待协调 |
 | 数据/配置/启动/外部声音 | 路径互斥、损坏拒绝、配置无任务/引用、恢复、防旧版降级、原音租约恢复 | Taskboard.Checks、IntegrationChecks、NotificationListeningChecks | 正式自启登录、真实通知替换需专项，不碰正式数据 |
 
 表中“入口”是选择和定位用，不承诺任一入口完整覆盖该行。阅读Program.cs确认参数及副作用，始终明确隔离`--data-dir`；会移动鼠标的工具必须先协调。合成规则、离屏控件、真实鼠标/像素、原桌面生命周期分别记录，历史检查数量不能计作本次通过。
@@ -58,3 +58,5 @@
 0.9.22消费者：EditorSurface、BoardEngine/Validation、BoardColumns/Preferences、SettingsSurface各页及SettingsLayout、BallSurface.EdgeHide。原模板/背景、系统命中、普通裁切、菜单/拖动范围不改。回归选择为StageDeletionRules/Taskboard.Checks、`--ux0922-verify`、AI初始化和数据配置整合；[本轮验收](../ACCEPTANCE-0.9.22-PUBLIC.md)区分离屏事件/WPF内部命中/确定性帧与未做的物理鼠标和真实像素。旧Ux0913位移动画失败边界不被新提示交接检查覆盖。
 
 本次不拆类、不改事件/窗口范围。以后局部变更先沿上述链路圈出共享消费者，必要时再逐步分离显示/命中、隐藏/提交、真实状态/动画；是否重构由具体问题和验证结果决定。修改代码入口、消费者或检查参数时，同步更新本表，不能把这里写成与代码脱节的理想架构。
+
+0.9.23消费者为安装发现/初始化/设置/控制器与CodexObserver、DesktopBridge、PendingBridge。改变连接发现与能力呈现，保持只读方法、绑定代次/epoch、等待优先和保存合并。回归为初始化/路径/旧地址/只读测试夹具、两代模块协议及投影、核心状态与存储；本轮不改共享表面、鼠标范围或六列动画，原桌面生命周期分开报告。

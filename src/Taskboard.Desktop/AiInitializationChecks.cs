@@ -29,11 +29,12 @@ internal static class AiInitializationChecks
         {
             inspectionCompleted = true, install.Desktop, install.Cli, install.Version, install.RegisteredDesktops,
             desktopFound = CodexInstallationDiscovery.Exists(install.Desktop), cliVersionCheck = install.Cli.Length > 0,
+            registeredSignatureTrusted = CodexInstallationDiscovery.TrustedDesktop(install.Desktop),
             desktopRejectedAsCli, helperRejectedAsCli,
             state = outcome.Report.State.ToString(), outcome.Report.Message, outcome.Report.Next, outcome.Report.Diagnostic,
-            outcome.Report.Catalog, outcome.Report.SourceReady,
+            outcome.Report.Catalog, outcome.Report.SourceReady, outcome.Report.DesktopConnected,
             originalConversationLifecycleVerified = false, desktopStartedOrStopped = false, originalChatsReadOrMutated = false,
-            scope = "实际系统登记、文件位置与CLI --version；初始化检查不选择聊天，不启动Codex桌面。兼容拒绝不算实时成功。"
+            scope = "实际系统登记、文件位置、签名、CLI版本与目录、原桌面只读通道；不选择具体聊天，不启动或重启Codex。观察源和聊天生命周期分别保留。"
         }, new JsonSerializerOptions { WriteIndented = true }));
     }
     internal static async Task Run(BoardController controller)
@@ -71,7 +72,12 @@ internal static class AiInitializationChecks
         environment.Running = false;
         Check((await service.Run(seed)).Report.State == CodexSetupState.NeedsOpen, "Codex未运行提供主动打开下一步");
         environment.Supported = false; var beforeCheck = environment.CheckCount;
-        Check((await service.Run(seed)).Report.State == CodexSetupState.Incompatible && environment.CheckCount == beforeCheck, "未知版本在内部读取前拒绝，不自动猜对象");
+        environment.Install = environment.Install with { Version = "future-version" };
+        environment.Connection = new(true, true, true, "unchanged-contract");
+        Check((await service.Run(seed)).Report.SourceReady && environment.CheckCount == beforeCheck + 1, "新版本先实际连接，结构仍可用时不被版本号或启动信任白名单拒绝");
+        environment.Connection = new(true, true, false, "unsupported-desktop-module");
+        var changedModule = await service.Run(seed);
+        Check(changedModule.Report.State == CodexSetupState.Incompatible && changedModule.Report.DesktopConnected && !changedModule.Report.SourceReady, "连接成功但观察结构变更时只报告缺少的观察能力");
         environment.Supported = true;
         environment.Connection = new(false, true, true, "catalog-unavailable");
         Check((await service.Run(seed)).Report.State == CodexSetupState.CatalogUnavailable, "观察源可用但目录失败仍不完成");
@@ -82,10 +88,20 @@ internal static class AiInitializationChecks
         environment.Connection = new(true, true, true, "fixture-ready");
         var original = new Dictionary<string, string> { [CodexInitialization.DesktopKey] = "manual-desktop.exe", [CodexInitialization.CliKey] = "manual-cli.exe", [CodexInitialization.InspectorKey] = "http://127.0.0.1:19439", ["codex.endpoint"] = "ws://127.0.0.1:19440", ["other"] = "unchanged" };
         var preserved = await service.Run(original);
-        Check(preserved.Report.State == CodexSetupState.ExistingService && original.All(x => preserved.Config[x.Key] == x.Value), "有效手动路径和原服务地址沿用，切换桌面前不覆盖清空");
+        Check(preserved.Report.SourceReady && original.All(x => preserved.Config[x.Key] == x.Value), "有效手动路径和原服务地址沿用，实际连接可用时无需用户切换连接路线");
         environment.RejectManual = true;
         var invalid = await service.Run(original);
         Check(invalid.Report.State == CodexSetupState.InvalidPath && invalid.Config[CodexInitialization.CliKey] == "manual-cli.exe", "失效原路径保留并给出手动修复入口");
+        environment.RejectManual = false;
+        var windowsApps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WindowsApps");
+        var oldRoot = Path.Combine(windowsApps, "OpenAI.Codex_1.0.0.0_x64__2p2nqsd0c76g0", "app");
+        var newRoot = Path.Combine(windowsApps, "OpenAI.Codex_2.0.0.0_x64__2p2nqsd0c76g0", "app");
+        var updatedDesktop = Path.Combine(newRoot, "ChatGPT.exe"); var updatedCli = Path.Combine(newRoot, "resources", "codex.exe");
+        environment.Install = new(updatedDesktop, updatedCli, "new", [updatedDesktop], "fixture-registration"); environment.RejectManual = true;
+        var storePrevious = new Dictionary<string, string> { [CodexInitialization.DesktopKey] = Path.Combine(oldRoot, "ChatGPT.exe"), [CodexInitialization.CliKey] = Path.Combine(oldRoot, "resources", "codex.exe") };
+        var repaired = await service.Run(storePrevious);
+        Check(repaired.Report.SourceReady && repaired.Config[CodexInitialization.DesktopKey] == updatedDesktop && repaired.Config[CodexInitialization.DesktopKey + ".previous"] == storePrevious[CodexInitialization.DesktopKey], "商店升级后自动刷新同包相对路径并备份旧路径，不要求重新手动查找");
+        Check(!CodexInstallationDiscovery.ReplacedStorePath(Path.Combine(oldRoot, "other.exe"), updatedDesktop) && !CodexInstallationDiscovery.ReplacedStorePath("C:/Temp/ChatGPT.exe", updatedDesktop), "其他程序和任意失效手动路径不被升级路径自动修复规则接管");
         environment.RejectManual = false;
         environment.Install = new("", "", "", [], "not-installed");
         Check((await service.Run(seed)).Report.State == CodexSetupState.NotFound, "未找到桌面程序提供手动选择");
@@ -101,8 +117,11 @@ internal static class AiInitializationChecks
         Check(controller.Engine.State.Tasks.Count == 0 && controller.AiConversationVerification.Contains("尚未验证"), "初始化成功不自动选择聊天且具体聊天显示未验证");
         var settings = new SettingsSurface(controller); settings.SelectSection("AI平台接入情况");
         Layout(settings.Root, 760, 680);
-        var buttons = Visual<Button>(settings.Root).ToArray();
+        var buttons = Logical<Button>(settings.Root).ToArray();
         Check(buttons.Any(x => Equals(x.Tag, "AiInitialize")) && buttons.Any(x => Equals(x.Tag, "AiChooseDesktop")) && buttons.Any(x => Equals(x.Tag, "AiChooseCli")), "设置提供重新检查和分别手动选择桌面CLI入口");
+        Check(buttons.Any(x => Equals(x.Tag, "AiTestConversations")) && !buttons.Any(x => Equals(x.Content, "改用原 Codex 桌面连接")), "设置提供只读测试入口且移除内部路线切换按钮");
+        await controller.TestAiConversations();
+        Check(controller.AiConversationTest.Contains("尚未关联") && controller.Engine.State.Tasks.Count == 0, "无聊天时测试不创建或接管聊天");
         Check(Visual<TextBlock>(settings.Root).Any(x => Equals(x.Tag, "AiConversationVerification") && x.Text.Contains("尚未验证")), "设置明确显示具体聊天尚未验证");
         Check(Visual<TextBlock>(settings.Root).Any(x => Equals(x.Tag, "AiInitializationResult") && x.Text.Contains("当前连接待确认")), "上次检查成功而当前无真实连接时，界面仍显示待确认");
         var snapshot = new RenderTargetBitmap(760, 680, 96, 96, PixelFormats.Pbgra32); snapshot.Render(settings.Root);
@@ -120,6 +139,14 @@ internal static class AiInitializationChecks
         var item = controller.Engine.Submit(session); await controller.Flush();
         var binding = item.Stages[0].Codex!;
         Check(binding.ThreadId == "fixture-exact-b" && new AtomicStore(root, controller.Store.ConfigurationDirectory).Load().Tasks.Single().Stages[0].Codex!.ThreadId == "fixture-exact-b", "用户手动选择准确聊天后绑定与任务落盘保持");
+        var beforeTest = JsonSerializer.Serialize(controller.Engine.State);
+        await controller.TestAiConversations((ids, address) => Task.FromResult(new[] { ids.SequenceEqual(new[] { "fixture-exact-b" }) ? "准确绑定实时可读，正在等待回答" : "错误来源" }));
+        Check(controller.AiConversationTest.Contains("正在等待回答") && JsonSerializer.Serialize(controller.Engine.State) == beforeTest, "用户主动测试只读取准确绑定，不修改任务状态、请求保护或配置");
+        var delayedTest = new TaskCompletionSource<string[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var testing = controller.TestAiConversations((_, _) => delayedTest.Task);
+        binding.Generation++; delayedTest.SetResult(["过期的聊天测试成功"]); await testing;
+        Check(controller.AiConversationTest.Contains("已变化") && !controller.AiConversationTest.Contains("过期"), "测试期间改绑时丢弃旧绑定结果，不能把旧成功套到新聊天");
+        binding.Generation--;
         var epoch = "fixture-init-epoch";
         JsonElement Event(string method, string status, string[] flags) => JsonSerializer.SerializeToElement(new { method, @params = new { threadId = binding.ThreadId, status = new { type = status, activeFlags = flags }, turn = new { id = "fixture-turn", status = "inProgress" } } });
         CodexState.Apply(item, stage.Id, Event("thread/status/changed", "active", ["waitingOnUserInput"]), 1, binding.Generation, epoch, true);
@@ -157,7 +184,7 @@ internal static class AiInitializationChecks
             if (DiscoveryPause is not null) await DiscoveryPause.Task;
             return Install with { Desktop = desktop.Length > 0 && !RejectManual ? desktop : Install.Desktop, Cli = cli.Length > 0 && !RejectManual ? cli : Install.Cli };
         }
-        public bool Compatible(string desktop) => Supported;
+        public bool CanOpenDesktop(string desktop) => Supported;
         public Task<CodexConnectionCheck> Check(string cli, string endpoint, string inspector) { CheckCount++; return Task.FromResult(Connection); }
         public bool DesktopRunning(string desktop) => Running;
         public Task OpenDesktop(string desktop, string inspector) { OpenCount++; return Task.CompletedTask; }

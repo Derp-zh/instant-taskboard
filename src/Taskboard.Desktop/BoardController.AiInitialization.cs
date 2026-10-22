@@ -13,13 +13,53 @@ internal sealed partial class BoardController
     private readonly SemaphoreSlim codexRestartGate = new(1, 1);
     internal CodexSetupReport AiSetupReport { get; private set; } = CodexSetupReport.Initial;
     internal bool AiSetupBusy { get; private set; }
+    internal string AiConversationTest { get; private set; } = "尚未测试已关联聊天。测试只读取当前状态，不发送消息。";
     private bool CodexSetupScopeValid(object state) => ReferenceEquals(state, Engine.State) && !exiting && !dataTransition;
-    internal string AiConversationVerification => Codex.Capabilities.Length == 0
-        ? "具体聊天尚未验证；请在任务阶段选择已有聊天。"
-        : $"已关联 {Codex.Capabilities.Length} 个聊天，实时可读 {Codex.Capabilities.Count(x => x.Live)} 个；本次提问／批准观察可用 {Codex.Capabilities.Count(x => x.PendingAvailable)} 个。未发生的等待和恢复不算已验证。";
+    internal string AiConversationVerification
+    {
+        get
+        {
+            var count = Engine.State.Tasks.SelectMany(x => x.Stages).Where(x => x.Codex is not null).Select(x => x.Codex!.ThreadId).Distinct().Count();
+            return count == 0 ? "具体聊天尚未验证；请在任务阶段选择已有聊天。" :
+                $"已关联 {count} 个聊天，实时可读 {Codex.Capabilities.Count(x => x.Live)} 个；本次提问／批准观察可用 {Codex.Capabilities.Count(x => x.PendingAvailable)} 个。未发生的等待和恢复不算已验证。";
+        }
+    }
 
     private void SetAiSetupReport(CodexSetupReport report)
     { AiSetupReport = report; settings?.RefreshAiInitialization(); }
+
+    internal async Task TestAiConversations(Func<string[], string, Task<string[]>>? inspect = null)
+    {
+        if (AiSetupBusy || dataTransition || exiting) return;
+        var state = Engine.State;
+        var bindings = state.Tasks.SelectMany(task => task.Stages.Where(stage => stage.Codex is not null)
+            .Select(stage => (task.Id, Stage: stage.Id, stage.Codex!.BindingId, stage.Codex.Generation, stage.Codex.ThreadId))).ToArray();
+        if (bindings.Length == 0)
+        { AiConversationTest = "尚未关联聊天。请先在任务阶段选择已有 Codex 聊天，再测试；不会为验证自动创建或选择聊天。"; settings?.RefreshAiInitialization(); return; }
+        var inspector = CodexInitialization.Inspector(state.Preferences.ConnectionConfigs);
+        var originalConfig = new Dictionary<string, string>(state.Preferences.ConnectionConfigs);
+        var threadIds = bindings.Select(x => x.ThreadId).Distinct().ToArray();
+        var labels = threadIds.Select(id => string.Join("、", state.Tasks.SelectMany(task => task.Stages
+            .Where(stage => stage.Codex?.ThreadId == id).Select(stage => task.Title + " / " + stage.Name)))).ToArray();
+        AiSetupBusy = true; AiConversationTest = "正在只读测试已关联聊天…"; settings?.RefreshAiInitialization();
+        try
+        {
+            if (Isolated && inspect is null) { AiConversationTest = "隔离模式不连接原 Codex，请使用合成检查。"; return; }
+            var results = await (inspect ?? CodexSetupEnvironment.TestConversations)(threadIds, inspector);
+            var current = state.Tasks.SelectMany(task => task.Stages.Where(stage => stage.Codex is not null)
+                .Select(stage => (task.Id, Stage: stage.Id, stage.Codex!.BindingId, stage.Codex.Generation, stage.Codex.ThreadId))).ToArray();
+            if (!CodexSetupScopeValid(state) || !bindings.SequenceEqual(current) ||
+                new[] { CodexInitialization.DesktopKey, CodexInitialization.CliKey, CodexInitialization.InspectorKey, "codex.endpoint" }
+                    .Any(key => originalConfig.GetValueOrDefault(key) != state.Preferences.ConnectionConfigs.GetValueOrDefault(key)))
+            { AiConversationTest = "聊天关联或配置已变化，请重新测试。"; return; }
+            AiConversationTest = "本次只读测试（" + DateTime.Now.ToString("HH:mm:ss") + "）\n" + string.Join("\n", results.Select((value, index) =>
+                results.Length == threadIds.Length ? labels[index] + "\n" + value : value)) +
+                "\n提问、批准及实际恢复的完整过程，需在正常使用中分别观察；本次没有发送测试消息，也没有修改任务状态。";
+        }
+        catch (Exception e) when (e is System.IO.IOException or InvalidOperationException or TimeoutException or OperationCanceledException)
+        { AiConversationTest = "本次测试未完成，请重新检查连接后再试。诊断：" + e.GetType().Name; }
+        finally { AiSetupBusy = false; settings?.RefreshAiInitialization(); }
+    }
 
     internal async Task InitializeAiPlatform(ICodexSetupEnvironment? environment = null)
     {
@@ -61,14 +101,14 @@ internal sealed partial class BoardController
         var inspector = CodexInitialization.Inspector(config);
         var environment = new CodexSetupEnvironment();
         if (environment.DesktopRunning(desktop))
-        { SetAiSetupReport(new(CodexSetupState.NeedsReopen, "Codex 仍在运行 · 待完成", "请保存工作并自行退出 Codex，再点击此按钮。看板不会关闭任何 Codex 进程。")); return; }
+        { SetAiSetupReport(new(CodexSetupState.NeedsReopen, "Codex 仍在运行，状态观察待开启", "请在方便时保存工作并自行退出 Codex，再点击此按钮。看板不会关闭任何 Codex 进程。")); return; }
         if (!await Ui.Confirm("将打开 Codex 并启用本机只读观察连接，用于识别提问、批准和实际恢复。不会自动选择聊天、发送消息或批准操作。是否打开？", "打开 Codex")) return;
         if (!CodexSetupScopeValid(state)) return;
         try
         {
             AiSetupBusy = true; settings?.RefreshAiInitialization();
             await Task.Run(() => environment.OpenDesktop(desktop, inspector));
-            SetAiSetupReport(new(CodexSetupState.Checking, "正在等待 Codex 连接", "Codex 打开后将自动重新检查。"));
+            SetAiSetupReport(new(CodexSetupState.Checking, "正在等待 Codex 连接", "Codex 打开后将自动重新检查实际能力。"));
             // Bounded and asynchronous; never blocks the desktop or restarts it.
             for (var attempt = 0; attempt < 15 && CodexSetupScopeValid(state); attempt++)
             {

@@ -27,7 +27,6 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     // Observed installed OpenAI-signed 26.1013.4894.0 artifact. Direct launch
     // can lack an MSIX process identity; accept only this exact protected image
     // while the user explicitly enables the loopback observer.
-    internal const string ObservedExecutableHash = "2F61EAEB01DCEE7FD18D572FBB338C88B686C0D891427487FDD182AFDD64B4F6";
     private readonly NamedPipeClientStream pipe;
     private readonly SemaphoreSlim calls = new(1, 1);
     private int nextId;
@@ -228,10 +227,10 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     private static JsonElement Object(JsonElement element, string name) => element.ValueKind == JsonValueKind.Object && element.TryGetProperty(name, out var value) ? value : default;
     internal static bool IsDesktopPipeName(string name) => name.StartsWith("codex-app-tools-", StringComparison.Ordinal) && Guid.TryParseExact(name[16..], "D", out _);
 
-    internal static bool MatchesObservedExecutable(int packageError, string path, string hash, string? inspector, string registeredExecutable) =>
-        packageError == 15700 && CodexPendingBridge.ValidEndpoint(inspector ?? "", out _) &&
+    internal static bool MatchesRegisteredExecutable(int packageError, string path, string registeredExecutable, bool trustedSignature) =>
+        packageError == 15700 && trustedSignature &&
         registeredExecutable.Length > 0 && string.Equals(path, registeredExecutable, StringComparison.OrdinalIgnoreCase) &&
-        string.Equals(hash, ObservedExecutableHash, StringComparison.OrdinalIgnoreCase);
+        path.Length > 0;
 
     private static bool VerifyServer(SafePipeHandle pipeHandle, string? inspector, out string reason)
     {
@@ -250,7 +249,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
             if (!packageIdentity)
             {
                 reason = "desktop-package-identity-mismatch";
-                if (packageError != 15700 || !CodexPendingBridge.ValidEndpoint(inspector ?? "", out _)) return false;
+                if (packageError != 15700) return false;
                 var image = new StringBuilder(32768); uint imageLength = (uint)image.Capacity;
                 if (!QueryFullProcessImageName(handle, 0, image, ref imageLength)) return false;
                 var matched = false;
@@ -264,8 +263,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
                     var expectedImage = canonical.ToString();
                     if (expectedImage.StartsWith(@"\\?\", StringComparison.Ordinal)) expectedImage = expectedImage[4..];
                     if (!string.Equals(image.ToString(), expectedImage, StringComparison.OrdinalIgnoreCase)) continue;
-                    var hash = Convert.ToHexString(SHA256.HashData(executable));
-                    matched = MatchesObservedExecutable(packageError, registered, hash, inspector, registered);
+                    matched = MatchesRegisteredExecutable(packageError, image.ToString(), expectedImage, CodexInstallationDiscovery.TrustedDesktop(registered));
                     if (matched) break;
                 }
                 if (!matched) return false;
@@ -276,7 +274,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
             using (var current = WindowsIdentity.GetCurrent())
             {
                 var valid = identity.User is not null && current.User is not null && identity.User.Equals(current.User);
-                reason = valid ? (packageIdentity ? "verified-package-peer" : "verified-pinned-installed-image-peer") : "different-desktop-user";
+                reason = valid ? (packageIdentity ? "verified-package-peer" : "verified-signed-installed-image-peer") : "different-desktop-user";
                 return valid;
             }
         }

@@ -23,6 +23,17 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
     internal const string BaseModuleHash = "a6579611db8acf9c9908e2a29e70a88687eaa1d8f8dbcdc258de58f286051e9d";
     private const string ModuleUrl = "app://-/assets/" + ModuleName;
     private const string BaseModuleUrl = "app://-/assets/" + BaseModuleName;
+    // A profile describes the actual observation contract, not the app version.
+    // An unchanged bundle remains usable after an app update. Unknown bundles
+    // are connected and identified, but never receive guessed object queries.
+    internal sealed record Profile(string Module, string ModuleHash, string BaseModule, string BaseHash, string Manager, string Export);
+    internal static readonly Profile[] Profiles = [
+        new(ModuleName, ModuleHash, BaseModuleName, BaseModuleHash, "Hfn", "Dot"),
+        new("app-initial-83973da15da9.js", "1fb9718e75ae6b4adc0dfd030028d570846d098892e774564db5efe491ce4691",
+            "app-shared-efae91d19fbd.js", "f3d9baa29fa49cbe6a0894ece757a4d5f88d99bdc4bf855bb8444e12e99158ca", "imn", "nct")
+    ];
+    private Profile? profile;
+    private readonly System.Collections.Generic.Dictionary<string, (string Id, string Url)> scripts = new();
     private readonly ClientWebSocket socket = new();
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly string setting;
@@ -85,14 +96,16 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
                 // managers in the renderer. Enable only this CDP session's
                 // read domain: never pause, set breakpoints or replace source.
                 await Call("Debugger.enable", new { }, timeout.Token).ConfigureAwait(false);
-                if (moduleScriptId is null || baseScriptId is null) { Reason = "unsupported-desktop-module"; return null; }
+                profile = Profiles.SingleOrDefault(p => scripts.ContainsKey(p.ModuleHash) && scripts.ContainsKey(p.BaseHash));
+                if (profile is null) { Reason = "unsupported-desktop-module"; await Call("Debugger.disable", new { }, timeout.Token).ConfigureAwait(false); return null; }
+                moduleScriptId = scripts[profile.ModuleHash].Id; baseScriptId = scripts[profile.BaseHash].Id;
                 // Import resolves the ALREADY parsed, exact-hash ESM namespace;
                 // no initializer, hook, app factory or mutation method is called.
                 // Hfn extends Er imported as Dot from the exact shared bundle.
                 // OXn in app-initial exports a different class named $Er.
                 // Querying its prototype finds derived instances without reading
                 // the application's module scope, tokens, messages or globals.
-                var expression = "document.readyState === 'complete' ? import('" + BaseModuleUrl + "').then(m => m.Dot?.prototype) : null";
+                var expression = "document.readyState === 'complete' ? import('" + scripts[profile.BaseHash].Url + "').then(m => m." + profile.Export + "?.prototype) : null";
                 var prototype = await Call("Runtime.evaluate", new { expression, awaitPromise = true, objectGroup = "instant-taskboard-pending", silent = true, timeout = 1000 }, timeout.Token).ConfigureAwait(false);
                 var prototypeId = Text(Object(prototype, "result"), "objectId");
                 if (prototypeId.Length == 0) { Reason = "manager-prototype-unavailable"; return null; }
@@ -108,7 +121,7 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
             if (threadId.Length == 0)
             {
                 var available = await Call("Runtime.callFunctionOn", new { objectId = managers,
-                    functionDeclaration = "function(){return this.some(m => m.constructor?.name === 'Hfn' && m.disposed === false && m.getHostId?.() === 'local' && typeof m.getConversation === 'function' && typeof m.threadStore?.stateReaders?.getListState === 'function');}",
+                    functionDeclaration = "function(){return this.filter(m => m.constructor?.name === '" + profile!.Manager + "' && m.disposed === false && m.getHostId?.() === 'local' && typeof m.getConversation === 'function' && typeof m.threadStore?.stateReaders?.getListState === 'function').length === 1;}",
                     returnByValue = true, silent = true }, timeout.Token).ConfigureAwait(false);
                 if (Object(Object(available, "result"), "value").ValueKind != JsonValueKind.True)
                 { managers = null; Reason = "manager-unavailable"; return null; }
@@ -116,7 +129,7 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
             }
             var result = await Call("Runtime.callFunctionOn", new
             {
-                objectId = managers, functionDeclaration = Projection,
+                objectId = managers, functionDeclaration = ProjectionFor(profile!),
                 arguments = new[] { new { value = threadId } }, returnByValue = true, silent = true
             }, timeout.Token).ConfigureAwait(false);
             var snapshot = Parse(Object(Object(result, "result"), "value"), threadId);
@@ -148,9 +161,10 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
           const turnId = state.latestTurnId, pending = [], methods = new Map([
             ['item/tool/requestUserInput', false], ['tool/requestUserInput', false],
             ['mcpServer/elicitation/request', false], ['item/commandExecution/requestApproval', true],
-            ['item/fileChange/requestApproval', true], ['item/permissions/requestApproval', true]
+            ['item/fileChange/requestApproval', true], ['item/permissions/requestApproval', true],
+            ['item/tool/requestOptionPicker', false]
           ]);
-          if (!Array.isArray(state.requests)) return null;
+          if (!Array.isArray(state.requests) || typeof state.isResponseInProgress !== 'boolean') return null;
           for (const request of state.requests) {
             if (!methods.has(request.method) || request.completed === true) continue;
             if (request.params?.threadId !== threadId || request.params?.turnId !== turnId ||
@@ -174,6 +188,8 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
             complete: true, overflow: pending.length > 128, pending: pending.slice(0,128)};
         }
         """;
+
+    internal static string ProjectionFor(Profile selected) => Projection.Replace("'Hfn'", "'" + selected.Manager + "'", StringComparison.Ordinal);
 
     internal static CodexPendingSnapshot? Parse(JsonElement value, string threadId)
     {
@@ -229,6 +245,13 @@ internal sealed class CodexPendingBridge : IAsyncDisposable
             if (Text(root, "method") == "Debugger.scriptParsed")
             {
                 var script = Object(root, "params");
+                var url = Text(script, "url"); var hash = Text(script, "hash");
+                if (Object(script, "isModule").ValueKind == JsonValueKind.True &&
+                    Uri.TryCreate(url, UriKind.Absolute, out var module) && module.Scheme == "app" && module.Host == "-" &&
+                    module.Query.Length == 0 && module.Fragment.Length == 0 && module.UserInfo.Length == 0 &&
+                    module.AbsolutePath.StartsWith("/assets/app-", StringComparison.Ordinal) && module.AbsolutePath.EndsWith(".js", StringComparison.Ordinal) &&
+                    Profiles.Any(p => p.ModuleHash == hash || p.BaseHash == hash))
+                    scripts[hash] = (Text(script, "scriptId"), url);
                 if (Text(script, "url") == ModuleUrl && Text(script, "hash") == ModuleHash && Object(script, "isModule").ValueKind == JsonValueKind.True)
                     moduleScriptId = Text(script, "scriptId");
                 if (Text(script, "url") == BaseModuleUrl && Text(script, "hash") == BaseModuleHash && Object(script, "isModule").ValueKind == JsonValueKind.True)
