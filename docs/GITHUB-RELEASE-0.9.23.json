@@ -1,0 +1,33 @@
+{
+  "repository": "Derp-zh/instant-taskboard",
+  "tag": "v0.9.23",
+  "releaseUrl": "https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.23",
+  "sourceCommit": "8d3d23ef201f4749ecd16cb581e1796b0cdc782b",
+  "remoteMainAtVerification": "8d3d23ef201f4749ecd16cb581e1796b0cdc782b",
+  "tagCommitVerified": true,
+  "fullRemoteTreeVerified": true,
+  "remoteSourceFilesVerified": 129,
+  "publishedAt": "2026-10-22T12:43:39Z",
+  "selfContained": true,
+  "portableFiles": 479,
+  "everyDownloadedEntryVerified": true,
+  "assets": [
+    {
+      "name": "instant-taskboard-0.9.23-win-x64.zip",
+      "bytes": 77392439,
+      "sha256": "0120dacb24674bbd9acf263b851a96a5b369c740bb8c5705e0117f42cf145d03",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.23/instant-taskboard-0.9.23-win-x64.zip",
+      "downloadVerified": true,
+      "serverDigestMatches": true
+    },
+    {
+      "name": "instant-taskboard-0.9.23-win-x64.zip.sha256",
+      "bytes": 104,
+      "sha256": "36bbce306b099163b840c9ff5f8dc8b5cdf168c4f3a8c30ff50dbbdae3871f18",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.23/instant-taskboard-0.9.23-win-x64.zip.sha256",
+      "downloadVerified": true,
+      "serverDigestMatches": true
+    }
+  ],
+  "scope": "Reviewed source plus complete self-contained package; final package tested in isolation and re-downloaded. Actual current desktop catalog/identity/readonly transport passed; observation endpoint and original chat lifecycle remain unverified. No mouse, restart, chat writes or production data changes."
+}

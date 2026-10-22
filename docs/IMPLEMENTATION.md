@@ -9,3 +9,5 @@
 影响消费者与保持范围见[共享影响](architecture/SHARED-CODE.md)，实际结果见[验收](ACCEPTANCE-0.9.23.md)。Codebase Memory实际检查/定点读取后已刷新；部分PowerShell解析缺口用源码补证，摘要写工具缺失不冒称同步。
 
 独立构建便携包，不替换正式运行文件。用户本轮明确要求GitHub更新，源码、完整ZIP与SHA256同步，发布后重新下载并逐文件校验。
+
+发布回读：源码`8d3d23e`与tag `v0.9.23`已核对；公开ZIP/SHA256重新下载，479个包内文件逐项验证一致。见[发布回执](GITHUB-RELEASE-0.9.23.json)。
