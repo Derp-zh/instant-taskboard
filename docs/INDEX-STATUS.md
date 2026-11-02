@@ -1,5 +1,11 @@
 # 当前索引与摘要同步状态
 
+## 2026-11-03 0.9.30 GitHub发布补记
+
+本轮只准备公开副本、发布与核对原源码／原包，并更新发布文档，产品源码不变。源码／Release／两个附件及重新下载逐文件核验已经完成，见[发布回执](GITHUB-RELEASE-0.9.30.json)。沿用下节11月2日最后核实的代码索引，不因发布另行重建。
+
+收尾尝试实际get／set_sections／index_status时，Codebase Memory MCP返回`Transport closed`；重试get仍断连。没有取得成功回执或完整摘要回读，因此不能确认任何远端摘要更新。本地[同步JSON](CODEBASE-MEMORY-SYNC.json)记录发布事实的待同步payload，status为pending；不冒称本轮索引或摘要同步成功。工具恢复后只需核对当前交付节并回读，不需要重做产品验收或发布。
+
 ## 2026-11-02 0.9.30 接入取舍与设置整理
 
 本轮实际执行index_status→架构→符号／trace／片段，旧行号、同名误边与新增文件缺口均用定点源码补证。完成源码、独立包及文档检查后才full/persistence刷新：ready，根`D:/Derp/Documents/0renwumianban`，indexed_at `2026-11-02T15:25:14Z`，10495节点／30808边，18部分解析、0不可用／跳过。CodexFollowPolicy、PeekSnapshot和CheckTerminalDisplay新符号命中，PeekSnapshot的365至375行已回读。

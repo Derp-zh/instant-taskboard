@@ -1,5 +1,7 @@
 # GitHub运行包发布记录
 
+2026-11-03已发布[即时任务看板0.9.30](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.30)，标签`v0.9.30`，源码提交`f554da9944fc24a53a41a03eaf455e781f822699`，确认为Latest。中英文首页、源码／相关检查、现行文档及完整Windows x64 ZIP／SHA256已同步；公开源码独立编译通过，远端源码归档410项及构建清单161项一致。重新下载ZIP的479个成员逐项哈希／长度一致，ZIP为77,205,581字节，SHA256 `E52D95A515A3A850D8481F96555C621E89DD41F362DD9D6A4F57516C76F832D8`。使用已验收原包，不操作正式数据或当前Codex；严格无副作用及完整原桌面生命周期仍未验收。见[发布回执](GITHUB-RELEASE-0.9.30.json)。以下记录保留各自历史时点。
+
 2026-10-21已发布[即时任务看板0.9.20宽度修正版](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20)，标签`v0.9.20`，源码提交`b7255e78559fcf29ce6ca0d3a727bd38d2819669`，已确认为Latest。同步更新源码/文档及完整485文件Windows x64便携ZIP与SHA256。最终ZIP大小79,842,129字节，SHA256：`F2D9C67ABF2E4753DC6F5C93EB20A16BB8BD887665AF6048148623E9DAC88B2F`；修正运行包说明中的失效链接后重新打包并替换了Release附件，两个附件均从公开Release重新下载，与GitHub服务端摘要及文件大小一致。双语README按qiangshou技能重构并通过配对校验。源码暂无LICENSE，README已如实注明授权条款未声明。
 
 [版本说明](RELEASE-NOTES-0.9.20.md)、[机器回执](GITHUB-RELEASE-0.9.20.json)、[验收摘要](ACCEPTANCE-0.9.20-widthfix.md)。以下为历史发布记录。

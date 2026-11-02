@@ -1,6 +1,6 @@
 # 项目文档索引
 
-公开仍0.9.23；本地0.9.30整理Codex接入并重排设置，未发布。保留离线目录和准确实时处理，撤出不可靠文件执行／未知轮次补报；严格被动目标未完成。更新：2026-11-02。
+公开0.9.30，已同步源码／文档和完整便携包，重新下载核验通过，见[发布回执](GITHUB-RELEASE-0.9.30.json)。本版整理Codex接入并重排设置。保留离线目录和准确实时处理，撤出不可靠文件执行／未知轮次补报；严格被动目标未完成。更新：2026-11-03。
 
 | 入口 | 用途 | 读取时机 |
 | --- | --- | --- |
@@ -38,7 +38,7 @@
 - [0.9.23验收](ACCEPTANCE-0.9.23.md)、[机器摘要](VERIFICATION-0.9.23.json)、[发布回执](GITHUB-RELEASE-0.9.23.json)：先连接再自检、保留旧配置、升级路径修复、只读测试及新观察适配；实际目录/原桌面通道通过，完整观察与生命周期待验收。初次初始化的历史检查见[0.9.21](ACCEPTANCE-0.9.21-ai-init.md)。
 - [DSH接入探索C02](current/C02-DSH接入探索.md)：2026-10-23复核目录/空闲状态与来源身份、补查受控HTTP和官方被动API；状态缺口、待选插件/API路线与后续原桌面验收，未接入产品。
 - [0.9.20宽度修正版验收](ACCEPTANCE-0.9.20-widthfix.md)、[证据](VERIFICATION-0.9.20-widthfix.json)、[包](BUILD-INFO-0.9.20-widthfix.json)、[已有GitHub回执](GITHUB-RELEASE-0.9.20.json)。
-- [项目功能介绍](../README.md)与[英文版](../README_EN.md)已同步0.9.23；源码8d3d23e及Release下载逐文件核对，详见[回执](GITHUB-RELEASE-0.9.23.json)。
+- [项目功能介绍](../README.md)与[英文版](../README_EN.md)已同步0.9.30；源码f554da9及Release下载逐文件核对，详见[回执](GITHUB-RELEASE-0.9.30.json)。
 - [Codex观察使用与兼容](CODEX-PENDING-BRIDGE.md)、[0.9.19实际验收](ACCEPTANCE-0.9.19.md)及[分层证据](VERIFICATION-0.9.19.json)。
 - [通知监听研究](NOTIFICATION-LISTENING.md)、[飞书探索](FEISHU-SYNC-RESEARCH.md)：技术参考不扩充已授权功能。
 - [整理前文档/来源编号](history/20261021-before-current/README.md)、[旧程序资料](legacy/INDEX.md)：仅追溯，不默认读取。旧包和版本化证据维持原时点，不复用其“当前/本轮”描述。

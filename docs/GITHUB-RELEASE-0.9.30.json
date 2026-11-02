@@ -1,0 +1,96 @@
+{
+  "repository": "Derp-zh/instant-taskboard",
+  "tag": "v0.9.30",
+  "releaseUrl": "https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.30",
+  "publicationDate": "2026-11-03",
+  "timezone": "Asia/Shanghai",
+  "sourceCommit": "f554da9944fc24a53a41a03eaf455e781f822699",
+  "remoteMainAtVerification": "f554da9944fc24a53a41a03eaf455e781f822699",
+  "tagCommitVerified": true,
+  "fullRemoteTreeVerified": true,
+  "remoteTreeFilesVerified": 410,
+  "remoteSourceFilesVerified": 161,
+  "publishedAt": "2026-11-02T18:24:46Z",
+  "selfContained": true,
+  "portableFiles": 479,
+  "everyDownloadedEntryVerified": true,
+  "assets": [
+    {
+      "name": "instant-taskboard-0.9.30-win-x64.zip",
+      "bytes": 77205581,
+      "sha256": "e52d95a515a3a850d8481f96555c621e89dd41f362dd9d6a4f57516c76f832d8",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.30/instant-taskboard-0.9.30-win-x64.zip",
+      "downloadVerified": true,
+      "serverDigestMatches": true
+    },
+    {
+      "name": "instant-taskboard-0.9.30-win-x64.zip.sha256",
+      "bytes": 103,
+      "sha256": "67cba22ddddb86fee033ad75b80f93fdc387c832ae2ce871cbe0d208d0e3b7e9",
+      "url": "https://github.com/Derp-zh/instant-taskboard/releases/download/v0.9.30/instant-taskboard-0.9.30-win-x64.zip.sha256",
+      "downloadVerified": true,
+      "serverDigestMatches": true
+    }
+  ],
+  "publicSourceBuild": {
+    "passed": true,
+    "warnings": 0,
+    "errors": 0
+  },
+  "publicDocumentationCheck": {
+    "passed": true,
+    "linksChecked": 333,
+    "immutableSnapshotsVerified": 10
+  },
+  "publicDocExports": [
+    {
+      "path": "docs/ACCEPTANCE-0.9.21-ai-init.md",
+      "privateIdsReplaced": 0,
+      "localLinksShownAsText": 1
+    },
+    {
+      "path": "docs/ACCEPTANCE-0.9.28.md",
+      "privateIdsReplaced": 1,
+      "localLinksShownAsText": 0
+    },
+    {
+      "path": "docs/ACCEPTANCE-CODEX-PASSIVE-20261024.md",
+      "privateIdsReplaced": 0,
+      "localLinksShownAsText": 4
+    },
+    {
+      "path": "docs/AI-HANDOFF-CODEX-PASSIVE-0.9.28.md",
+      "privateIdsReplaced": 1,
+      "localLinksShownAsText": 0
+    },
+    {
+      "path": "docs/REVIEW-CODEX-0.9.28-20261024.md",
+      "privateIdsReplaced": 0,
+      "localLinksShownAsText": 3
+    },
+    {
+      "path": "docs/VERIFICATION-0.9.27.json",
+      "privateIdsReplaced": 1,
+      "localLinksShownAsText": 0
+    },
+    {
+      "path": "docs/VERIFICATION-0.9.28.json",
+      "privateIdsReplaced": 1,
+      "localLinksShownAsText": 0
+    },
+    {
+      "path": "docs/VERIFICATION-DRAG-BINDING-R2.json",
+      "privateIdsReplaced": 2,
+      "localLinksShownAsText": 0
+    },
+    {
+      "path": "docs/current/C02-DSH接入探索.md",
+      "privateIdsReplaced": 0,
+      "localLinksShownAsText": 9
+    }
+  ],
+  "originalTestedArchiveReused": true,
+  "packagedDocsRetainBuildTimePublicationStatus": true,
+  "scope": "Source/docs and original tested portable ZIP published; public source compiled independently and downloaded source tree plus all 479 downloaded package files verified. No product changes, current Codex lifecycle actions, desktop input, formal data/config changes or strict zero-side-effect claim. Source tag is fixed; publication receipts may follow as a docs-only commit on main.",
+  "codebaseMemoryPublicationSync": "pending-transport-closed"
+}
