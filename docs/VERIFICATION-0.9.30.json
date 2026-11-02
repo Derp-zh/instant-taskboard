@@ -1,0 +1,144 @@
+{
+  "version": "0.9.30",
+  "date": "2026-11-02",
+  "published": false,
+  "status": "implemented-isolated-verification-passed",
+  "completeTrafficFix": false,
+  "strictIdleRetentionFixed": false,
+  "unobservedShortTerminalSupported": false,
+  "realCodexOperated": false,
+  "formalDataTouched": false,
+  "desktopInputUsed": false,
+  "build": {
+    "releasePassed": true,
+    "warnings": 0,
+    "errors": 0,
+    "packageVersion": "0.9.30.0",
+    "packageAssemblies": {
+      "即时任务看板.exe": "043A4CF89437E9346AADC7799EA20DDB4F64D74491F049C6C04BFA3BE850E862",
+      "Taskboard.dll": "1E93C3EE71806F8F26CC13B2315648011F711E978A9D594682B6BE036044FCCF",
+      "Taskboard.Core.dll": "534949EAB3CC652A621EDEB802C5F4BB39B2CF7A5C5CFCFF1E37B72FD221FAA3"
+    },
+    "sourceSnapshot": "output/0930/published-source-final.json"
+  },
+  "checks": {
+    "cleanup": {
+      "path": "test-output/cleanup0930-final-f/cleanup-report.json",
+      "passed": 47,
+      "reportSHA256": "E909A23E6A4B9904BAD9955C74EE25A85818935FAC6899D950D8A47CA80B3AA9"
+    },
+    "fileActivity": {
+      "path": "test-output/cleanup0930-activity-b/file-projection.json",
+      "passed": 26,
+      "reportSHA256": "FEA0956856BD6BBF33CEF749EB9C65CE42B504FF57A66ADF43A6322489DD3515"
+    },
+    "fileIntegrity": {
+      "path": "test-output/cleanup0930-activity-b/file-projection-verify.json",
+      "passed": true,
+      "reportSHA256": "705098CD7978153AF03B5DDA432B90EEF1F7095AFEE26C281FE7AD182E76592D"
+    },
+    "core": {
+      "path": "test-output/0930-core-c/report.json",
+      "passed": 334,
+      "reportSHA256": "A2638580959D56C571BFD4FA34963488C88118334AAE2253524E3EAB359DCBB3"
+    },
+    "protocol": {
+      "path": "test-output/0930-protocol-c/report.json",
+      "passed": 73,
+      "reportSHA256": "5A0B75219B80843ED1AF3EB07F12FF9CF79C6A916836C7ECA32688FF55B7E68F"
+    },
+    "reconnect": {
+      "path": "test-output/cleanup0930-reconnect-d/reconnect-report.json",
+      "passed": 15,
+      "reportSHA256": "55BF4D84FC53B68C9CFF2910B615100CC1C4533C1F98DE21759A57804B30B891"
+    },
+    "localState": {
+      "path": "test-output/cleanup0930-local-unit-b/local-unit.json",
+      "passed": 25,
+      "reportSHA256": "8E5BA1FDA6939F4D6C21F1BAFE7DEC6C98053A6E4764A8FA0E2B76B93E9203D6"
+    },
+    "settings": {
+      "path": "test-output/0930-package-settings-b/settings0930-report.json",
+      "passed": 54,
+      "reportSHA256": "15ECECCC53CBA9BACECE8DCB5F5FEBB3ACAD48454C9D175D235F1A9932FE4E5D"
+    },
+    "setup": {
+      "path": "test-output/0930-package-settings-b/codex-setup0930-report.json",
+      "passed": 15,
+      "reportSHA256": "BC8193CCDE257BC053D5A8D3D362146EE958C166B7D811217BA65CDAEB3F499F"
+    },
+    "initialization": {
+      "path": "test-output/0930-package-init-b/ai-initialization-report.json",
+      "passed": 44,
+      "reportSHA256": "DEBBEAD4ADE5B9B7E69A9EDA3ACD7DF9EA6CA1AC7CA1CAF3AAF0CA7FF93CF312"
+    },
+    "catalog": {
+      "path": "test-output/0930-package-catalog-b/local-catalog-report.json",
+      "passed": 26,
+      "reportSHA256": "EEF912DE5F47E494B024C402F9E1860A3E3A2BF46DAF44AB7FE581BA9858CF85"
+    },
+    "catalogIntegrity": {
+      "path": "test-output/0930-package-catalog-b/fixture-integrity.json",
+      "passed": true,
+      "reportSHA256": "92E9410316CEB1508906C813B552CAE401234168826C62ECF02FE1D23F98A71B"
+    },
+    "uiRegression": {
+      "path": "test-output/0930-ux-a/ux0922-report.json",
+      "passed": 38,
+      "reportSHA256": "F1A332E875D23BE5CFD7E8E9C7030EB6707874C241EAC0430C8B1DC477B338DF"
+    },
+    "integration": {
+      "path": "test-output/0930-integration-b/integration-report.json",
+      "passed": 17,
+      "reportSHA256": "B074E63B195DC02BD0104C8D4C2D0D2B8D262DE752882A7ADB54AB9F930388B9"
+    },
+    "reconnectUi": {
+      "path": "test-output/0930-reconnect-ui-a/reconnect-ui-report.json",
+      "passed": 10,
+      "reportSHA256": "2C64212C21408DDC48D8F3A920CA1FA80F4AF153A1F5602B64160AFAD7421720"
+    },
+    "startup": {
+      "path": "test-output/0930-package-start-b/startup-report.json",
+      "passed": null,
+      "reportSHA256": "EA508397824902C5F3AD492F0243036E141262CEFCB5B0E8B92444569DF4B325",
+      "readyMs": 1886.7089
+    }
+  },
+  "countsAreAssertionsNotRealDesktopScenarios": true,
+  "sourceAndPackageRechecksNotSummed": true,
+  "packageReceipt": "docs/BUILD-INFO-0.9.30.json",
+  "packageIntegrityGeneratedAfterThisReport": true,
+  "documentationIntegrityReceipt": "output/0930/docs-verification.json",
+  "documentationIntegrityIsNotProductVerification": true,
+  "syntheticScope": "Fresh explicit test-output data dirs; WPF offscreen checks use fresh profile/CODEX_HOME and no integrations; protocol uses local synthetic source. No current Codex chat lifecycle, user input or system-wide traffic measurement.",
+  "knownLimitations": [
+    "Verified active/waiting turns still follow; discovery windows may affect idle timing.",
+    "Unobserved short turns cannot be reliably classified from first-seen persisted history.",
+    "Policy deadlines tested with injected time; actual unsubscribe occurs on next completed observation loop, no strict wall-clock bound claimed.",
+    "Zero proxy requests does not prove zero TCP/UDP or zero indirect public traffic.",
+    "Real desktop question-answer, approval-resume, multi-monitor DPI and physical input not accepted this round."
+  ],
+  "terminalReconnectFix": {
+    "originalCounterexample": "test-output/cleanup0930-terminal-reconnect-a/terminal-reconnect-review.json",
+    "fixedBy": "Runtime binding-specific observed turn evidence; preserved only across same-binding live merge; accepted current terminal not overwritten by capability summary.",
+    "negativeBoundaries": [
+      "binding id",
+      "generation",
+      "chat",
+      "newer turn",
+      "saved history",
+      "editor rebind"
+    ],
+    "controllerCallbackVerifiedInActualPackage": true
+  },
+  "intermediateFailuresRetained": {
+    "cleanup0930-a": "Old prebuild DLL invocation, unknown mode; rebuilt.",
+    "cleanup0930-activity-a": "Copied synthetic DB rollout path still targeted source fixture; corrected only working fixture.",
+    "0930-ai-init-a": "Old wording assertion matched negative explanation; simplified product next-action text.",
+    "0930-integration-a": "Storage controls now folded; test expands real disclosure.",
+    "0930-protocol-a": "Sandbox HttpListener handle failure; local-only synthetic retest approved.",
+    "terminal-reconnect-review": "Original linked-source counterexample reproduced and retained; final cleanup and actual-controller checks pass.",
+    "build-conflict": "Two concurrent builds shared Core output; rebuilt sequentially.",
+    "check-compile": "New test dictionary lambda corrected; final build zero warnings/errors."
+  }
+}

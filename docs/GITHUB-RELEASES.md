@@ -1,10 +1,9 @@
-# GitHub portable releases
-
-2026-10-21: [Instant Taskboard 0.9.20 widthfix](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20) is the latest release. Source/tag commit: `b7255e78559fcf29ce6ca0d3a727bd38d2819669`. Published source and documentation with a complete 485-file Windows x64 portable ZIP and SHA256 sidecar. The final ZIP is 79,842,129 bytes, SHA256 `F2D9C67ABF2E4753DC6F5C93EB20A16BB8BD887665AF6048148623E9DAC88B2F`. After fixing a broken link in the bundled guide, the ZIP was rebuilt and the GitHub asset replaced. Both public attachments were downloaded again and checked against GitHub digests and sizes. The bilingual README pair passed the qiangshou skill validator. There is no `LICENSE` file; source reuse terms remain undeclared.
-
-See [release notes](RELEASE-NOTES-0.9.20.md), [release receipt](GITHUB-RELEASE-0.9.20.json), and [acceptance summary](ACCEPTANCE-0.9.20-widthfix.md).
-
 # GitHub运行包发布记录
+
+2026-10-21已发布[即时任务看板0.9.20宽度修正版](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.20)，标签`v0.9.20`，源码提交`b7255e78559fcf29ce6ca0d3a727bd38d2819669`，已确认为Latest。同步更新源码/文档及完整485文件Windows x64便携ZIP与SHA256。最终ZIP大小79,842,129字节，SHA256：`F2D9C67ABF2E4753DC6F5C93EB20A16BB8BD887665AF6048148623E9DAC88B2F`；修正运行包说明中的失效链接后重新打包并替换了Release附件，两个附件均从公开Release重新下载，与GitHub服务端摘要及文件大小一致。双语README按qiangshou技能重构并通过配对校验。源码暂无LICENSE，README已如实注明授权条款未声明。
+
+[版本说明](RELEASE-NOTES-0.9.20.md)、[机器回执](GITHUB-RELEASE-0.9.20.json)、[验收摘要](ACCEPTANCE-0.9.20-widthfix.md)。以下为历史发布记录。
+
 
 2026-10-19已发布[即时任务看板0.9.16](https://github.com/Derp-zh/instant-taskboard/releases/tag/v0.9.16)，同步源码/文档及完整476文件ZIP、SHA256。源码标签提交`0a8e923e64983c515a89b24dfb503b6c65f1a53c`；两个附件实际下载及逐文件校验通过，确认为latest。原桌面执行/结束/双向移列已实测；异步提问仍缺信号，计划模式提问及权限等待/批准恢复未验收，不宣称完整接入通过。
 

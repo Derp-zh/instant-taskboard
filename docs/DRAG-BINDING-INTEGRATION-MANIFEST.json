@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "preparedOn": "2026-10-23",
+  "status": "handoff-prepared-not-integrated",
+  "purpose": "Integrate verified r2 drag binding into the latest verified local main-development baseline; this manifest does not authorize publication.",
+  "projectRoot": "D:/Derp/Documents/0renwumianban",
+  "sourceGitObserved": {
+    "branch": "master",
+    "head": "5bed7c9c7865c963f2d2b52da48c7bb2852373f6",
+    "targetedFilesStatus": "untracked",
+    "featureCommittedInThisHead": false,
+    "testBranchOrCommitConfirmed": false,
+    "targetMainDevelopmentBranchConfirmed": false
+  },
+  "currentSourceSnapshots": [
+    {
+      "path": "src/Taskboard.Core/BoardEngine.ConversationBinding.cs",
+      "role": "business-core",
+      "bytes": 1306,
+      "sha256": "682A04F03918A390190E774CB18D73BBD89EBB6BCA41982F335E7E587FB39F45"
+    },
+    {
+      "path": "src/Taskboard.Desktop/ConversationDragButton.cs",
+      "role": "drag-button",
+      "bytes": 4683,
+      "sha256": "9840579D5E22658E2846BA2A409FE03CE7E8C9DD75CF9E638FA77FE03A26E720"
+    },
+    {
+      "path": "src/Taskboard.Desktop/ConversationBindingDrag.cs",
+      "role": "drag-session",
+      "bytes": 7334,
+      "sha256": "0227E4EB28F5D86748D39FDADB7D39D70E37474C2E54A74073ADA88FC0895D7E"
+    },
+    {
+      "path": "src/Taskboard.Desktop/CodexConversationDropTarget.cs",
+      "role": "desktop-target-reader",
+      "bytes": 5761,
+      "sha256": "E49F77A95D1F53EAC9013466D4E86797DFD93ADBB1992D086DACD6603938F468"
+    },
+    {
+      "path": "src/Taskboard.Desktop/CodexConversationMenu.cs",
+      "role": "native-thread-link-resolver",
+      "bytes": 15324,
+      "sha256": "8878FEEF7C8658507A9D2FAF174867FDACDFDD4480087EEA4DA95025055797A3"
+    },
+    {
+      "path": "src/Taskboard.Desktop/ConversationClipboard.cs",
+      "role": "clipboard-materialization-and-restore",
+      "bytes": 2555,
+      "sha256": "50C1CBF465630ACE6167DBD636AA6063B8D689D8144541DCBCA77BF56B246086"
+    },
+    {
+      "path": "src/Taskboard.Desktop/BoardController.ConversationDrag.cs",
+      "role": "controller-business-and-preview-separation-required",
+      "bytes": 2585,
+      "sha256": "068E76319B754356D655CB7EAED147167E9C43A1E6C7CFA0882672F6C3A7CDF0"
+    },
+    {
+      "path": "src/Taskboard.Desktop/ColumnSurface.cs",
+      "role": "shared-existing-file-merge-targeted-difference-only",
+      "bytes": 33432,
+      "sha256": "4C3D54209591A3EEB0613AD61CCF14FD69EBFAFFBB8EB2F5867DAE849A04628A"
+    },
+    {
+      "path": "src/Taskboard.Desktop/BoardController.cs",
+      "role": "shared-existing-file-cancel-and-dispose-hooks",
+      "bytes": 49830,
+      "sha256": "897F2068E7D0C6EF86782869DC6EAB92AA9FDFA5C121057A37790886E091FC0F"
+    },
+    {
+      "path": "src/Taskboard.Desktop/Program.cs",
+      "role": "shared-existing-file-normal-vs-test-startup",
+      "bytes": 20695,
+      "sha256": "65862BE1E4F375E7A68DE0847DEC1185AD86E9BEFFBD95D4368E9CC2C610A9CD"
+    },
+    {
+      "path": "src/Taskboard.Desktop/ConversationDragChecks.cs",
+      "role": "adapt-test-mode-expectations",
+      "bytes": 11129,
+      "sha256": "0E7F66CDCEFB843FC59C03B355C0F0FE05F47C59BCA7CEC65761BF4C31A21A1E"
+    },
+    {
+      "path": "tools/Verify-DragBindingReal.ps1",
+      "role": "adapt-real-mouse-checks-to-target-build",
+      "bytes": 13735,
+      "sha256": "F8F85D9A22FEDE32012D5DE8B798E898FD9F875003E08774387CBE4E795379E7"
+    },
+    {
+      "path": "tools/Probe-CodexThreadMenu.ps1",
+      "role": "independent-real-id-reference-probe",
+      "bytes": 9768,
+      "sha256": "156C5FFEFAF2D76BA1533B62E7C659D81D45BE21777826CD355D98B4843C3AD6"
+    },
+    {
+      "path": "tools/Verify-ConversationClipboard.ps1",
+      "role": "adapt-clipboard-check-assembly-path",
+      "bytes": 2011,
+      "sha256": "3E78AAFBBD6F2D1E8C83DA3A48007857BF8816822248522BD89A2C5EED9101BA"
+    }
+  ],
+  "supportingDependencies": [
+    {
+      "path": "tools/Desktop-Interaction.ps1",
+      "role": "helpers-extracted-by-existing-test-tools-never-run-whole-script-implicitly",
+      "bytes": 40774,
+      "sha256": "E3B3808B37511C6F46E330B6A46A489335536DD52C4AEF84A0357FDAC0B8AEE8"
+    }
+  ],
+  "existingTargetDependencies": [
+    "CodexInstallationDiscovery",
+    "CodexBinding",
+    "Copies",
+    "BoardEngine and AtomicStore",
+    "humanTaskGate and Flush",
+    "SurfaceWindow and Native",
+    "CardHeading / MarqueeText / TaskCardLayout"
+  ],
+  "historicalEvidence": [
+    {
+      "path": "docs/VERIFICATION-DRAG-BINDING-R2.json",
+      "role": "historical-r2-evidence-not-new-target-acceptance",
+      "bytes": 7600,
+      "sha256": "833A59A4C8925FD68D80FCFFFE47EE5EE59F4C1FFB36A9A7A748E9FF49230876"
+    },
+    {
+      "path": "docs/BUILD-INFO-DRAG-BINDING-R2.json",
+      "role": "historical-r2-evidence-not-new-target-acceptance",
+      "bytes": 83674,
+      "sha256": "118F72179F500E83E14F901C0253316650368AE362C8B29B6B4EF01F36FB6CA9"
+    }
+  ],
+  "historicalAcceptance": {
+    "codexVersion": "26.1016.8120.0",
+    "realPositiveDrops": 3,
+    "realMouseChecks": 34,
+    "syntheticAndOffscreenChecks": 40,
+    "realIdAndDiskPersistenceAndReopen": true,
+    "newMainDevelopmentBuildValidated": false
+  },
+  "r2PackageCurrentBinaryReadback": {
+    "Taskboard.dll": {
+      "exists": true,
+      "sha256": "1A21A34766211628048BD023B152656A00C73E7D902D1CEB984AE92762055684",
+      "matchesHistoricalVerification": true
+    },
+    "Taskboard.Core.dll": {
+      "exists": true,
+      "sha256": "D58B04BE04B219C9BB53338ADE53DA428CC7A4DD0A675D0B66A7F3F721882ED1",
+      "matchesHistoricalVerification": true
+    }
+  },
+  "entryDocuments": [
+    "docs/DRAG-BINDING-INTEGRATION-PROMPT.md",
+    "docs/DRAG-BINDING-INTEGRATION.md",
+    "docs/current/X01-拖动绑定探索.md",
+    "docs/DRAG-BINDING-PREVIEW-GUIDE.md"
+  ],
+  "criticalAdaptations": [
+    "Enable normal business path independently of preview build/flag and Isolated",
+    "Keep isolation and preview-data/sample/tray/forced-expand behavior confined to test modes",
+    "Restrict last-conversation-drop.json diagnostics to tests",
+    "Adapt old ordinary-start-disabled test expectations and fixed test-script package/session locations"
+  ],
+  "exclusions": [
+    "formal task data and configuration",
+    "preview-data and test-output task files",
+    "preserved-data",
+    "authentication and conversation bodies",
+    "Codex shipped artifact extraction",
+    "unrelated source changes",
+    "old root Git repository as an assumed target baseline"
+  ],
+  "notes": [
+    "Relative paths resolve against projectRoot",
+    "Current source hashes detect drift and are not a proof every file built the historical r2 package",
+    "If a source hash differs later, investigate differences and preserve newer work rather than overwrite it",
+    "No merge, product build, product regression, mouse input, clipboard operation or GitHub write performed while preparing these files"
+  ],
+  "memoryToolsThisPreparation": {
+    "index_status": "Transport closed",
+    "get_architecture": "Transport closed",
+    "connected": false,
+    "indexRefreshed": false,
+    "fallback": "targeted local documentation and source reads"
+  }
+}

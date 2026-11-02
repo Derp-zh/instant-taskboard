@@ -94,6 +94,7 @@ internal sealed class StageConversationPicker : IDisposable
     private async Task Load()
     {
         if (loading || disposed) return; loading = true;
+        note.Text = "正在加载本地会话列表…";
         try
         {
             var values = await controller.LoadConversations(); if (disposed) return;
@@ -102,7 +103,7 @@ internal sealed class StageConversationPicker : IDisposable
             { binding.ThreadName = known.Name; Present(); changed(); }
             note.Text = values.Length == 0 ? "暂无可选会话，请确认Codex连接后再次点击输入框。" : ""; Filter();
         }
-        catch { if (!disposed) note.Text = "读取会话失败，请稍后再次点击输入框重试。"; }
+        catch { if (!disposed) note.Text = "会话列表暂不可用，已尝试恢复连接；再次点击输入框可重试。"; }
         finally { loading = false; }
     }
     internal void SetCatalog(CodexThread[] values) { catalog = values; Filter(); }

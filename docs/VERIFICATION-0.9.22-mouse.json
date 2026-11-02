@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-22",
+  "version": "0.9.22",
+  "scope": "Additional physical mouse and sampled screen verification; no product changes or new publication.",
+  "executableSHA256": "43ad23c5b4cb20a61b088f1a1f4d03d0b435fcd703dbdbaabe72806822bc0b01",
+  "physicalChecks": 19,
+  "physicalClickActions": 15,
+  "capturedHoverFrames": 39,
+  "screen": {
+    "physicalPixels": [
+      2560,
+      1440
+    ],
+    "scalePercent": 150
+  },
+  "medianSampleIntervalMs": 17.43,
+  "largestSampleIntervalMs": 25.18,
+  "noObservedGapOrOverlap": true,
+  "lastDot": {
+    "file": "hover-012.png",
+    "ms": 212.5336
+  },
+  "firstNumber": {
+    "file": "hover-013.png",
+    "ms": 225.519
+  },
+  "numberGlyphAndBorderVisibleTogether": true,
+  "hintTextsVisuallyVerified": [
+    "至少保留一个运行中的阶段",
+    "至少保留一个阶段"
+  ],
+  "mouseAndForegroundRestorationReadback": true,
+  "productionDataChanged": false,
+  "productionStartupChanged": false,
+  "codexOperated": false,
+  "productSourceChanged": false,
+  "githubChangedThisAcceptanceTurn": false,
+  "checks": [
+    "测试程序与已发布验收二进制一致",
+    "实际编辑窗口显示两个阶段X",
+    "物理点击唯一运行阶段X被拒绝并显示原保护提示",
+    "物理点击另一个阶段X后该阶段从编辑窗口移除",
+    "编辑删除尚未保存时正式任务仍保留两个阶段",
+    "物理点击最后阶段X被拒绝并显示保护提示",
+    "物理点击保存任务后独立回读仅剩一个阶段",
+    "重新打开编辑窗口恢复已保存的阶段删除结果",
+    "编辑窗口新增阶段供取消验证",
+    "取消保存不提交新增或删除副本",
+    "实际新建窗口显示初始阶段X",
+    "新建窗口物理点击最后阶段X被拒绝",
+    "新建窗口新增第二阶段",
+    "新建窗口物理点击X删除新增未运行阶段",
+    "关闭空新建后不增加正式任务",
+    "离开后球实际隐藏至边缘四分之一",
+    "悬停落点原生命中隔离球窗口",
+    "物理悬停后球实际弹出到完整宽度",
+    "鼠标离开后球再次自动隐藏"
+  ],
+  "evidence": {
+    "physical": "test-output/ux0922-mouse-20261022-05/mouse-report.json",
+    "frames": "test-output/ux0922-mouse-20261022-05/pixel-analysis.json",
+    "hintUnique": "test-output/ux0922-mouse-20261022-06/hint-captures.jsonl",
+    "hintLastAndRestore": "test-output/ux0922-mouse-20261022-07/mouse-report.json"
+  },
+  "screenshots": {
+    "test-output/ux0922-mouse-20261022-06/hint-immediate-639282212773273385.png": "eca6e14a296653030ea926d22a328183c6ea3b8813e408d170659ab3a9ff8656",
+    "test-output/ux0922-mouse-20261022-07/hint-immediate-639282213989515193.png": "826219c21119ce020d2bda9cab430250d07670c1084c666bd8ce01d4b08bfb09",
+    "test-output/ux0922-mouse-20261022-05/editor-after-delete.png": "98c1dfea32d43e12d3ca44f350d0235f39e5b5e8e85b96a9189a50f50ce564ff",
+    "test-output/ux0922-mouse-20261022-05/hover-contact.png": "e1f7f24f7148ddf98ffb6b12feee1c9f440aea92533f8a78cc7b12fadb293109",
+    "test-output/ux0922-mouse-20261022-05/actual-hover.gif": "7775b66afd8075709d74c89551653ca2ae55c3e797520393d664a0fe3cc45fbe"
+  },
+  "notVerified": [
+    "all screen refresh/compositor timings",
+    "mixed DPI / other monitors",
+    "every X boundary point / unrelated transparent-window hit regions",
+    "fast reverse hover under load",
+    "current Codex complete live observation"
+  ]
+}

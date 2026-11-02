@@ -9,6 +9,7 @@ preserved-data/
 __pycache__/
 *.py[cod]
 release/
+output/
 
 # Local indexes, credentials and task data
 .codebase-memory/

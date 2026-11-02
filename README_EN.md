@@ -1,4 +1,4 @@
-<!-- README_SYNC: source=working-tree; updated=2026-10-22 -->
+<!-- README_SYNC: source=working-tree; updated=2026-11-03 -->
 [简体中文](README.md) · English
 
 # Instant Taskboard
@@ -11,7 +11,7 @@ Find it useful? [Star the project](https://github.com/Derp-zh/instant-taskboard)
 
 [Download for Windows](https://github.com/Derp-zh/instant-taskboard/releases/latest) · [Report an issue](https://github.com/Derp-zh/instant-taskboard/issues)
 
-Current version **0.9.23** adds connection-first Codex checks, read-only tests for linked chats, Store upgrade path repair, and a new observation adapter. See the [release notes](docs/RELEASE-NOTES-0.9.23.md).
+Current version **0.9.30** keeps the offline Codex chat catalog and automatic reconnection while removing unreliable state inference. Settings are grouped by purpose, with everyday controls up front and diagnostics available on demand. See the [release notes](docs/RELEASE-NOTES-0.9.30.md).
 
 ## What is it for?
 
@@ -52,19 +52,21 @@ Collapsing the board keeps the app running, with reminders and unsubmitted input
 
 **Each stage can link to an existing Codex conversation**, with its name and status shown on the card. Different stages of the same task can use different conversations.
 
-With optional local status observation enabled, tasks can move automatically between In progress and Needs action:
+The board connects to the existing local state channel at startup. When reliable state is available, tasks can move automatically between In progress and Needs action:
 
 - Waiting for your answer or approval, or finishing a run that needs review, moves the task to Needs action.
 - Actual execution resuming moves it back to In progress. If several stages are active, a stage still waiting for attention takes priority.
 - A completed AI run never marks the task Done automatically. You decide when the task is finished.
 
-**Initialize or recheck from Settings → AI platform integration, then run a read-only test of linked chats. No scripts are required. An app update alone does not block connection: chat search, the live connection, and question/approval observation are checked separately.** The installed 26.1016.8120.0 passed catalog and original-desktop transport checks. A new observation adapter is included; its endpoint is not enabled, so real question/approval/recovery lifecycle validation remains pending. No messages, answers or approvals are sent. See the [Codex observation guide](docs/CODEX-PENDING-BRIDGE-PUBLIC.md).
+**Check the connection and view existing monitoring results from Settings → AI platforms. No script, observation port, or Codex restart is required.** The chat catalog reads the existing local database without starting a helper service. Testing linked chats reuses received state and adds no subscription. Catalog access, the local connection, and per-chat capability are reported separately. No messages, answers, or approvals are sent. See the [user guide](docs/USER-GUIDE-0.9.30.md).
+
+This version does not eliminate Codex idle-retention effects: confirmed long-running or waiting turns still use ongoing observation, and a short turn never captured live may remain unconfirmed. The full original-desktop question/approval/resumption lifecycle and system-wide traffic savings have not been accepted for this release. A persisted “in progress” record alone is not treated as execution. See the [acceptance scope](docs/ACCEPTANCE-0.9.30.md).
 
 AI platform labels can also serve as ordinary categories; choosing one does not connect that platform. Feishu two-way sync and live DSH or WorkBuddy integration are not implemented.
 
 ## Custom notification sounds
 
-The notification-listening settings let you configure a Windows notification sound for each application, using the built-in sound or your own audio, with playback previews. This module is separate from Codex status observation; notifications do not move tasks between lists.
+The Notification sounds settings let you configure a Windows notification sound for each application, using the built-in sound or your own audio, with playback previews. This module is separate from Codex status observation; notifications do not move tasks between lists.
 
 Listening is off by default. Actual notification capture, replacement of the original system sound, and restoration still need separate validation for the target application and Windows environment.
 
@@ -77,7 +79,7 @@ For 64-bit Windows 10 (version 2004 or later) and Windows 11.
 3. Click the floating button to open the board. Capture an idea directly in the Ideas list, or create a task from any list.
 4. Add reminders to individual tasks. Adjust windows, the shortcut, and startup at sign-in in Settings. The default global shortcut is `Ctrl+~`.
 
-Before upgrading, exit the old version from its tray menu, then extract the new version in full. See the [user guide](docs/USER-GUIDE-0.9.23.md) for more.
+Before upgrading, exit the old version from its tray menu, then extract the new version in full. See the [user guide](docs/USER-GUIDE-0.9.30.md) for more.
 
 ## Local data
 

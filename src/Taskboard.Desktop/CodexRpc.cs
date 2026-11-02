@@ -10,9 +10,15 @@ using System.Threading.Tasks;
 
 namespace Taskboard.Desktop;
 
+internal interface ICodexCatalogRpc : IAsyncDisposable
+{
+    bool IsConnected { get; }
+    Task<JsonElement> Call(string method, object parameters, int timeoutMs = 4000);
+}
+
 // Read-only port of codex_probe/rpc.py; no inference, resume, answer or approval
 // methods exist on this connection. All I/O runs away from the UI dispatcher.
-internal sealed class CodexRpc : IAsyncDisposable
+internal sealed class CodexRpc : ICodexCatalogRpc
 {
     private readonly ConcurrentDictionary<int, TaskCompletionSource<JsonElement>> pending = new();
     private readonly SemaphoreSlim writes = new(1);
@@ -22,6 +28,7 @@ internal sealed class CodexRpc : IAsyncDisposable
     private Task? reader;
     private int nextId;
     private int disposed;
+    public bool IsConnected => disposed == 0 && !lifetime.IsCancellationRequested && reader is { IsCompleted: false };
     internal event Action<JsonElement>? Notification;
     internal static bool Allowed(string method) => method is "initialize" or "thread/list" or "thread/read" or "thread/loaded/list" or "thread/turns/list";
     internal static async Task<CodexRpc> Start(string executable, bool proxy, string endpoint)
@@ -59,8 +66,9 @@ internal sealed class CodexRpc : IAsyncDisposable
         }
         catch { await rpc.DisposeAsync(); throw; }
     }
-    internal async Task<JsonElement> Call(string method, object parameters, int timeoutMs = 4000)
+    public async Task<JsonElement> Call(string method, object parameters, int timeoutMs = 4000)
     {
+        if (!IsConnected) throw new IOException("Codex 本地目录连接已断开");
         if (!Allowed(method)) throw new InvalidOperationException("只读监听不允许修改Codex会话");
         var id = Interlocked.Increment(ref nextId); var completion = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
         pending[id] = completion;

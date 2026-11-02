@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "status": "synced",
+  "baseline": "0.9.30 local Codex cleanup and settings redesign; strict passive monitoring incomplete; public 0.9.23",
+  "history_snapshot": "docs/history/20261021-before-current/codebase-memory-before.json",
+  "update_payload": {
+    "project": "Instant-taskboard",
+    "mode": "update",
+    "content": "## 当前交付\n本地0.9.30接入取舍与设置整理版已构建／隔离核验，公开仍0.9.23，未上传或替换旧包。正式运行最后只读核实为0.9.27，本轮不操作用户进程。现行入口docs/HANDOFF.md、docs/current/STATUS.md；本版证据docs/ACCEPTANCE-0.9.30.md、VERIFICATION-0.9.30.json、BUILD-INFO-0.9.30.json。0.9.20-widthfix仅历史入口。\n\n## 电脑端需求规划\n权威入口docs/PRD.md→docs/current/README.md→目标模块；拖动绑定见docs/current/X01-拖动绑定探索.md、M05、M09和C01。新规则原位替换及更新验收，建议不当已确认；默认不读历史、旧聊天或全部源码。重要未明确选择先讨论。\n\n## 本轮源码定位\nCodexObserver内CodexFollowPolicy控制发现截止与恢复资格，CodexFileActivity同事务只读轮次／水位；文件仅候选和已实时确认同轮终态，Core拒绝旧probe/turnProjected。CodexState的运行时ObservedTurn限绑定／代次／聊天／轮次，不持久化；BoardEngine.MergeStage仅同绑定保留，BoardController.AttachCodex不覆盖当前已确认终态。正常目录CodexLocalCatalog不启动app-server；普通初始化不检查CLI，TestAiConversations→PeekSnapshot只读已有快照不新订阅。设置七页对应SettingsSurface／Layout／AiInitialization／Listening，常用直达、长结果和诊断折叠，无效表单撤出但旧值保持。消费者／回归见docs/architecture/SHARED-CODE.md，现行需求docs/current/C01-Codex接入.md与M11-设置与外部边界.md。\n\n## 实际能力与待验边界\n本版实际隔离结果统一见docs/VERIFICATION-0.9.30.json及对应ACCEPTANCE；专项47、核心334、实际包设置54／接入与Controller15／初始化44／目录26等按各自范围报告，不相加冒充原桌面场景。严格无订阅／不影响闲置释放仍未完成，可信长活动／等待继续跟随，未知短轮次可能待确认；无系统级公网节省计量。未操作原桌面问答／批准／恢复、当前Codex、正式数据、鼠标或剪贴板；不将离屏图当物理输入或多屏DPI验收。索引仍18部分解析，精确源码metadata_changed／现行页missing用定点原文补证，不因ready称全部新鲜。\n\n## 维护和测试入口\n先docs/HANDOFF.md、docs/INDEX.md，按需读current及共享表；代码先index_status→get_architecture→search_graph/trace_path/get_code_snippet，缺口用rg。维护docs/DOCS-MAINTENANCE.md；文档检查python tools/check_current_docs.py。显式隔离--data-dir，不碰正式数据/配置、自启或preserved-data，桌面操作按根AGENTS.md先询问用户是否方便，收到明确同意后才开始；仅提示、未回复、历史授权或命令获批均不能代替本次确认。索引ready不证明全部路径新鲜，摘要只存路由。\n\n## DSH接入探索\n2026-10-23只读复核与待选路线统一见docs/current/C02-DSH接入探索.md、docs/TASKS.md和docs/current/STATUS.md；本轮证据output/dsh-research-20261023/。桥目录/空闲状态和来源身份通过，受控HTTP响应不等于官方Gateway已连接；完整待处理/同轮恢复/终态/原桌面与实际卡片保存未验。A最小状态插件、B官方被动API或C暂缓均未获选择，未实施产品监听。用户报正式0.9.19，文档公开0.9.23/开发0.9.25分开，实施前核对且不替换正式包。\n"
+  },
+  "summary_readback_exact": true,
+  "index_status": "refreshed",
+  "index_verification": {
+    "status": "ready",
+    "root_path": "D:/Derp/Documents/0renwumianban",
+    "indexed_at": "2026-11-02T15:25:14Z",
+    "nodes": 10495,
+    "edges": 30808,
+    "mode": "full",
+    "persistence": true,
+    "partial_files": 18,
+    "unusable_files": 0,
+    "skipped_files": 0
+  },
+  "coverage_limitations": [
+    {
+      "requested_path": "src/Taskboard.Core/CodexState.cs",
+      "path": "src/Taskboard.Core/CodexState.cs",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "src/Taskboard.Core/BoardEngine.cs",
+      "path": "src/Taskboard.Core/BoardEngine.cs",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "src/Taskboard.Desktop/CodexObserver.cs",
+      "path": "src/Taskboard.Desktop/CodexObserver.cs",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "src/Taskboard.Desktop/SettingsAiInitialization.cs",
+      "path": "src/Taskboard.Desktop/SettingsAiInitialization.cs",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "docs/current/C01-Codex接入.md",
+      "path": "docs/current/C01-Codex接入.md",
+      "status": "no_recorded_issue",
+      "freshness": "missing",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "docs/current/M11-设置与外部边界.md",
+      "path": "docs/current/M11-设置与外部边界.md",
+      "status": "no_recorded_issue",
+      "freshness": "missing",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    }
+  ],
+  "coverage_note": "Fresh index symbols and PeekSnapshot snippet read back; exact source freshness still metadata_changed and current Markdown missing, verified by direct files. No repeated rebuild or all-fresh claim. output/test-output/release/preserved-data remain excluded.",
+  "documentation_receipts_changed_after_index": true,
+  "latest_dsh_review": {
+    "date": "2026-10-23",
+    "document": "docs/current/C02-DSH接入探索.md",
+    "evidence": "output/dsh-research-20261023/",
+    "scope": "Read-only research; no product implementation",
+    "index_verification": "output/dsh-research-20261023/index-final.json"
+  },
+  "note": "2026-11-02: only current delivery/source/boundary ADR sections updated; full expected text readback exact, planning/maintenance/DSH preserved. Final sync receipts postdate index.",
+  "latest_codex_passive_review": {
+    "date": "2026-10-24",
+    "acceptance": "docs/ACCEPTANCE-CODEX-PASSIVE-20261024.md",
+    "evidence": "output/codex-passive-20261024-review/",
+    "productModified": false
+  },
+  "latest_0930": {
+    "date": "2026-11-02",
+    "acceptance": "docs/ACCEPTANCE-0.9.30.md",
+    "evidence": "output/0930/",
+    "productModified": true,
+    "published": false
+  }
+}

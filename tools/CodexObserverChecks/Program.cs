@@ -9,11 +9,18 @@ using System.Text.Json;
 using Taskboard.Core;
 using Taskboard.Desktop;
 
-if (args.Length != 2 || args[0] != "--data-dir") throw new ArgumentException("必须指定隔离 --data-dir");
+if (args.Length is < 2 or > 3 || args[0] != "--data-dir") throw new ArgumentException("必须指定隔离 --data-dir");
 var output = Path.GetFullPath(args[1]);
-if (!output.StartsWith(Path.GetFullPath("test-output") + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) || Directory.Exists(output))
+var prepared = args.Length == 3 && args[2] == "--local-catalog" && Environment.GetEnvironmentVariable("TASKBOARD_PREPARED_CATALOG_FIXTURE") == output;
+if (!output.StartsWith(Path.GetFullPath("test-output") + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) || Directory.Exists(output) && !prepared)
     throw new ArgumentException("必须使用test-output下新的隔离目录");
 Directory.CreateDirectory(output);
+if (args.Length == 3 && args[2] == "--local-catalog") { await LocalCatalogChecks.Run(output); return; }
+if (args.Length == 3 && args[2] == "--reconnect") { await ReconnectChecks.Run(output); return; }
+if (args.Length == 3 && args[2] == "--activity") { await ActivityChecks.Run(output); return; }
+if (args.Length == 3 && args[2] == "--cleanup-0930") { await CleanupChecks.Run(output); return; }
+if (args.Length == 3 && args[2] == "--activity-probe") { await ActivityChecks.Probe(output); return; }
+if (args.Length == 3) { await LocalChecks.Run(output, args[2]); return; }
 var checks = new List<string>();
 void Check(bool value, string text) { if (!value) throw new Exception(text); checks.Add(text); }
 async Task Until(Func<bool> condition, string text, int timeout = 10000)
@@ -22,7 +29,7 @@ async Task Until(Func<bool> condition, string text, int timeout = 10000)
     while (!condition()) { if (clock.ElapsedMilliseconds > timeout) throw new TimeoutException(text); await Task.Delay(25); }
 }
 await using var fixture = new Fixture();
-await using var observer = new CodexObserver();
+await using var observer = new CodexObserver(TimeSpan.FromMilliseconds(150));
 var task = new WorkItem { Title = "仅合成观察器回归", Lane = Lane.Running, TimerUnread = true };
 task.Stages[0].IsRunning = true; task.Stages[0].Codex = new CodexBinding { ThreadId = "fixture-a" };
 var taskB = new WorkItem { Title = "合成交错B", Lane = Lane.Running };
@@ -43,7 +50,7 @@ observer.Event += (watch, message, sequence, epoch, live) =>
     }
 };
 observer.Watch(items.Select(Watch).ToArray());
-observer.Start("", fixture.Endpoint, discoverDesktop: false);
+observer.Start("", fixture.Endpoint, discoverDesktop: false, allowCompatibilityPolling: true);
 await Until(() => observer.Capabilities.Length == 3, "首次逐会话能力未就绪");
 lock (gate)
 {

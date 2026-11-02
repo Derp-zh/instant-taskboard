@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-24",
+  "version": "0.9.27",
+  "productSourceModified": false,
+  "runtimePackageModified": false,
+  "newPackageCreated": false,
+  "published": false,
+  "completeTrafficFix": false,
+  "catalogHelperStartupRemovedPreviously": true,
+  "catalogFixReverifiedThisRound": true,
+  "monitoringIdleRetentionFixed": false,
+  "accurateMonitoringImplementationRetained": true,
+  "passiveMemoryReaderImplemented": false,
+  "checks": {
+    "catalog": {
+      "path": "test-output/codex-passive-review-catalog-a/local-catalog-report.json",
+      "passed": 26,
+      "scope": "synthetic SQLite fixtures through actual packaged assembly"
+    },
+    "core": {
+      "path": "test-output/codex-passive-review-core-a/report.json",
+      "passed": 334,
+      "scope": "current source rules and isolated persistence"
+    },
+    "stateProjection": {
+      "path": "test-output/codex-passive-review-state-a/local-unit.json",
+      "passed": 25,
+      "scope": "synthetic current-source state projection"
+    },
+    "reconnect": {
+      "path": "test-output/codex-passive-review-reconnect-a/reconnect-report.json",
+      "passed": 15,
+      "scope": "synthetic current-source connection lifecycle"
+    },
+    "packageInitialization": {
+      "path": "test-output/codex-passive-review-init-a/ai-initialization-report.json",
+      "passed": 44,
+      "scope": "actual packaged offscreen controls and injected connection fixtures"
+    },
+    "routeReplay": {
+      "path": "output/codex-passive-20261024-review/route-replay.json",
+      "passed": 13,
+      "scope": "exact shipped methods with synthetic sockets and state"
+    }
+  },
+  "catalogIntegrity": {
+    "path": "test-output/codex-passive-review-catalog-a/fixture-integrity.json",
+    "hashesUnchanged": true,
+    "proxyRequests": 0,
+    "fullTcpUdpTrace": false
+  },
+  "baselineEvidence": "output/codex-passive-20261024-review/baseline.json",
+  "routeEvidence": "output/codex-passive-20261024-review/route-methods.json",
+  "nativeMetadata": "output/codex-passive-20261024-review/v8-metadata.json",
+  "memoryReview": "output/codex-passive-20261024-review/memory-route-review.md",
+  "rea": {
+    "summary": "output/codex-passive-20261024-review/rea-summary.json",
+    "parentEvidenceId": "ev_8dc340f4d3db64ecbabd61b7239ef2a2d2d678d7991b996ccf5b44ec4ae36e9e",
+    "selectedMembers": 3,
+    "completePackageAnalysis": false,
+    "semanticCoverage": "partial",
+    "limitation": "main and src semantic workers exhausted the configured 1GiB heap; direct source and exact-method replay supplement bounded findings"
+  },
+  "unresolved": [
+    "matching native V8 decoder and isolate/context roots",
+    "UUID/host/actual owner/current turn/full request reachability",
+    "GC and multi-object consistency without target pause or execution",
+    "accurate post-answer/approval execution under real lifecycle",
+    "production network attribution and idle-release fix"
+  ],
+  "sixAreas": {
+    "monitoring": "source and controlled replay; follower retention remains",
+    "catalog": "new actual-assembly isolated check; proxy-aware capture only",
+    "noServerMessages": "source verified stable loop; missing snapshots may refollow; no new live full capture",
+    "heartbeatRelease": "user supplied original backend evidence reread, not rerun; no production rate inferred",
+    "initializeSelectMoveSaveReopen": "new offscreen fixtures/rule/persistence checks; no original desktop actions",
+    "waitRecoveryMultiStageRebindArchiveEdit": "new current-source synthetic/rule checks; original desktop lifecycle not rerun"
+  },
+  "realChatHeapRead": false,
+  "realChatsOperated": false,
+  "liveCodexPipeConnectedByInvestigation": false,
+  "codexStoppedRestartedPausedInjectedOrDebugEnabled": false,
+  "mouseOrClipboardOperated": false,
+  "formalDataTouched": false,
+  "originalDesktopLifecycleVerified": false,
+  "systemNetworkMeasurementPerformed": false,
+  "testHarnessIssues": [
+    "First replay run treated async owner discovery as synchronous; awaited the result and reran successfully"
+  ],
+  "oldAcceptanceEvidenceUnmodified": {
+    "docs/ACCEPTANCE-0.9.27.md": "8fbdefcbbdb5f730a5f9b29f2970fcd68024c09e0d714849eb1994ee6caa9125",
+    "docs/VERIFICATION-0.9.27.json": "21640bf4801569685ad27dc2dd8f48067b669d7dd924bd250ec75ec868e87a6e"
+  },
+  "codebaseMemory": {
+    "index": "output/codex-passive-20261024-review/index-final.json",
+    "status": "ready",
+    "nodes": 9995,
+    "edges": 28836,
+    "partialFiles": 18,
+    "summaryReadbackVerified": true,
+    "unrelatedSectionsPreserved": true
+  }
+}

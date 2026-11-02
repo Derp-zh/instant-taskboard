@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -15,7 +16,10 @@ internal static class Program
     {
         var startupClock = Stopwatch.StartNew();
         var performanceVerify=false;
-        var aiInitializationVerify = false; var aiEnvironmentVerify = false; var ux0922Verify = false;
+        var previewBuild = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            .StartsWith("0.0.0-drag-binding-preview", StringComparison.Ordinal) == true;
+        var dragBindingPreview = previewBuild; var dragBindingVerify = false;
+        var aiInitializationVerify = false; var aiEnvironmentVerify = false; var ux0922Verify = false; var codexReconnectVerify = false; var settings0930Verify = false;
         var scrollVerify = false;
         var scrollRestoreVerify = false;
         var scrollStackVerify = false;
@@ -44,9 +48,13 @@ internal static class Program
         {
             if (args[i] == "--data-dir" && i + 1 < args.Length) { data = Path.GetFullPath(args[++i]); isolated = true; hasDataDirectory = true; }
             else if (args[i] == "--no-integrations") isolated = true;
+            else if (args[i] == "--drag-binding-preview") { dragBindingPreview = true; isolated = true; }
+            else if (args[i] == "--drag-binding-verify") { dragBindingVerify = true; isolated = true; stageVerify = true; startupCheck = true; }
             else if (args[i] == "--ui-smoke") smoke = true;
             else if (args[i] == "--startup-check") startupCheck = true;
             else if (args[i] == "--ai-init-verify") { aiInitializationVerify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--settings-0930-verify") { settings0930Verify = true; stageVerify = true; startupCheck = true; }
+            else if (args[i] == "--codex-reconnect-verify") { codexReconnectVerify = true; stageVerify = true; startupCheck = true; }
             else if (args[i] == "--ux0922-verify") { ux0922Verify = true; stageVerify = true; startupCheck = true; }
             else if (args[i] == "--ai-init-environment-verify") { aiEnvironmentVerify = true; startupCheck = true; }
             else if (args[i] == "--desktop-verify") desktopVerify = true;
@@ -90,6 +98,13 @@ internal static class Program
             else if (args[i] == "--listening-verify") { listeningVerify = true; startupCheck = true; }
             else { MessageBox.Show("不支持的启动参数：" + args[i]); return 2; }
         }
+        if (previewBuild)
+        {
+            isolated = true;
+            if (!hasDataDirectory) { data = Path.Combine(AppContext.BaseDirectory, "preview-data"); hasDataDirectory = true; }
+        }
+        if (dragBindingPreview && (!hasDataDirectory || string.Equals(Path.TrimEndingDirectorySeparator(data), Path.TrimEndingDirectorySeparator(defaultData), StringComparison.OrdinalIgnoreCase)))
+        { Console.Error.WriteLine("拖动绑定测试必须明确指定隔离 --data-dir。"); return 2; }
         if ((smoke || startupCheck || desktopVerify || animationVerify || performanceVerify || scrollVerify || sharedVerify || outsideObserverVerify || codexLifecycleVerify) && !hasDataDirectory)
         { Console.Error.WriteLine("验证模式必须明确指定隔离数据目录。"); return 2; }
         if (codexVerify)
@@ -163,11 +178,15 @@ internal static class Program
         {
             try
             {
-                controller = new BoardController(data, isolated, smoke || startupCheck); if (!listeningVerify && !appearanceVerify && !integrationVerify && !compactVerify && !stageVerify && !sharedVerify && !workspaceGeometryVerify) await controller.Start();
+                controller = new BoardController(data, isolated, smoke || startupCheck) { ConversationPreviewMode = dragBindingPreview }; if (!listeningVerify && !appearanceVerify && !integrationVerify && !compactVerify && !stageVerify && !sharedVerify && !workspaceGeometryVerify) await controller.Start();
+                if (dragBindingPreview && !dragBindingVerify) await controller.PrepareConversationPreview();
                 if (startupInvocation && !isolated) File.WriteAllText(Path.Combine(DataPaths.SystemRoot, "last-startup.json"), System.Text.Json.JsonSerializer.Serialize(new { utc = DateTime.UtcNow, version = typeof(Program).Assembly.GetName().Version!.ToString(), executable = Environment.ProcessPath }));
                 startupClock.Stop();
                 if (smoke || startupCheck) File.WriteAllText(Path.Combine(data, "startup-report.json"), System.Text.Json.JsonSerializer.Serialize(new { readyMs = startupClock.Elapsed.TotalMilliseconds, tasks = controller.Engine.State.Tasks.Count, draftsAndEdits = controller.Engine.State.Sessions.Count }));
-                if (ux0922Verify) { await Ux0922Checks.Run(controller); await controller.Exit(); }
+                if (dragBindingVerify) { await ConversationDragChecks.Run(controller); await controller.Exit(); }
+                else if (ux0922Verify) { await Ux0922Checks.Run(controller); await controller.Exit(); }
+                else if (codexReconnectVerify) { await CodexReconnectUiChecks.Run(controller); await controller.Exit(); }
+                else if (settings0930Verify) { await CodexSetup0930Checks.Run(controller); await Settings0930Checks.Run(controller, data); await controller.Exit(); }
                 else if (aiInitializationVerify) { await AiInitializationChecks.Run(controller); await controller.Exit(); }
                 else if (ux0917Verify) { await Ux0917Checks.Run(controller, ux0917GlassOnly); await controller.Exit(); }
                 else if (codexLifecycleVerify) { await CodexDesktopLifecycleChecks.Run(controller); await controller.Exit(); }

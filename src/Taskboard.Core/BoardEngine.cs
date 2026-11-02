@@ -117,6 +117,9 @@ public sealed partial class BoardEngine(BoardState state)
                 PreviousThreads = live.Codex is null ? [] : live.Codex.PreviousThreads.Append(live.Codex.ThreadId).TakeLast(20).ToList() };
         if (result.Codex is not null && edited.Codex is not null && original.Codex?.ThreadId == edited.Codex.ThreadId && original.Codex?.ThreadName != edited.Codex.ThreadName)
             result.Codex.ThreadName = edited.Codex.ThreadName;
+        if (result.Codex is { } mergedBinding && live.Codex is { } liveBinding &&
+            mergedBinding.BindingId == liveBinding.BindingId && mergedBinding.Generation == liveBinding.Generation && mergedBinding.ThreadId == liveBinding.ThreadId)
+            mergedBinding.ObservedTurn = liveBinding.ObservedTurn;
         return result;
     }
 

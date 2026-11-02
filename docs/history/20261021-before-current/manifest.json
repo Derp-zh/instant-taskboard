@@ -1,0 +1,69 @@
+{
+  "captured_date": "2026-10-21",
+  "files": [
+    {
+      "original": "AGENTS.md",
+      "snapshot": "docs/history/20261021-before-current/AGENTS.md",
+      "sha256": "55c1fedbd60926f1905a01514658e7151403b5a3c438dce3f04cbdf74943dd8a",
+      "bytes": 5838
+    },
+    {
+      "original": "docs/HANDOFF.md",
+      "snapshot": "docs/history/20261021-before-current/HANDOFF.md",
+      "sha256": "3c01cfcfb2de0b1d3d0fa002ebc372c14af0ac0e8b2f4cff663e4ca0786c1fb3",
+      "bytes": 19044
+    },
+    {
+      "original": "docs/INDEX.md",
+      "snapshot": "docs/history/20261021-before-current/INDEX.md",
+      "sha256": "6d9d371a9f239ff053896d8fef9c9b46a28440ee3ad078c76fb202516085db71",
+      "bytes": 26520
+    },
+    {
+      "original": "docs/PRD.md",
+      "snapshot": "docs/history/20261021-before-current/PRD.md",
+      "sha256": "3cb0c911e003d6f1e4aeeab14dee73b03d12d23b63b318051071ceda28f41ffa",
+      "bytes": 97259
+    },
+    {
+      "original": "docs/TASKS.md",
+      "snapshot": "docs/history/20261021-before-current/TASKS.md",
+      "sha256": "4b181b0b7676d15876986adecf137544711f964ed4bece0e5be6543825a2fb09",
+      "bytes": 46647
+    },
+    {
+      "original": "docs/IMPLEMENTATION.md",
+      "snapshot": "docs/history/20261021-before-current/IMPLEMENTATION.md",
+      "sha256": "1806c2372116aa73b494106adcb3d53f96f2a9205384334da63f9aa8b17948a2",
+      "bytes": 103654
+    },
+    {
+      "original": "docs/HANDOFF.md",
+      "snapshot": "docs/history/20261021-before-current/HANDOFF-preapply.md",
+      "sha256": "d725980866767e33c483353eee1a9815da9146d22ac4c7b89aa90eb5873b2f6b",
+      "bytes": 19148,
+      "stage": "并行README发布回执合并"
+    },
+    {
+      "original": "docs/INDEX.md",
+      "snapshot": "docs/history/20261021-before-current/INDEX-preapply.md",
+      "sha256": "8e2e52e540ae557f65715fc8a41f460df8842907e5a23c46226c1392378350bf",
+      "bytes": 26546,
+      "stage": "并行README发布回执合并"
+    },
+    {
+      "original": "docs/IMPLEMENTATION.md",
+      "snapshot": "docs/history/20261021-before-current/IMPLEMENTATION-preapply.md",
+      "sha256": "52b10000562cbbb71222053119e26c0caf0058dc18a36bf073c5f878e1f80953",
+      "bytes": 104001,
+      "stage": "并行README发布回执合并"
+    },
+    {
+      "original": "docs/INDEX-STATUS.md",
+      "snapshot": "docs/history/20261021-before-current/INDEX-STATUS.md",
+      "sha256": "cae1c42b0f9ae45460db50f8c39a7b04f4b9ec04a63760bda9e7bb96272bd4da",
+      "bytes": 34569,
+      "stage": "索引历史原文归档"
+    }
+  ]
+}

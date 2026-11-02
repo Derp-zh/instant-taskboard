@@ -13,7 +13,7 @@ internal sealed partial class BoardController
     private readonly SemaphoreSlim codexRestartGate = new(1, 1);
     internal CodexSetupReport AiSetupReport { get; private set; } = CodexSetupReport.Initial;
     internal bool AiSetupBusy { get; private set; }
-    internal string AiConversationTest { get; private set; } = "尚未测试已关联聊天。测试只读取当前状态，不发送消息。";
+    internal string AiConversationTest { get; private set; } = "查看已有监测结果，不会额外连接聊天。";
     private bool CodexSetupScopeValid(object state) => ReferenceEquals(state, Engine.State) && !exiting && !dataTransition;
     internal string AiConversationVerification
     {
@@ -44,17 +44,17 @@ internal sealed partial class BoardController
         AiSetupBusy = true; AiConversationTest = "正在只读测试已关联聊天…"; settings?.RefreshAiInitialization();
         try
         {
-            if (Isolated && inspect is null) { AiConversationTest = "隔离模式不连接原 Codex，请使用合成检查。"; return; }
-            var results = await (inspect ?? CodexSetupEnvironment.TestConversations)(threadIds, inspector);
+            var results = inspect is not null ? await inspect(threadIds, inspector) : threadIds.Select((id, index) =>
+                CodexSetupEnvironment.DescribeSnapshot(Codex.PeekSnapshot(id), index)).ToArray();
             var current = state.Tasks.SelectMany(task => task.Stages.Where(stage => stage.Codex is not null)
                 .Select(stage => (task.Id, Stage: stage.Id, stage.Codex!.BindingId, stage.Codex.Generation, stage.Codex.ThreadId))).ToArray();
             if (!CodexSetupScopeValid(state) || !bindings.SequenceEqual(current) ||
                 new[] { CodexInitialization.DesktopKey, CodexInitialization.CliKey, CodexInitialization.InspectorKey, "codex.endpoint" }
                     .Any(key => originalConfig.GetValueOrDefault(key) != state.Preferences.ConnectionConfigs.GetValueOrDefault(key)))
             { AiConversationTest = "聊天关联或配置已变化，请重新测试。"; return; }
-            AiConversationTest = "本次只读测试（" + DateTime.Now.ToString("HH:mm:ss") + "）\n" + string.Join("\n", results.Select((value, index) =>
+            AiConversationTest = "已有监测结果（查看于 " + DateTime.Now.ToString("HH:mm:ss") + "）\n" + string.Join("\n", results.Select((value, index) =>
                 results.Length == threadIds.Length ? labels[index] + "\n" + value : value)) +
-                "\n提问、批准及实际恢复的完整过程，需在正常使用中分别观察；本次没有发送测试消息，也没有修改任务状态。";
+                "\n未额外连接聊天或修改任务。提问、批准和实际恢复的完整过程，需在正常使用中分别确认。";
         }
         catch (Exception e) when (e is System.IO.IOException or InvalidOperationException or TimeoutException or OperationCanceledException)
         { AiConversationTest = "本次测试未完成，请重新检查连接后再试。诊断：" + e.GetType().Name; }
@@ -86,7 +86,7 @@ internal sealed partial class BoardController
             Engine.Touch();
             if (!await Flush()) { SetAiSetupReport(new(CodexSetupState.Failed, "配置未能保存", "请检查数据目录是否可写，再重新初始化。")); return; }
             // Test environments never contact the user's Codex or spawn a real CLI.
-            if (environment is null) await RestartCodex();
+            if (environment is null) EnsureCodexConnection();
             SetAiSetupReport(result.Report);
         }
         finally { AiSetupBusy = false; settings?.RefreshAiInitialization(); }
@@ -101,8 +101,8 @@ internal sealed partial class BoardController
         var inspector = CodexInitialization.Inspector(config);
         var environment = new CodexSetupEnvironment();
         if (environment.DesktopRunning(desktop))
-        { SetAiSetupReport(new(CodexSetupState.NeedsReopen, "Codex 仍在运行，状态观察待开启", "请在方便时保存工作并自行退出 Codex，再点击此按钮。看板不会关闭任何 Codex 进程。")); return; }
-        if (!await Ui.Confirm("将打开 Codex 并启用本机只读观察连接，用于识别提问、批准和实际恢复。不会自动选择聊天、发送消息或批准操作。是否打开？", "打开 Codex")) return;
+        { await InitializeAiPlatform(); return; }
+        if (!await Ui.Confirm("将正常打开 Codex，连接它已有的本机状态通道。不会自动选择聊天、发送消息或批准操作。是否打开？", "打开 Codex")) return;
         if (!CodexSetupScopeValid(state)) return;
         try
         {
@@ -113,8 +113,7 @@ internal sealed partial class BoardController
             for (var attempt = 0; attempt < 15 && CodexSetupScopeValid(state); attempt++)
             {
                 await Task.Delay(1000);
-                if (CodexPendingBridge.ValidEndpoint(inspector, out var address) &&
-                    System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().Any(x => x.Port == address!.Port)) break;
+                if (environment.DesktopRunning(desktop)) break;
             }
         }
         catch (Exception e)

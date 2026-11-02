@@ -6,9 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App" />
+    <Compile Include="../../src/Taskboard.Desktop/CodexCatalog.cs" Link="CodexCatalog.cs" />
+    <Compile Include="../../src/Taskboard.Desktop/CodexLocalCatalog.cs" Link="CodexLocalCatalog.cs" />
+    <Compile Include="../../src/Taskboard.Desktop/CodexFileActivity.cs" Link="CodexFileActivity.cs" />
+    <Compile Include="../../src/Taskboard.Desktop/CodexLocalEvents.cs" Link="CodexLocalEvents.cs" />
+    <Compile Include="../../src/Taskboard.Desktop/CodexLocalState.cs" Link="CodexLocalState.cs" />
     <Compile Include="../../src/Taskboard.Desktop/CodexInstallationDiscovery.cs" Link="CodexInstallationDiscovery.cs" />
     <ProjectReference Include="../../src/Taskboard.Core/Taskboard.Core.csproj" />
     <Compile Include="../../src/Taskboard.Desktop/CodexObserver.cs" Link="CodexObserver.cs" />
+    <Compile Include="../../src/Taskboard.Desktop/CodexReadBudget.cs" Link="CodexReadBudget.cs" />
     <Compile Include="../../src/Taskboard.Desktop/CodexRpc.cs" Link="CodexRpc.cs" />
     <Compile Include="../../src/Taskboard.Desktop/CodexTurnTracker.cs" Link="CodexTurnTracker.cs" />
     <Compile Include="../../src/Taskboard.Desktop/CodexDesktopBridge.cs" Link="CodexDesktopBridge.cs" />

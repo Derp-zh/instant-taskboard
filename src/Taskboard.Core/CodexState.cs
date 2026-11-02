@@ -16,6 +16,9 @@ public sealed class CodexBinding
     public string? TurnId { get; set; }
     public string SourceEpoch { get; set; } = "";
     public long LastSequence { get; set; } = -1;
+    // Runtime evidence belongs to this exact binding incarnation. It survives
+    // an unavailable reconnect snapshot, but is never loaded from saved history.
+    internal (Guid BindingId, int Generation, string ThreadId, string TurnId)? ObservedTurn { get; set; }
     public List<string> PendingRequests { get; set; } = [];
     public List<string> PendingApprovals { get; set; } = [];
     // A saturated request set stays protected until an accurate new turn or terminal.
@@ -63,10 +66,17 @@ public static class CodexState
              !UnixSecond(Object(turn, "startedAt"), out var startedAt) || !UnixSecond(Object(parameters, "baselineStartedAt"), out var baseline) || startedAt <= baseline)) return false;
         // A terminal needs an observed turn, not a persisted first-start history.
         // The observer can reconcile that same known turn immediately after reconnect.
-        if (method is "turn/completed" or "error" && (turnId.Length == 0 || binding.SourceEpoch.Length == 0 || binding.TurnId != turnId)) return false;
+        var runtimeKnownTurn = binding.ObservedTurn is { } observed && observed.BindingId == binding.BindingId &&
+            observed.Generation == binding.Generation && observed.ThreadId == binding.ThreadId && observed.TurnId == turnId;
+        if (method is "turn/completed" or "error" && (turnId.Length == 0 || binding.SourceEpoch.Length == 0 ||
+            binding.TurnId != turnId && !(binding.TurnId is null && runtimeKnownTurn))) return false;
         if (method == "turn/completed" && Text(turn, "status") is not ("completed" or "failed" or "interrupted")) return false;
         if (method == "turn/started" && turnId.Length == 0) return false;
         if (method == "turn/started" && turnId == binding.TurnId && binding.SourceEpoch.Length > 0) return false;
+        // File-only first-seen turns have no proven binding-time boundary.
+        // Retire the 0.9.28 cross-turn projection rather than treating a newly
+        // backfilled historical row as this card's fresh result.
+        if (method == "probe/turnProjected") return false;
         var request = method is "item/tool/requestUserInput" or "tool/requestUserInput" or "mcpServer/elicitation/request" or
             "item/commandExecution/requestApproval" or "item/fileChange/requestApproval" or "item/permissions/requestApproval";
         var idElement = Object(message, "id"); var requestId = idElement.ToString();
@@ -135,7 +145,11 @@ public static class CodexState
         var executionResumed = currentState && binding.Phase == CodexPhase.Running &&
             (method == "turn/started" || knownWait || before.AwaitingUserAction);
         if (currentState && binding.Phase != CodexPhase.Unknown)
+        {
             binding.AwaitingUserAction = NeedsUserAction(binding.Phase);
+            if (!string.IsNullOrEmpty(binding.TurnId))
+                binding.ObservedTurn = (binding.BindingId, binding.Generation, binding.ThreadId, binding.TurnId);
+        }
         if (currentState && (binding.Phase == CodexPhase.Running || NeedsUserAction(binding.Phase)) &&
             task.Stages.Any(x => x.Id == stageId && x.IsRunning == true) && task.ColumnId is null && task.Lane is Lane.Running or Lane.Action)
         {

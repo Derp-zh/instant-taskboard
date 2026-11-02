@@ -1,0 +1,2588 @@
+{
+  "schema": 1,
+  "baseline": "0.9.20-widthfix",
+  "source": "docs/history/20261021-before-current/PRD.md",
+  "rule_count": 516,
+  "rules": [
+    {
+      "source_id": "A01",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A02",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A03",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A04",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A04b",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A05",
+      "current_page": "docs/current/M03-任务与状态.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A06",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A07",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A08",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A09",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A10",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A11",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A12",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A13",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A14",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A15",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A16",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A17",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A18",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A19",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A20",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A21",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A22",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A23",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A24",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A25",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A26",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A27",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A28",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A29",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A30",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A31",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A32",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A33",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A34",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A35",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A36",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A37",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A38",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A39",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A40",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A41",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A42",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A43",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A44",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A45",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A46",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A47",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A48",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A49",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A50",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A51",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A52",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A53",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A54",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A55",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A56",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A57",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A58",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A59",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A60",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A61",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A62",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A63",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A64",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A65",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A66",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A67",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A68",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A69",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A70",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A71",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A72",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A73",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A74",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A75",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A76",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A77",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A78",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A79",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A80",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A81",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A82",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A83",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A84",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A85",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A86",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A87",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A88",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A89",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A90",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A91",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A92",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A93",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A94",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A95",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A96",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A97",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A98",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A99",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A100",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A101",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A102",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A103",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A104",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A105",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A106",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A107",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A108",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A109",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A110",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A111",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A112",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A113",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A114",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A115",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A116",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A117",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A118",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A119",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A120",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A121",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A122",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A123",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A124",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A125",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A126",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A127",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A128",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A129",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A130",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A131",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A132",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A133",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A134",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A135",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A136",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A137",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A138",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A139",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A140",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A141",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A142",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A143",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A144",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A145",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A146",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A147",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A148",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A149",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A150",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A151",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A152",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A153",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A154",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A155",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A156",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A157",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A158",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A159",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A160",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A161",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A162",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A163",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A164",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A165",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A166",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A167",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A168",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A169",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A170",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A171",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A172",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A173",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A174",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A175",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A176",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A177",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A178",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A179",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A180",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A181",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A182",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A183",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A184",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A185",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A186",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A187",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A188",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A189",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A190",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A191",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A192",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A193",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A194",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A195",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A196",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A197",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A198",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A199",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A200",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A201",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A202",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A203",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A204",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A205",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A206",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A207",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A208",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A209",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A210",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A211",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A212",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A213",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A214",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A215",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "A216",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D01",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D02",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D03",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D04",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D05",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D06",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D07",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D08",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D09",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D10",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D11",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "D12",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R01",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R02",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R03",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R04",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R05",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R06",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R07",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R08",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R09",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R10",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R11",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R12",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R13",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R14",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R15",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R16",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R17",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R18",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R19",
+      "current_page": "docs/current/M03-任务与状态.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R20",
+      "current_page": "docs/current/M03-任务与状态.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R21",
+      "current_page": "docs/current/M03-任务与状态.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R22",
+      "current_page": "docs/current/M03-任务与状态.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R23",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R24",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R25",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R26",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R27",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R28",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R29",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R30",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R30a",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R31",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R32",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R33",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R34",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R35",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R36",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R37",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R38",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R39",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R40",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R41",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R42",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R43",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R44",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R45",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R46",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R47",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R48",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R49",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R50",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R51",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R52",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R53",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R54",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R54a",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R55",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R56",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R57",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R58",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R59",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R60",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R61",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R62",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R63",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R64",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R65",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R66",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R67",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R68",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R69",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R70",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R71",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R72",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R73",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R74",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R75",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R76",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R77",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R78",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R79",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R80",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R81",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R82",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R83",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R84",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R85",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R86",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "R87",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U01",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U02",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U03",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U04",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U05",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U06",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U07",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U08",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U09",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U10",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U11",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U12",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U13",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U14",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U15",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U16",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U17",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U18",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U19",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U20",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U21",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U22",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U23",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U24",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U25",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U26",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U27",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U28",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U29",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U30",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U31",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U32",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U33",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U34",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U35",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U36",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U37",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U38",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U39",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U40",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U41",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U42",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U43",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U44",
+      "current_page": "docs/current/N01-通知监听.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U45",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U46",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U47",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U48",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U49",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U50",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U51",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U52",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U53",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U54",
+      "current_page": "docs/current/M11-设置与外部边界.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U55",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U56",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U57",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U58",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U59",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U60",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U61",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U62",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U63",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U64",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U65",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U66",
+      "current_page": "docs/current/M08-平台与优先级.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U67",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U68",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U69",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U70",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U71",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U72",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U73",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U74",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U75",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U76",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U77",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U78",
+      "current_page": "docs/current/M10-提醒与预览.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U79",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U80",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U81",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U82",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U83",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U84",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U85",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U86",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U87",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U88",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U89",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U90",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U91",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U92",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U93",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U94",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U95",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U96",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U97",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U98",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U99",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U100",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U101",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U102",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U103",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U104",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U105",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U106",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U107",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U108",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U109",
+      "current_page": "docs/current/M06-灵感快捷录入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U110",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U111",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U112",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U113",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U114",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U115",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U116",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U117",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U118",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U119",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U120",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U121",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U122",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U123",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U124",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U125",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U126",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U127",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U128",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U129",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U130",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U131",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U132",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U133",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U134",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U135",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U136",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U137",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U138",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U139",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U140",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U141",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U142",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U143",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U144",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U145",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U146",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U147",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U148",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U149",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U150",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U151",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U152",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U153",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U154",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U155",
+      "current_page": "docs/current/M09-搜索与会话选择.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U156",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U157",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U158",
+      "current_page": "docs/current/M02-列表与布局.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U159",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U160",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U161",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U162",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U163",
+      "current_page": "docs/current/M01-入口与悬浮球.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U164",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U165",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U166",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U167",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U168",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U169",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U170",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U171",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U172",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U173",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U174",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U175",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U176",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U177",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U178",
+      "current_page": "docs/current/M07-卡片操作与归档.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U179",
+      "current_page": "docs/current/M04-新建编辑与草稿.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U180",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U181",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U182",
+      "current_page": "docs/current/SURFACE-背景动画与输入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U183",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U184",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U185",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U186",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U187",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U188",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U189",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U190",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U191",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U192",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U193",
+      "current_page": "docs/current/C01-Codex接入.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U194",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U195",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U196",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U197",
+      "current_page": "docs/current/M05-阶段与卡片.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    },
+    {
+      "source_id": "U198",
+      "current_page": "docs/current/M12-数据启动与交付.md",
+      "meaning": "来源归属；以目标页合并后的有效条目为准，不复活原文旧值"
+    }
+  ]
+}

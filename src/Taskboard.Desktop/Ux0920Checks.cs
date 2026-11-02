@@ -39,10 +39,11 @@ internal static class Ux0920Checks
             var text = (MarqueeText)pill.Child;
             var row = (CardHeading)VisualTreeHelper.GetParent(pill);
             var name = Children<MarqueeText>(row).Single(x => Equals(x.Tag, "TaskConversationName"));
-            var state = Children<Button>(row).Single();
+            var state = Children<Button>(row).Single(x => Equals(x.Tag, "TaskStageRun"));
+            var nameSlot = Children<ConversationDragButton>(row).Single();
             var stateX = state.TranslatePoint(new Point(), row).X; var nameX = name.TranslatePoint(new Point(), row).X;
             var pillX = pill.TranslatePoint(new Point(), row).X;
-            var remaining = Math.Max(0, nameX - name.Margin.Left - pill.Margin.Right);
+            var remaining = Math.Max(0, nameX - nameSlot.Margin.Left - pill.Margin.Right);
             var natural = Width(text.Label, title) + pill.Padding.Left + pill.Padding.Right + pill.BorderThickness.Left + pill.BorderThickness.Right;
             var expected = Math.Min(remaining, natural);
             var key = $"列{width}/会话{conversation}/阶段{title}";
@@ -69,7 +70,8 @@ internal static class Ux0920Checks
             var pill = Children<Border>(liveCard).Single(x => Equals(x.Tag, "TaskStageName") && x.DataContext is Stage s && s.Id == stage.Id);
             var row = (CardHeading)VisualTreeHelper.GetParent(pill);
             var name = Children<MarqueeText>(row).Single(x => Equals(x.Tag, "TaskConversationName"));
-            var slot = Math.Max(0, name.TranslatePoint(new Point(), row).X - name.Margin.Left - pill.Margin.Right);
+            var nameSlot = Children<ConversationDragButton>(row).Single();
+            var slot = Math.Max(0, name.TranslatePoint(new Point(), row).X - nameSlot.Margin.Left - pill.Margin.Right);
             var visible = Math.Min(pill.ActualWidth, pill.Clip?.Bounds.Width ?? double.PositiveInfinity);
             Check(liveCard.BuildCount == builds && Math.Abs(visible - slot) < 1, "同一卡片缩放至" + width + "不重建，长阶段同步占满余宽");
             Render(liveCard, Path.Combine(root, "resize-" + width + ".png"));

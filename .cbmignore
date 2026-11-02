@@ -5,3 +5,12 @@ docs/legacy/index-snapshot/
 test-output/
 release/
 **/__pycache__/
+
+# 版本快照只供追溯；现行文档位于docs/current
+docs/history/
+
+# 本轮安装产物定向核验材料，不属于产品源码。
+output/
+output/codex-init-20261022/compatibility/
+output/codex-0923-compatibility/
+output/codex-0923-work/

@@ -22,6 +22,15 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     public BoardColumn Definition { get; private set; }
     public Lane Lane => Definition.BuiltinLane ?? Lane.Refining;
     private readonly TextBlock heading;
+    private readonly TextBlock codexConnectionHint = new() { Tag = "CodexConnectionHint", FontSize = 10,
+        Foreground = Ui.Muted, Opacity = .65, Margin = new Thickness(14, 1, 22, 8),
+        TextWrapping = TextWrapping.NoWrap, TextTrimming = TextTrimming.CharacterEllipsis, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    internal void RefreshCodexConnectionHint()
+    {
+        var hint = Definition.BuiltinLane is Taskboard.Core.Lane.Running or Taskboard.Core.Lane.Action ? controller.CodexConnectionHint : "";
+        codexConnectionHint.Text = hint;
+        codexConnectionHint.Visibility = hint.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+    }
     private readonly Thumb group;
     private readonly ObservableCollection<object> items = new();
     private readonly ListBox list;
@@ -61,6 +70,7 @@ internal sealed partial class ColumnSurface : SurfaceWindow
         Root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) });
         Root.RowDefinitions.Add(new RowDefinition());
         Root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        Grid.SetRow(codexConnectionHint, 2); Root.Children.Add(codexConnectionHint);
         var header = new Grid { Margin = new Thickness(12, 3.6, 12, 0), Background = Brushes.Transparent };
         header.ColumnDefinitions.Add(new ColumnDefinition()); header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var title = heading = Ui.Label(definition.Name, 15); title.FontWeight = FontWeights.SemiBold;
@@ -151,6 +161,7 @@ internal sealed partial class ColumnSurface : SurfaceWindow
             group.DragStarted += (_, _) => controller.BeginWorkspaceResize(); group.DragDelta += (_, _) => controller.ResizeWorkspaceFromPointer(); group.DragCompleted += (_, _) => controller.EndWorkspaceResize();
         }
         Refresh(); ApplySettings();
+        Root.PreviewMouseDown += (_, _) => controller.EnsureCodexConnection();
         Closed += (_, _) => { inlineTimer?.Stop(); releaseInlineInput?.Invoke(); };
     }
 
@@ -166,6 +177,7 @@ internal sealed partial class ColumnSurface : SurfaceWindow
     public void Rebind(BoardColumn definition) { Definition = definition; Title = heading.Text = definition.Name; Refresh(); ApplySettings(); }
     public void Refresh()
     {
+        RefreshCodexConnectionHint();
         InvalidateAnimation();
         if (cardPreview is not null) items.Remove(cardPreview);
         var wanted = controller.Engine.State.Tasks.Where(x => Definition.Contains(x) && x.Id != draggedTask && x.Id != inlineTask && !incoming.Contains(x.Id)).ToList();
@@ -306,8 +318,9 @@ internal sealed partial class TaskCard : Border
         TaskCardLayout.Frame(this); Cursor = Cursors.Hand;
         DataContextChanged += (_, _) => { RestoreAfterRemoval(); Build(); };
         Unloaded += (_, _) => RestoreAfterRemoval();
-        PreviewMouseDown += (_,_) =>
+        PreviewMouseDown += (_,e) =>
         {
+            if (ConversationDragButton.Contains(e.OriginalSource as DependencyObject)) return;
             if (!ArchivedPreview && DataContext is WorkItem { TimerUnread: true } item)
             { item.TimerUnread = false; Controller.Engine.Touch(); Dispatcher.BeginInvoke(new Action(() => Controller.Engine.Notify([item.Id])), System.Windows.Threading.DispatcherPriority.Background); }
         };
@@ -416,7 +429,7 @@ internal sealed partial class TaskCard : Border
             text.TextAlignment = TextAlignment.Right;
             var name = new MarqueeText(text, conversation: true) { Tag = "TaskConversationName", Margin = new Thickness(5, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Right, ToolTip = binding is null ? "未绑定" : text.Text + " · " + binding.ThreadId, DataContext = stage };
-            row.SetConversation(name);
+            row.SetConversation(!ArchivedPreview ? new ConversationDragButton(Controller, item, stage, name) : name);
         }
         if (item.Stages.Count > 1)
         {

@@ -40,6 +40,8 @@ internal static class IntegrationChecks
         Descendants<Button>(settings.Root).Single(x => Equals(x.Content, "取消归档")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Check(controller.Engine.State.Archives.Count == 0 && controller.Engine.State.Tasks.Single().Stages.Count == 2, "设置取消归档恢复全部阶段");
         settings.SelectSection("数据与备份"); Layout(settings.Root, 760, 680);
+        foreach (var storage in Descendants<Expander>(settings.Root).Where(x => x.Header?.ToString() == "存储位置").ToArray()) storage.IsExpanded = true;
+        Layout(settings.Root, 760, 680);
         Check(Descendants<Button>(settings.Root).Any(x => Equals(x.Content, "切换配置路径")) && Descendants<Button>(settings.Root).Any(x => Equals(x.Content, "切换数据路径")), "任务和配置路径均有可编辑入口");
         var configuration = Path.Combine(root, "alternate-config"); await controller.ChangeConfigurationDirectory(configuration);
         Check(controller.Store.ConfigurationDirectory == configuration && File.Exists(Path.Combine(configuration, "settings.json")) && controller.Engine.State.Tasks.Single().Id == item.Id, "切换配置目录保存设置且保留当前任务身份");

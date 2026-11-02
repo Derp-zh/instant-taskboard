@@ -60,7 +60,9 @@ internal sealed partial class BoardController : IDisposable
             if (exiting) return;
             Codex = new CodexObserver(); AttachCodex(); UpdateCodexWatches();
             var config = Engine.State.Preferences.ConnectionConfigs;
-            Codex.Start(config.GetValueOrDefault("codex.executable",CodexObserver.FindExecutable()), config.GetValueOrDefault("codex.endpoint",""), CodexInitialization.Inspector(config));
+            Codex.Start(config.GetValueOrDefault("codex.executable", ""), config.GetValueOrDefault("codex.endpoint",""), CodexInitialization.Inspector(config),
+                allowCompatibilityPolling: false, desktopExecutable: config.GetValueOrDefault(CodexInitialization.DesktopKey, ""));
+            RefreshCodexConnectionHint();
         }
         finally { codexRestartGate.Release(); }
     }
@@ -72,11 +74,15 @@ internal sealed partial class BoardController : IDisposable
             if (exiting || Codex != observer) return;
             if (!observer.Authoritative)
             {
-                var changed = Engine.State.Tasks.Where(x => x.Stages.Any(stage => stage.Codex is { Phase: not CodexPhase.Unknown })).ToArray();
-                foreach (var binding in changed.SelectMany(x => x.Stages).Select(x => x.Codex).OfType<CodexBinding>()) binding.Phase = CodexPhase.Unknown;
+                bool Unavailable(CodexBinding binding) => binding.Phase != CodexPhase.Unknown &&
+                    !(observer.TransportConnected && observer.SourceIdentityVerified && binding.SourceEpoch == observer.Epoch &&
+                      !string.IsNullOrEmpty(binding.TurnId) && binding.Phase is CodexPhase.ReadyForReview or CodexPhase.Failed or CodexPhase.Interrupted);
+                var changed = Engine.State.Tasks.Where(x => x.Stages.Any(stage => stage.Codex is { } binding && Unavailable(binding))).ToArray();
+                foreach (var binding in changed.SelectMany(x => x.Stages).Select(x => x.Codex).OfType<CodexBinding>().Where(Unavailable)) binding.Phase = CodexPhase.Unknown;
                 if (changed.Length > 0) Engine.Notify(changed.Select(x => x.Id).ToArray());
             }
             settings?.RefreshCodexStatus();
+            RefreshCodexConnectionHint();
         }));
         observer.Event += (watch,message,sequence,epoch,authoritative) => Application.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
@@ -251,8 +257,10 @@ internal sealed partial class BoardController : IDisposable
     internal double LastWorkspaceRevealMs,LastBallRevealMs,LastEditorRestoreMs;
     public void SetExpanded(bool expanded)
     {
+        if (expanded) EnsureCodexConnection();
         if (exiting || Expanded == expanded) return;
         Expanded = expanded;
+        if (!expanded) ConversationDrag?.Dispose();
         restoringGroup = expanded && hiddenGroup.Count > 0;
         workspaceGeneration++;
         outsideTarget = null;
@@ -443,6 +451,7 @@ internal sealed partial class BoardController : IDisposable
     }
     public void Settings()
     {
+        EnsureCodexConnection();
         if (!Expanded) SetExpanded(true);
         if (settings is null) { settings = new SettingsSurface(this); RegisterAuxiliary(settings); var area = WorkArea(Ball); settings.Left = area.Left + (area.Width - settings.Width) / 2; settings.Top = area.Top + (area.Height - settings.Height) / 2; Clamp(settings); }
         settings.Show(); settings.Activate(); Native.RaiseBall();
@@ -738,6 +747,7 @@ internal sealed partial class BoardController : IDisposable
     }
     public void Dispose()
     {
+        ConversationDrag?.Dispose(); ConversationDrag = null;
         CardDrag?.Dispose(); CardDrag = null;
         globalHotkey?.Dispose(); globalHotkey = null;
         Listening.Dispose();

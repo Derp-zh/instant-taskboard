@@ -1,0 +1,108 @@
+{
+  "Version": "0.9.19",
+  "Date": "2026-10-21",
+  "Status": "formal-local-release-partial-original-desktop-acceptance",
+  "PublicReleaseRemains": "0.9.16",
+  "LocalPackage": "BUILD-INFO-0.9.19.json",
+  "OriginalDesktopAcceptance": {
+    "OptionsWait": true,
+    "FreeInputWait": true,
+    "PlanSynchronousWait": true,
+    "ApprovalAndRecovery": true,
+    "SameCardAnswerRecovery": true,
+    "RealFailedTurn": false,
+    "RealQuotaStop": false,
+    "FullIntegrationPassed": false,
+    "QuotaDeliberatelyExhausted": false
+  },
+  "Evidence": {
+    "Approval": {
+      "Path": "test-output/codex-20261021-live/board-approval-C-v2/codex-lifecycle-report.json",
+      "SHA256": "9C5F02A6A5F08FCC75488AE0B9C6B8CFDD3BBBA8BCF2B90CB60535DACDF041D7",
+      "PassedAssertions": 34,
+      "AllChecksPassed": true,
+      "AliasBIsC": true
+    },
+    "Freeform": {
+      "Path": "test-output/codex-20261020-live/freeform-B-evidence.json",
+      "SHA256": "258D811034B843ED8DAC5EAD7E80FD587B73853603891D8D2AE73A949AB50E8E",
+      "Passed": true,
+      "WholeHarnessPassed": false
+    },
+    "Plan": {
+      "Path": "test-output/codex-20261021-live/board-plan-approval-v1/codex-lifecycle-report.json",
+      "SHA256": "77E0C4EE56450A0EA2F9DBCB9B901757947C59BFD8A4B18EFE45F8572694F681",
+      "WaitingPassed": true,
+      "SameAnswerRunningObserved": true,
+      "AllChecksPassed": false,
+      "LateCheckpointFailureRetained": true
+    }
+  },
+  "Tests": {
+    "Core": {
+      "Path": "test-output/codex-20261021-checks/core-final-1/report.json",
+      "SHA256": "8FC03761D119B6C5884BFA9778A2A8AA1C5415AD5246F9623FC04945E6B39978",
+      "PassedAssertions": 313,
+      "Synthetic": true,
+      "OriginalDesktopLifecycle": false
+    },
+    "ObserverAndTransport": {
+      "Path": "test-output/codex-20261021-checks/observer-final-2/report.json",
+      "SHA256": "FEAD961224CB24C945F02AB267381F35EA6EE6A2E1EE11D3BD53062A0D353705",
+      "PassedAssertions": 71,
+      "Synthetic": true,
+      "OriginalDesktopLifecycle": false
+    },
+    "Projection": {
+      "Path": "test-output/codex-20261021-checks/projection-final-1/report.json",
+      "SHA256": "2B55BFAA3C3B1FB9A1A4077359323F19D4C26C2F392F4751D2781B4F0F652D82",
+      "PassedAssertions": 16,
+      "Synthetic": true,
+      "OriginalDesktopLifecycle": false
+    }
+  },
+  "Restoration": {
+    "MainBCHelpApproveVerified": true,
+    "BOriginalModel": "gpt-6.1-sol",
+    "APlanDisabled": true,
+    "GlobalConfigFileChanged": false,
+    "TemporaryHostDefaultChangedAndRestored": true
+  },
+  "ProductionDataChanged": false,
+  "StartupChanged": false,
+  "GitHubPublished": false,
+  "FailedHarnessRecordsRetained": [
+    "board-questions-v2: later wrong edit target",
+    "board-questions-v4: wrong whole-multi expectation",
+    "board-plan-approval-v1: checkpoint after execution had finished",
+    "board-approval-C-v1: three wrong timing/state expectations"
+  ],
+  "Boundary": "Four requirement areas have original-desktop evidence; failed/quota remain unverified. Default-off optional observer requires original loopback endpoint and pinned installation.",
+  "Build": {
+    "Path": "docs/BUILD-INFO-0.9.19.json",
+    "SHA256": "197DA8FC2CCBCD45D5DC24C114F0E613BD4F4D357B614225C7F757E04A419D92",
+    "Archive": "release/即时任务看板-0.9.19-win-x64.zip",
+    "ArchiveSHA256": "72F160D59B55DD52843AAA36725E4D1308FF88A95BCB484B4C7D6C22EC6FEB46",
+    "FileCount": 481,
+    "ZipAllFilesVerified": true,
+    "ContainsData": false
+  },
+  "VersionPromotion": {
+    "UserRequested": true,
+    "OfficialLocalVersion": "0.9.19",
+    "PriorAcceptedEvidenceCarriedForward": true,
+    "BusinessLogicUnchanged": true,
+    "NewOriginalDesktopLifecycleRun": false,
+    "FileVersion": "0.9.19.0",
+    "ProductVersion": "0.9.19+5bed7c9c7865c963f2d2b52da48c7bb2852373f6",
+    "GitHubPublished": false
+  },
+  "PortableSmoke": {
+    "Path": "test-output/codex-20261021-version019/package-startup/startup-report.json",
+    "SHA256": "F071DED09AE906A994D188799FA18EF15D04B1503B63ED62E886139295476A4B",
+    "Passed": true,
+    "Isolated": true,
+    "ReadyMs": 4225.129,
+    "StartupProcessExited": true
+  }
+}

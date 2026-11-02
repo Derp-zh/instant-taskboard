@@ -1,0 +1,109 @@
+{
+  "version": "0.9.24",
+  "date": "2026-10-23",
+  "publication": "local only; no GitHub upload",
+  "package": "release/即时任务看板-0.9.24",
+  "normalStartup": true,
+  "previewArgumentRequired": false,
+  "codexVersion": "26.1016.8120.0",
+  "reports": {
+    "binding": {
+      "path": "test-output/drag-0924-release-binding-a/drag-binding-report.json",
+      "sha256": "ffa344ce7dd437567bc45dde39b1e4f236d4c8d83fe4f1a8409d29c11e78b316",
+      "passed": 53
+    },
+    "core": {
+      "path": "test-output/drag-0924-core-a/report.json",
+      "sha256": "5d60495bc0f392ede5d34986c1019ec7b7ea970429b8d70aeed22c5981bf0a2e",
+      "passed": 334
+    },
+    "initialization": {
+      "path": "test-output/drag-0924-release-initialization-a/ai-initialization-report.json",
+      "sha256": "8c2f68b5fe589fe8c3ffb29722abc259bd751a702ea495d5fb635b901f5edadc",
+      "passed": 44
+    },
+    "configuration": {
+      "path": "test-output/drag-0924-release-configuration-a/integration-report.json",
+      "sha256": "b074e63b195dc02bd0104c8d4c2d0d2b8d262de752882a7adb54ab9f930388b9",
+      "passed": 17
+    },
+    "ux": {
+      "path": "test-output/drag-0924-release-ux-a/ux0922-report.json",
+      "sha256": "f1a332e875d23be5cfd7e8e9c7030eb6707874c241eac0430c8b1dc477b338df",
+      "passed": 38
+    },
+    "layout": {
+      "path": "test-output/drag-0924-release-layout-a/ux0920-report.json",
+      "sha256": "c190efa7f81c981be98b3afd33f7ae35623491665049e4f4d650eb2eea9a31d6",
+      "passed": 1532
+    },
+    "real_binding": {
+      "path": "test-output/drag-0924-release-real-a/main-drag-real-report.json",
+      "sha256": "b38990ca956028c4f1d48639fe1689dc22bebd3b94a9323714e0655fc6bed55d",
+      "passed": 61
+    },
+    "original_ui": {
+      "path": "test-output/drag-0924-release-ui-a/original-ui-report.json",
+      "sha256": "29e9625ccf71edb66efdef81352cad49f93c43436dc32b9bbe87034f777facb6",
+      "passed": 43
+    },
+    "clipboard": {
+      "path": "output/drag-integration-20261023/final-clipboard.json",
+      "sha256": "b8eb55058bb564d2cdf7fb235a1c7c31fb8588ac0d86013c227ded4e9ad29324",
+      "passed": true
+    }
+  },
+  "actualBinding": {
+    "targetCount": 3,
+    "independentReferences": "fresh Codex target menus; no catalog/name match prerequisite",
+    "cases": [
+      {
+        "target": "侧栏当前聊天",
+        "threadIdSha256": "81d743ddb3f0fd8c1d4cd4bd864363fc06a756c66a0301c6bba81c6b02923fc0",
+        "persisted": true
+      },
+      {
+        "target": "侧栏另一条未打开聊天",
+        "threadIdSha256": "4074179ba4652abaf7c40c3e0bbbd5dc2ed1da6013d490d12c541d6f5646ec5c",
+        "persisted": true
+      },
+      {
+        "target": "当前聊天正文",
+        "threadIdSha256": "81d743ddb3f0fd8c1d4cd4bd864363fc06a756c66a0301c6bba81c6b02923fc0",
+        "persisted": true
+      }
+    ],
+    "exactSourceStageOnly": true,
+    "unopenedSidebarNotNavigated": true,
+    "reopenedExactIdAndName": true,
+    "otherStagesUnchanged": true,
+    "normalBusinessReceiptAbsent": true
+  },
+  "restoration": {
+    "cursor": true,
+    "foreground": true,
+    "originalClipboard": true,
+    "textAndHtml": true
+  },
+  "scope": {
+    "explicitIsolatedDataDirectory": true,
+    "productionDataChanged": false,
+    "productionConfigurationChanged": false,
+    "autostartChanged": false,
+    "codexRestarted": false,
+    "messagesSent": false,
+    "approvalsExecuted": false
+  },
+  "notVerified": [
+    "same-name chats",
+    "multiple Codex windows/split view",
+    "mixed DPI/hotplug",
+    "remote host",
+    "rapid target changes",
+    "complex custom clipboard formats",
+    "original Codex question/approval/actual-resume full lifecycle"
+  ],
+  "entrySha256": "1d6f47600e64e34c563386753c1bd07a59eee709ca54f232787a8c692404487b",
+  "desktopAssemblySha256": "18870399af0d7d165d18ff83b53a8b9f104bf9a7fdc50b87e3c665e3fb5bcb2b",
+  "coreAssemblySha256": "7eb5f27edf2d83a0adc9ce2cc923a59c660652e0ebf5bee1547af7eec4a25e3f"
+}

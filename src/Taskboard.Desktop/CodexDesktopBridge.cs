@@ -93,7 +93,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
     }
 
     internal async Task<CodexDesktopSnapshot> Read(string threadId, string? targetTurnId = null,
-        CancellationToken cancellation = default)
+        CancellationToken cancellation = default, string[]? targetTurnIds = null)
     {
         if (string.IsNullOrWhiteSpace(threadId) || threadId.Length > 256) return Unavailable("thread-unavailable");
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
@@ -131,7 +131,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
                     return parsed with { Turns = turns.ToArray() };
                 if (parsed.Turns.Any(x => x.Status == "inProgress"))
                     return Unavailable("inconsistent-turn-state");
-                if (targetTurnId is null || ids.Contains(targetTurnId) || next.Length == 0)
+                if ((targetTurnIds is { Length: > 0 } ? targetTurnIds.All(ids.Contains) : targetTurnId is null || ids.Contains(targetTurnId)) || next.Length == 0)
                     return latest with { Turns = turns.ToArray() };
                 if (!cursors.Add(next)) return latest with { Turns = turns.ToArray(), Reason = "live-current-state-turn-cursor-cycle" };
                 cursor = next;
@@ -232,7 +232,7 @@ internal sealed class CodexDesktopBridge : IAsyncDisposable
         registeredExecutable.Length > 0 && string.Equals(path, registeredExecutable, StringComparison.OrdinalIgnoreCase) &&
         path.Length > 0;
 
-    private static bool VerifyServer(SafePipeHandle pipeHandle, string? inspector, out string reason)
+    internal static bool VerifyServer(SafePipeHandle pipeHandle, string? inspector, out string reason)
     {
         reason = "server-identity-unavailable";
         try

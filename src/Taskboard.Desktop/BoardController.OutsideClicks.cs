@@ -17,6 +17,9 @@ internal sealed partial class BoardController
     private long outsidePressTime;
     private Point outsidePressPoint;
     private long workspaceGeneration;
+    private long conversationInputBoundary = long.MinValue;
+    internal void FinishConversationInput() => conversationInputBoundary = Environment.TickCount64;
+    internal bool IsStaleConversationPress(long pressedAt) => pressedAt <= conversationInputBoundary;
     internal void VerifyOutsideObserverRegistration() { using var observer = new OutsideClickObserver(this); }
     internal object OutsideInputStatus => outsideClicks?.Status ?? new { RawInput = false };
     internal void DisableLegacyInputForIsolatedCheck()
@@ -28,11 +31,12 @@ internal sealed partial class BoardController
     internal SurfaceWindow? DismissibleWindow() => FloatingWindows()
         .Where(x => x.ShouldRestore).OrderByDescending(x => x.WindowLayer).ThenByDescending(x => x.ActivationOrder).FirstOrDefault();
     internal bool HasFloatingWindow => FloatingWindows().Any(x => x.IsVisible || x.ShouldRestore);
-    internal void ObserveWorkspaceOutsidePress(bool externalAtPress, long? generation = null)
+    internal void ObserveWorkspaceOutsidePress(bool externalAtPress, long? generation = null, long? pressedAt = null)
     {
         // A real other-app click folds the whole group exactly like the orb.
         // Focus notifications after closing a window must never replay clicks.
-        if (!externalAtPress || (generation is long captured && captured != workspaceGeneration)) return;
+        if (!externalAtPress || (generation is long captured && captured != workspaceGeneration)
+            || pressedAt is long time && IsStaleConversationPress(time)) return;
         if (Expanded && !SuppressCollapse) SetExpanded(false);
     }
     internal void ObserveOutsidePress(SurfaceWindow target, bool inside, Point screenPoint = default, long? pressedAt = null, bool leftButton = true, bool taskCard = false)
@@ -142,10 +146,11 @@ internal sealed partial class BoardController
                 {
                     _ = ui.BeginInvoke(new Action(() =>
                     {
-                        if (disposed || controller.exiting || !controller.Expanded || generation != controller.workspaceGeneration || Native.Dialogs().Length != 0) return;
+                        if (disposed || controller.exiting || !controller.Expanded || generation != controller.workspaceGeneration
+                            || controller.IsStaleConversationPress(pressedAt) || Native.Dialogs().Length != 0) return;
                         if (external)
                         {
-                            controller.ObserveWorkspaceOutsidePress(true, generation); return;
+                            controller.ObserveWorkspaceOutsidePress(true, generation, pressedAt); return;
                         }
                         var target = controller.DismissibleWindow(); if (target is null) return;
                         var handle = new WindowInteropHelper(target).Handle;

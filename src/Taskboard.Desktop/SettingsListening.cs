@@ -35,23 +35,25 @@ internal sealed partial class SettingsSurface
     {
         var panel = new StackPanel(); var options = controller.Engine.State.Preferences.Listening;
         panel.Children.Add(Ui.Label("监听", 18));
-        panel.Children.Add(Ui.Label("为不同应用分别播放自己的通知音。保留Windows横幅和应用自身声音。", 12, Ui.Muted));
+        panel.Children.Add(Ui.Label("Windows 通知横幅照常显示。", 12, Ui.Muted));
         var enabled = new CheckBox { Content = "启用通知音替换", IsChecked = options.Enabled, Margin = new Thickness(0, 10, 0, 8), IsEnabled = !controller.Isolated };
         enabled.Click += async (_, _) => { options.Enabled = enabled.IsChecked == true; await SaveListening(); }; panel.Children.Add(enabled);
         listeningStatus = Ui.Label(controller.Listening.Status, 12, Ui.Accent); panel.Children.Add(listeningStatus);
-        panel.Children.Add(Ui.Label("开启替换会自动关闭已关联应用的Windows通知音；关闭替换或正常退出时恢复原设置。系统更新后请用一条实际通知确认效果。", 12, Ui.Muted));
+        panel.Children.Add(Ui.Label("开启后替换所选应用的 Windows 通知音；关闭或正常退出时恢复原设置。", 12, Ui.Muted));
         var system = Ui.Button("打开Windows通知设置", () => Try(() => Process.Start(new ProcessStartInfo("ms-settings:notifications") { UseShellExecute = true })));
-        system.IsEnabled = !controller.Isolated; panel.Children.Add(system);
-        panel.Children.Add(Ui.Label("捕获方式", 13));
+        system.IsEnabled = !controller.Isolated;
+        var capture = new StackPanel(); capture.Children.Add(system);
+        capture.Children.Add(Ui.Label("捕获方式", 13));
         var mode = new ComboBox { Margin = new Thickness(0, 4, 0, 8), ItemsSource = new[] { "自动：双通道", "辅助功能：捕获横幅", "Windows通知读取：需要权限" }, SelectedIndex = (int)options.CaptureMode };
-        mode.SelectionChanged += async (_, _) => { options.CaptureMode = (NotificationCaptureMode)mode.SelectedIndex; await SaveListening(); }; panel.Children.Add(mode);
-        panel.Children.Add(Ui.Label("辅助功能需要通知横幅可见；开启勿扰、关闭横幅或通知来源无法识别时，可能无法捕获。", 11, Ui.Muted));
-        var retry = Ui.Button("重试监听 / 请求通知读取权限", async () => { await controller.Listening.Apply(true); RefreshListeningStatus(); }); retry.IsEnabled = !controller.Isolated; panel.Children.Add(retry);
+        mode.SelectionChanged += async (_, _) => { options.CaptureMode = (NotificationCaptureMode)mode.SelectedIndex; await SaveListening(); }; capture.Children.Add(mode);
+        capture.Children.Add(Ui.Label("辅助功能需要通知横幅可见；开启勿扰、关闭横幅或通知来源无法识别时，可能无法捕获。", 11, Ui.Muted));
+        var retry = Ui.Button("重试监听 / 请求通知读取权限", async () => { await controller.Listening.Apply(true); RefreshListeningStatus(); }); retry.IsEnabled = !controller.Isolated; capture.Children.Add(retry);
+        panel.Children.Add(SettingsDisclosure("捕获方式与权限", capture));
         var volumeLabel = Ui.Label($"替换音量 {options.Volume * 100:0}%", 13); panel.Children.Add(volumeLabel);
         var volume = new Slider { Minimum = 0, Maximum = 100, Value = options.Volume * 100, Margin = new Thickness(6, 4, 6, 12) };
         volume.ValueChanged += (_, _) => { options.Volume = volume.Value / 100; volumeLabel.Text = $"替换音量 {volume.Value:0}%"; controller.Engine.Touch(); }; panel.Children.Add(volume);
         panel.Children.Add(Ui.Label("应用与音频", 15));
-        panel.Children.Add(Ui.Label("选择Windows应用后默认使用内置Alarm04，可换成自己的音频。应用名精确匹配，忽略大小写和.exe。", 12, Ui.Muted));
+        panel.Children.Add(Ui.Label("新添加的应用使用默认提示音，可随时更换。", 12, Ui.Muted));
         panel.Children.Add(Ui.Button("刷新应用列表", async () => { await controller.Listening.RefreshApplications(); RefreshSection(); }));
         listeningRuleStatus.Clear();
         foreach (var rule in options.Rules.ToArray()) panel.Children.Add(ListeningRule(rule));
@@ -84,7 +86,9 @@ internal sealed partial class SettingsSurface
             if (duplicate) { identity.Text = "这个应用已有配置，请修改原条目"; picker.SelectedItem = applications.FirstOrDefault(x => x.Id == rule.AppId); return; }
             rule.AppId = selected.Id; rule.AppName = selected.Name; name.Text = selected.Name; identity.Text = selected.Id; await SaveListening();
         };
-        body.Children.Add(picker); body.Children.Add(identity); body.Children.Add(Ui.Label("通知显示名（辅助功能匹配）", 12, Ui.Muted)); body.Children.Add(name);
+        body.Children.Add(picker);
+        var matching = new StackPanel(); matching.Children.Add(identity); matching.Children.Add(Ui.Label("通知显示名（辅助功能匹配）", 12, Ui.Muted)); matching.Children.Add(name);
+        body.Children.Add(SettingsDisclosure("应用识别与匹配", matching));
         name.LostKeyboardFocus += async (_, _) =>
         {
             var value = name.Text.Trim(); if (value == rule.AppName) return;
@@ -108,6 +112,6 @@ internal sealed partial class SettingsSurface
         buttons.Children.Add(Ui.Button("试听", async () => await controller.Listening.Preview(rule.AudioPath))); body.Children.Add(buttons);
         var status = Ui.Label(controller.Listening.RuleStatus(rule.Id), 11, Ui.Accent); listeningRuleStatus[rule.Id] = status; body.Children.Add(status);
         body.Children.Add(Ui.Label("默认音内置，移动程序后仍可使用。自选音频记录原位置；配置备份不复制自选音频。", 10, Ui.Muted));
-        return Ui.Panel(body);
+        return SettingsCard(body);
     }
 }

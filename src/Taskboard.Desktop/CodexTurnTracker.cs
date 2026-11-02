@@ -120,7 +120,7 @@ internal sealed class CodexTurnTracker(string threadId)
     // A missing target/capped/cyclic page is inconclusive, not a completed turn.
     internal static async Task<CodexTurnPage> ReadTurnsAsync(Func<string, object, Task<JsonElement>> call,
         string threadId, string? targetTurnId = null, CancellationToken cancellation = default,
-        int maximumPages = 8)
+        int maximumPages = 8, string[]? targetTurnIds = null)
     {
         var turns = new List<CodexTurnMetadata>();
         var ids = new HashSet<string>(StringComparer.Ordinal);
@@ -138,13 +138,13 @@ internal sealed class CodexTurnTracker(string threadId)
                 if (id.Length > 0 && ids.Add(id)) turns.Add(new(id, Text(item, "status"), CodexTurnMetadata.ReadStopReason(Object(item, "error"))));
             }
             var next = Text(response, "nextCursor");
-            var found = targetTurnId is not null && ids.Contains(targetTurnId);
-            if (found || next.Length == 0 || targetTurnId is null)
+            var found = targetTurnIds is { Length: > 0 } ? targetTurnIds.All(ids.Contains) : targetTurnId is not null && ids.Contains(targetTurnId);
+            if (found || next.Length == 0 || targetTurnId is null && targetTurnIds is not { Length: > 0 })
                 return new(turns.ToArray(), next.Length == 0, found, page + 1, false);
             if (!cursors.Add(next)) return new(turns.ToArray(), false, false, page + 1, true);
             cursor = next;
         }
-        return new(turns.ToArray(), false, targetTurnId is not null && ids.Contains(targetTurnId), Math.Clamp(maximumPages, 1, 32), false);
+        return new(turns.ToArray(), false, targetTurnIds is { Length: > 0 } ? targetTurnIds.All(ids.Contains) : targetTurnId is not null && ids.Contains(targetTurnId), Math.Clamp(maximumPages, 1, 32), false);
     }
 }
 

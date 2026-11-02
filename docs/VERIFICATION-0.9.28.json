@@ -1,0 +1,141 @@
+{
+  "version": "0.9.28",
+  "date": "2026-10-24",
+  "published": false,
+  "completeTrafficFix": false,
+  "catalogHelperStartupRemoved": true,
+  "accurateMonitoringRetained": true,
+  "monitoringRoute": "active-turn-follow + local-file-projection",
+  "idleChatsSubscribed": false,
+  "boundedFollowerWindows": {
+    "activityWindowMs": 30000,
+    "followMaxMs": 90000,
+    "note": "turn运行期间的follow与该聊天原本的active状态重合；结束后最多30秒尾巴，本机无记录时每次连接最多90秒探测"
+  },
+  "monitoringIdleRetentionFullyFixed": false,
+  "passiveMemoryRouteInProduction": false,
+  "checks": {
+    "fileProjection": {
+      "path": "test-output/fp-3/file-projection.json",
+      "passed": 26,
+      "chatQueries": 0,
+      "turnQueries": 0
+    },
+    "fileProjectionIntegrity": {
+      "path": "test-output/fp-3/file-projection-verify.json",
+      "passed": true,
+      "fixtureHashesUnchanged": true,
+      "proxyRequests": 0,
+      "auxiliaryProcesses": 1
+    },
+    "realHomeActivityProbe": {
+      "path": "test-output/oc0928-probe/activity-probe.json",
+      "requested": 8,
+      "produced": 7,
+      "networkUsed": false,
+      "chatTextRead": false
+    },
+    "localCatalog": {
+      "path": "test-output/lc-0928b/local-catalog-report.json",
+      "passed": 24,
+      "hashesUnchanged": true
+    },
+    "localCatalogIntegrity": {
+      "path": "test-output/lc-0928b/fixture-integrity.json",
+      "passed": true
+    },
+    "stateProjection": {
+      "path": "test-output/oc-0928u/local-unit.json",
+      "passed": 25
+    },
+    "protocol": {
+      "path": "test-output/oc-0928a/report.json",
+      "passed": 73
+    },
+    "reconnect": {
+      "path": "test-output/oc-0928b/reconnect-report.json",
+      "passed": 15
+    },
+    "core": {
+      "path": "test-output/core-0928/report.json",
+      "passed": 334
+    },
+    "packageInitialization": {
+      "path": "test-output/oc0928-package-init/ai-initialization-report.json",
+      "passed": 44
+    },
+    "packageUi": {
+      "path": "test-output/oc0928-package-reconnect/reconnect-ui-report.json",
+      "passed": 10
+    },
+    "packageStartup": {
+      "path": "test-output/oc0928-package-start/startup-report.json",
+      "passed": null,
+      "readyMs": 1031.9265
+    },
+    "actualPackagedCatalog": {
+      "path": "test-output/oc0928-package-catalog-c/local-catalog-report.json",
+      "passed": 26,
+      "assemblyVersion": "0.9.28.0"
+    },
+    "actualPackagedCatalogIntegrity": {
+      "path": "test-output/oc0928-package-catalog-c/fixture-integrity.json",
+      "passed": true
+    }
+  },
+  "reusedEvidence": {
+    "idleMethodReplay": {
+      "path": "output/codex-network-20261024/idle-contract-replay.json",
+      "passed": 6,
+      "reusedNotRerun": true
+    },
+    "passiveFeasibility": {
+      "path": "output/codex-network-20261024/passive-feasibility.json",
+      "reusedNotRerun": true
+    },
+    "getterRouteSearch": {
+      "path": "output/codex-network-20261024/getter-route-search.json",
+      "reusedNotRerun": true
+    },
+    "originalBackendIsolation": {
+      "path": "C:\\Users\\Derp\\.codex\\visualizations\\2026\\10\\23\\11111111-1111-4111-8111-000000000001\\network-measure\\cache-verification.json",
+      "nativeHashRechecked": "C81ED464E5E7CAFD09A5FA26AF390C480BED8E9FAB2A87A54B285FBD56E7122A",
+      "productionRateAttributed": false
+    }
+  },
+  "protocolFindings": {
+    "readRequestMethods": 0,
+    "evidence": "src-CsH31EEu.js 的 codex-ipc 方法表（offset 8031）只含 thread-stream-* 广播与 thread-follower-* 命令；thread-owner-discovery 只返回 handledByClientId／supportsUntrustedAppInput",
+    "idleConstants": {
+      "ttlMs": 10800000,
+      "checkThrottleMs": 15000,
+      "batchLimit": 10
+    }
+  },
+  "systemNetworkMeasurement": {
+    "status": "not obtained",
+    "reason": "ETW access denied, administrator unavailable",
+    "thisRoundAttempted": false
+  },
+  "proxyCapture": {
+    "requests": 0,
+    "scope": "合成Codex目录的文件投影检查与只读目录检查；仅代理感知请求",
+    "fullTcpUdpCapture": false
+  },
+  "originalDesktopLifecycleVerified": false,
+  "realChatsOperated": false,
+  "userProcessesStopped": false,
+  "codexRestartedOrInjected": false,
+  "mouseOrClipboardOperated": false,
+  "formalDataTouched": false,
+  "testHarnessIssues": [
+    "Build-Portable.ps1 无BOM，Windows PowerShell 5.1 按ANSI解析中文报解析错误；用UTF-8临时副本执行，不改原脚本",
+    "LocalCatalogChecks 打包分支曾硬编码 0.9.27.0 且按4参数反射构造CodexObserver，0.9.28新增第5参数后失败；改为按构造参数数量构造并读取 TASKBOARD_PACKAGE_VERSION",
+    "Verify-LocalCatalog.py 的打包程序集参数需相对仓库根传 release/...，且输出目录必须预先不存在",
+    "ActivityChecks 的合成事件流最初对已跟随聊天只回 unavailable，导致“未进入进行中”超时；补上 active/inProgress 快照后通过"
+  ],
+  "publicExport": {
+    "chatIdentifiersRedacted": true,
+    "originalEvidenceRetainedLocally": true
+  }
+}

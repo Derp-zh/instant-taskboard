@@ -72,10 +72,19 @@ internal static class CodexInstallationDiscovery
         catch (Exception e) when (e is ArgumentException or NotSupportedException) { return false; }
     }
 
-    internal static async Task<CodexInstallation> Find(string desktop, string cli)
+    internal static async Task<CodexInstallation> Find(string desktop, string cli, bool inspectCli = true)
     {
         var registered = await Task.Run(RegisteredDesktops).ConfigureAwait(false);
         var selectedDesktop = Exists(desktop) ? desktop : registered.FirstOrDefault() ?? "";
+        // Normal setup uses the registered desktop and the existing local pipe.
+        // CLI discovery remains an explicit diagnostic, never a setup prerequisite.
+        if (!inspectCli)
+        {
+            var desktopVersion = Exists(selectedDesktop) ? RegisteredVersion(selectedDesktop) : "";
+            return new(selectedDesktop, cli, desktopVersion, registered,
+                $"登记桌面数量：{registered.Length}；已核对桌面位置，未启动CLI。" +
+                (desktop.Length > 0 && !Exists(desktop) ? " 原桌面路径已失效；原值保留供修复。" : ""));
+        }
         var cliCandidates = new List<string>();
         if (Exists(cli)) cliCandidates.Add(cli);
         // Prefer the CLI shipped with the selected/registered desktop, then PATH.

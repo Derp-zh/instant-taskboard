@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -8,34 +8,48 @@ namespace Taskboard.Desktop;
 
 internal sealed partial class SettingsSurface
 {
-    private TextBlock? aiSetupTitle, aiSetupNext, aiSetupDiagnostics, aiSetupVerification, aiSetupPaths, aiSetupCapabilities, aiTestResult;
+    private TextBlock? aiSetupTitle, aiSetupNext, aiSetupDiagnostics, aiSetupVerification, aiSetupPaths, aiSetupCapabilities, aiTestResult, aiTestSummary;
     private Button? aiInitialize, aiOpenCodex, aiTest;
-    private Expander? aiDiagnostics;
+    private Expander? aiDiagnostics, aiTestDetails;
     private readonly List<Control> aiConfigurationControls = new();
     private bool updatingAiFields;
     internal void RefreshAiInitialization()
     {
         if (aiSetupTitle is null) return;
         var report = controller.AiSetupReport;
-        aiSetupTitle.Text = report.Message;
-        aiSetupNext!.Text = report.Next;
         var desktopConnected = controller.Codex.TransportConnected && controller.Codex.SourceIdentityVerified;
-        var connected = report.SourceReady && desktopConnected;
-        aiSetupTitle.Foreground = connected ? Ui.Accent : report.State is CodexSetupState.NotStarted or CodexSetupState.Finding or CodexSetupState.Checking ? Ui.Text : Ui.Brush("#F2C879");
-        if (report.SourceReady && !connected)
+        var ids = controller.Engine.State.Tasks.SelectMany(x => x.Stages).Where(x => x.Codex is not null)
+            .Select(x => x.Codex!.ThreadId).Distinct(StringComparer.Ordinal).ToArray();
+        var capabilities = controller.Codex.Capabilities.Where(x => ids.Contains(x.ThreadId, StringComparer.Ordinal)).ToArray();
+        var live = desktopConnected ? capabilities.Count(x => x.Live) : 0;
+        var pending = desktopConnected ? capabilities.Count(x => x.Live && x.PendingAvailable) : 0;
+        var checking = controller.AiSetupBusy || report.State is CodexSetupState.Finding or CodexSetupState.Checking;
+        var failed = report.State is CodexSetupState.NotFound or CodexSetupState.InvalidPath or CodexSetupState.MissingCli or CodexSetupState.Incompatible or
+            CodexSetupState.ConnectionUnavailable or CodexSetupState.CatalogUnavailable or CodexSetupState.Failed;
+        aiSetupTitle.Text = checking ? "正在检查连接…" : failed ? report.Message : desktopConnected ? "本机连接已建立" : report.State == CodexSetupState.NotStarted ? "尚未检查连接" : report.SourceReady ? "连接暂时中断" : report.Message;
+        aiSetupTitle.Foreground = checking || report.State == CodexSetupState.NotStarted ? Ui.Text : failed ? Ui.Brush("#F2C879") : desktopConnected ? Ui.Accent : Ui.Brush("#F2C879");
+        aiSetupNext!.Text = failed ? report.Next : desktopConnected
+            ? ids.Length == 0 ? "下一步：在任务阶段关联一个已有 Codex 聊天。" : "聊天状态无法确认时，会保留原有等待提醒。"
+            : report.State == CodexSetupState.NotStarted ? "正常打开 Codex 后，点击检查连接。" : report.Next;
+        if (!failed && report.SourceReady && !desktopConnected)
         {
-            aiSetupTitle.Text = "配置已保存，当前连接待确认";
-            aiSetupNext.Text = "请重新检查当前连接；上次检查结果不代表本次仍然连通。";
+            aiSetupNext.Text = "正在自动重连，也可点击检查连接。";
         }
-        aiSetupDiagnostics!.Text = (report.Diagnostic.Length == 0 ? "尚无本次检查结果。" : report.Diagnostic) +
-            $"\n聊天目录：{(report.Catalog ? "本次检查可用" : "尚未通过本次检查")}\n完整观察源：{(report.SourceReady ? "本次检查已准备好" : "待完成")}\n当前连接：{controller.CodexStatus}";
+        aiSetupDiagnostics!.Text = (report.Diagnostic.Length == 0 ? "尚无本次检查记录。" : report.Diagnostic) +
+            "\n当前状态：" + controller.CodexStatus + "\n读取方式：" + controller.Codex.ReadMode +
+            "\n连接成功不代表所有聊天均可观察。提问、批准及实际恢复应在对应聊天发生时分别验证。";
         aiSetupVerification!.Text = controller.AiConversationVerification;
-        aiSetupCapabilities!.Text = $"聊天搜索与选择：{(report.Catalog ? "本次检查可用" : "待检查")}\nCodex 实时连接：{(report.DesktopConnected ? desktopConnected ? "已连接" : "检查通过，当前连接待确认" : "待检查")}\n提问／批准状态观察：{(report.SourceReady ? connected ? "已准备好" : "检查通过，当前连接待确认" : "待完成")}";
+        aiSetupCapabilities!.Text = $"聊天列表　{(report.State == CodexSetupState.CatalogUnavailable ? "暂不可用" : report.Catalog ? "本次检查可用" : "待检查")}\n本机连接　{(desktopConnected ? "已连接" : "待连接")}\n关联聊天　" +
+            (ids.Length == 0 ? "尚未关联" : $"{live}/{ids.Length} 状态可读 · {pending}/{ids.Length} 提问／批准可读");
         aiTestResult!.Text = controller.AiConversationTest;
+        var hasTest = !controller.AiConversationTest.StartsWith("尚未测试", StringComparison.Ordinal);
+        aiTestDetails!.Visibility = hasTest ? Visibility.Visible : Visibility.Collapsed;
+        var firstLine = controller.AiConversationTest.Split('\n')[0].Trim();
+        var sentenceEnd = firstLine.IndexOf('。');
+        aiTestSummary!.Text = (sentenceEnd >= 0 ? firstLine[..(sentenceEnd + 1)] : firstLine) + " · 查看详情";
         var config = controller.Engine.State.Preferences.ConnectionConfigs;
-        aiSetupPaths!.Text = "桌面程序：" + config.GetValueOrDefault(CodexInitialization.DesktopKey, "尚未发现") +
-            "\nCLI（codex.exe）：" + config.GetValueOrDefault(CodexInitialization.CliKey, "尚未发现");
-        aiInitialize!.Content = report.State == CodexSetupState.NotStarted ? "一键初始化" : "重新检查";
+        aiSetupPaths!.Text = "系统会自动寻找 Codex。只有找不到或路径失效时，才需要手动选择。";
+        aiInitialize!.Content = checking ? "检查中…" : "检查连接";
         aiInitialize.IsEnabled = !controller.AiSetupBusy;
         aiTest!.IsEnabled = !controller.AiSetupBusy;
         aiOpenCodex!.Visibility = report.State is CodexSetupState.NeedsOpen or CodexSetupState.NeedsReopen ? Visibility.Visible : Visibility.Collapsed;
@@ -59,29 +73,38 @@ internal sealed partial class SettingsSurface
     {
         aiConfigurationControls.Clear();
         var body = new StackPanel();
-        body.Children.Add(Ui.Label("初始化AI平台配置", 16));
-        body.Children.Add(Ui.Label("关联 Codex 聊天后，看板可以根据执行状态自动移列。", 12, Ui.Muted));
-        body.Children.Add(Ui.Label("目前仅支持 Codex。初始化不会选择或创建聊天，也不会发送消息、回答问题或批准操作。", 12, Ui.Muted));
-        aiSetupTitle = Ui.Label("", 14, Ui.Accent); aiSetupTitle.Tag = "AiInitializationResult"; body.Children.Add(aiSetupTitle);
-        aiSetupNext = Ui.Label("", 12); body.Children.Add(aiSetupNext);
-        aiSetupCapabilities = Ui.Label("", 12); aiSetupCapabilities.Tag = "AiCapabilities"; body.Children.Add(aiSetupCapabilities);
-        aiInitialize = Ui.Button("一键初始化", async () => await controller.InitializeAiPlatform(), true); aiInitialize.Tag = "AiInitialize"; body.Children.Add(aiInitialize);
-        aiTest = Ui.Button("测试已关联聊天", async () => await controller.TestAiConversations()); aiTest.Tag = "AiTestConversations"; body.Children.Add(aiTest);
-        aiTestResult = Ui.Label("", 12, Ui.Muted); aiTestResult.Tag = "AiTestResult"; body.Children.Add(aiTestResult);
-        aiOpenCodex = Ui.Button("打开 Codex 并开启状态观察", async () => await controller.OpenCodexForInitialization()); aiOpenCodex.Tag = "AiOpenCodex"; body.Children.Add(aiOpenCodex);
-        aiSetupVerification = Ui.Label("", 12, Ui.Muted); aiSetupVerification.Tag = "AiConversationVerification"; body.Children.Add(aiSetupVerification);
+        aiSetupTitle = Ui.Label("", 14); aiSetupTitle.Tag = "AiInitializationResult"; aiSetupTitle.Margin = new Thickness(0, 8, 0, 3); body.Children.Add(aiSetupTitle);
+        aiSetupNext = Ui.Label("", 12); aiSetupNext.Tag = "AiNextStep"; body.Children.Add(aiSetupNext);
+        aiSetupCapabilities = Ui.Label("", 12, Ui.Muted); aiSetupCapabilities.Tag = "AiCapabilities"; aiSetupCapabilities.LineHeight = 24; aiSetupCapabilities.Margin = new Thickness(0, 8, 0, 10); body.Children.Add(aiSetupCapabilities);
+        var actions = new WrapPanel { Margin = new Thickness(-3, 0, -3, 4) };
+        aiInitialize = Ui.Button("检查连接", async () => await controller.InitializeAiPlatform(), true); aiInitialize.Tag = "AiInitialize"; actions.Children.Add(aiInitialize);
+        aiTest = Ui.Button("测试已关联聊天", async () => await controller.TestAiConversations()); aiTest.Tag = "AiTestConversations"; actions.Children.Add(aiTest);
+        aiTest.ToolTip = "仅查看已有监测结果，不额外连接聊天，不发送消息、回答问题或批准操作。";
+        aiOpenCodex = Ui.Button("打开 Codex", async () => await controller.OpenCodexForInitialization()); aiOpenCodex.Tag = "AiOpenCodex"; actions.Children.Add(aiOpenCodex);
+        body.Children.Add(actions);
+        aiTestResult = Ui.Label("", 11, Ui.Muted); aiTestResult.Tag = "AiTestResult"; aiTestResult.LineHeight = 18;
+        aiTestSummary = Ui.Label("", 11, Ui.Muted); aiTestSummary.Tag = "AiTestSummary"; aiTestSummary.TextWrapping = TextWrapping.NoWrap;
+        aiTestSummary.TextTrimming = TextTrimming.CharacterEllipsis; aiTestSummary.MaxWidth = 440;
+        aiTestDetails = SettingsDisclosure("", aiTestResult); aiTestDetails.Tag = "AiTestDetails"; aiTestDetails.Header = aiTestSummary;
+        body.Children.Add(aiTestDetails);
+        body.Children.Add(Ui.Label("仅查看已有信息，不代答、不批准。", 11, Ui.Muted));
         var diagnostics = new StackPanel(); aiSetupDiagnostics = Ui.Label("", 11, Ui.Muted); diagnostics.Children.Add(aiSetupDiagnostics);
+        aiSetupVerification = Ui.Label("", 12, Ui.Muted); aiSetupVerification.Tag = "AiConversationVerification"; diagnostics.Children.Add(aiSetupVerification);
         aiSetupPaths = Ui.Label("", 11, Ui.Muted); diagnostics.Children.Add(aiSetupPaths);
         AddManualPath(diagnostics, "手动选择桌面程序", CodexInitialization.DesktopKey, "选择 Codex 桌面程序（商店版通常是 app 下的 ChatGPT.exe）");
-        AddManualPath(diagnostics, "手动选择 CLI", CodexInitialization.CliKey, "选择 Codex CLI（resources 下的 codex.exe；不是桌面启动辅助程序）");
-        foreach (var (key, caption) in new[] { (CodexInitialization.DesktopKey, "桌面程序路径"), (CodexInitialization.CliKey, "CLI 路径"), ("codex.endpoint", "原有本机服务地址（通常留空）"), (CodexInitialization.InspectorKey, "本机观察地址（自动配置，无需手填）") })
+        void AddPath(Panel destination, string key, string caption)
         {
-            diagnostics.Children.Add(Ui.Label(caption, 12, Ui.Muted));
+            destination.Children.Add(Ui.Label(caption, 12, Ui.Muted));
             var input = Ui.Input(controller.Engine.State.Preferences.ConnectionConfigs.GetValueOrDefault(key, "")); input.Tag = key;
             input.TextChanged += (_, _) => { if (updatingAiFields) return; controller.Engine.State.Preferences.ConnectionConfigs[key] = input.Text.Trim(); controller.Engine.Touch(); };
-            aiConfigurationControls.Add(input); diagnostics.Children.Add(input);
+            aiConfigurationControls.Add(input); destination.Children.Add(input);
         }
-        aiDiagnostics = new Expander { Header = "手动选择与诊断（可选）", Content = diagnostics, Foreground = Ui.Muted, Margin = new Thickness(0, 8, 0, 8) };
+        AddPath(diagnostics, CodexInitialization.DesktopKey, "桌面程序路径");
+        var compatibility = new StackPanel(); compatibility.Children.Add(Ui.Label("仅用于兼容诊断，普通连接无需填写。", 11, Ui.Muted));
+        AddManualPath(compatibility, "手动选择 CLI", CodexInitialization.CliKey, "选择 Codex CLI（resources 下的 codex.exe）");
+        AddPath(compatibility, CodexInitialization.CliKey, "CLI 路径（可选）");
+        diagnostics.Children.Add(SettingsDisclosure("兼容工具（可选）", compatibility));
+        aiDiagnostics = SettingsDisclosure("手动选择与诊断（可选）", diagnostics); aiDiagnostics.Tag = "AiDiagnostics";
         body.Children.Add(aiDiagnostics);
         RefreshAiInitialization(); return body;
     }

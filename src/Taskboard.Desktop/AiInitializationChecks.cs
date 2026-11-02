@@ -67,7 +67,7 @@ internal static class AiInitializationChecks
 
         environment.Connection = new(true, true, false, "inspector-peer-mismatch"); environment.Running = true;
         var pending = await service.Run(seed);
-        Check(pending.Report.State == CodexSetupState.NeedsReopen && !pending.Report.SourceReady && pending.Report.Catalog, "目录与桌面均可读但提问观察不可用必须待重开，不能假成功");
+        Check(pending.Report.State == CodexSetupState.ConnectionUnavailable && !pending.Report.SourceReady && pending.Report.Catalog && !pending.Report.Next.Contains("自行退出"), "本机状态暂不可用时给出重连诊断，不要求重开或假报成功");
         Check(environment.OpenCount == 0, "一键初始化从不擅自打开或重启Codex");
         environment.Running = false;
         Check((await service.Run(seed)).Report.State == CodexSetupState.NeedsOpen, "Codex未运行提供主动打开下一步");
@@ -84,7 +84,11 @@ internal static class AiInitializationChecks
         environment.Connection = new(true, false, false, "pipe-not-found");
         Check(!(await service.Run(seed)).Report.SourceReady, "单独历史服务可读不冒充原桌面完整监测");
         environment.Connection = new(true, true, false, "inspector-port-occupied");
-        Check((await service.Run(seed)).Report.State == CodexSetupState.ConnectionUnavailable, "端口冲突提供修复端口动作而非盲目要求重启");
+        environment.Running = true;
+        var legacyObservation = await service.Run(seed);
+        Check(legacyObservation.Report.State == CodexSetupState.ConnectionUnavailable && !legacyObservation.Report.Next.Contains("端口") && !legacyObservation.Report.Next.Contains("重开"),
+            "旧观察错误只给本机重连建议，不再要求配置观察端口或重开");
+        environment.Running = false;
         environment.Connection = new(true, true, true, "fixture-ready");
         var original = new Dictionary<string, string> { [CodexInitialization.DesktopKey] = "manual-desktop.exe", [CodexInitialization.CliKey] = "manual-cli.exe", [CodexInitialization.InspectorKey] = "http://127.0.0.1:19439", ["codex.endpoint"] = "ws://127.0.0.1:19440", ["other"] = "unchanged" };
         var preserved = await service.Run(original);
@@ -106,14 +110,14 @@ internal static class AiInitializationChecks
         environment.Install = new("", "", "", [], "not-installed");
         Check((await service.Run(seed)).Report.State == CodexSetupState.NotFound, "未找到桌面程序提供手动选择");
         environment.Install = new("desktop.exe", "", "known", [], "no-cli");
-        Check((await service.Run(seed)).Report.State == CodexSetupState.MissingCli, "发现桌面不等于CLI可用");
+        Check((await service.Run(seed)).Report.SourceReady, "本地目录与状态可用时不再要求启动CLI辅助服务");
         environment.Install = new("desktop.exe", "cli.exe", "known", [], "fixture");
         var badAddress = await service.Run(new() { [CodexInitialization.InspectorKey] = "http://external.invalid:9339" });
-        Check(badAddress.Report.State == CodexSetupState.Failed && !badAddress.Report.SourceReady, "原观察地址无效时保留且拒绝远程来源");
+        Check(badAddress.Report.SourceReady && badAddress.Config[CodexInitialization.InspectorKey] == "http://external.invalid:9339", "旧观察地址原样保留但不参与本机连接，不访问旧远程地址");
 
         await controller.InitializeAiPlatform(environment);
         var saved = new AtomicStore(root, controller.Store.ConfigurationDirectory).Load();
-        Check(saved.Preferences.ConnectionConfigs[CodexInitialization.CliKey] == "cli.exe" && saved.Preferences.ConnectionConfigs[CodexInitialization.DesktopKey] == "desktop.exe" && saved.Preferences.ConnectionConfigs[CodexInitialization.InspectorKey] == CodexInitialization.DefaultInspector, "初始化后的桌面CLI与观察配置实际落盘并独立重读");
+        Check(saved.Preferences.ConnectionConfigs[CodexInitialization.CliKey] == "cli.exe" && saved.Preferences.ConnectionConfigs[CodexInitialization.DesktopKey] == "desktop.exe" && !saved.Preferences.ConnectionConfigs.ContainsKey(CodexInitialization.InspectorKey), "初始化路径实际落盘且不新增观察端口，独立重读保持");
         Check(controller.Engine.State.Tasks.Count == 0 && controller.AiConversationVerification.Contains("尚未验证"), "初始化成功不自动选择聊天且具体聊天显示未验证");
         var settings = new SettingsSurface(controller); settings.SelectSection("AI平台接入情况");
         Layout(settings.Root, 760, 680);
@@ -122,8 +126,9 @@ internal static class AiInitializationChecks
         Check(buttons.Any(x => Equals(x.Tag, "AiTestConversations")) && !buttons.Any(x => Equals(x.Content, "改用原 Codex 桌面连接")), "设置提供只读测试入口且移除内部路线切换按钮");
         await controller.TestAiConversations();
         Check(controller.AiConversationTest.Contains("尚未关联") && controller.Engine.State.Tasks.Count == 0, "无聊天时测试不创建或接管聊天");
-        Check(Visual<TextBlock>(settings.Root).Any(x => Equals(x.Tag, "AiConversationVerification") && x.Text.Contains("尚未验证")), "设置明确显示具体聊天尚未验证");
-        Check(Visual<TextBlock>(settings.Root).Any(x => Equals(x.Tag, "AiInitializationResult") && x.Text.Contains("当前连接待确认")), "上次检查成功而当前无真实连接时，界面仍显示待确认");
+        Check(Logical<TextBlock>(settings.Root).Any(x => Equals(x.Tag, "AiConversationVerification") && x.Text.Contains("尚未验证")) &&
+            Visual<TextBlock>(settings.Root).Any(x => Equals(x.Tag, "AiCapabilities") && x.Text.Contains("尚未关联")), "主视图显示尚未关联，诊断保留具体聊天尚未验证说明");
+        Check(Visual<TextBlock>(settings.Root).Any(x => Equals(x.Tag, "AiInitializationResult") && x.Text == "连接暂时中断"), "上次检查成功而当前无真实连接时，界面显示连接中断");
         var snapshot = new RenderTargetBitmap(760, 680, 96, 96, PixelFormats.Pbgra32); snapshot.Render(settings.Root);
         var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(snapshot)); using (var stream = File.Create(Path.Combine(root, "ai-initialization-settings.png"))) png.Save(stream);
         await controller.InitializeAiPlatform(environment);

@@ -1,0 +1,111 @@
+{
+  "version": "0.9.27",
+  "date": "2026-10-24",
+  "published": false,
+  "completeTrafficFix": false,
+  "catalogHelperStartupRemoved": true,
+  "accurateMonitoringRetained": true,
+  "monitoringIdleRetentionFixed": false,
+  "passiveMemoryRouteInProduction": false,
+  "checks": {
+    "localCatalog": {
+      "path": "test-output/codex-network-0927-catalog-b/local-catalog-report.json",
+      "passed": 24,
+      "readyMs": null
+    },
+    "catalogIntegrity": {
+      "path": "test-output/codex-network-0927-catalog-b/fixture-integrity.json",
+      "passed": true,
+      "readyMs": null
+    },
+    "reconnect": {
+      "path": "test-output/codex-network-0927-reconnect-a/reconnect-report.json",
+      "passed": 15,
+      "readyMs": null
+    },
+    "core": {
+      "path": "test-output/codex-network-0927-core-a/report.json",
+      "passed": 334,
+      "readyMs": null
+    },
+    "stateProjection": {
+      "path": "test-output/codex-network-0927-state-a/local-unit.json",
+      "passed": 25,
+      "readyMs": null
+    },
+    "protocol": {
+      "path": "test-output/codex-network-0927-protocol-b/report.json",
+      "passed": 73,
+      "readyMs": null
+    },
+    "packageInitialization": {
+      "path": "test-output/codex-network-0927-package-init/ai-initialization-report.json",
+      "passed": 44,
+      "readyMs": null
+    },
+    "packageUi": {
+      "path": "test-output/codex-network-0927-package-ui/reconnect-ui-report.json",
+      "passed": 10,
+      "readyMs": null
+    },
+    "packageStartup": {
+      "path": "test-output/codex-network-0927-package-start/startup-report.json",
+      "passed": null,
+      "readyMs": 2233.7355
+    },
+    "idleMethodReplay": {
+      "path": "output/codex-network-20261024/idle-contract-replay.json",
+      "passed": 6,
+      "readyMs": null
+    },
+    "passiveFeasibility": {
+      "path": "output/codex-network-20261024/passive-feasibility.json",
+      "passed": null,
+      "readyMs": null
+    },
+    "actualPackagedCatalog": {
+      "path": "test-output/codex-network-0927-package-catalog-g/local-catalog-report.json",
+      "passed": 26,
+      "assemblyVersion": "0.9.27.0"
+    },
+    "actualPackagedCatalogIntegrity": {
+      "path": "test-output/codex-network-0927-package-catalog-g/fixture-integrity.json",
+      "passed": true
+    }
+  },
+  "systemNetworkMeasurement": {
+    "status": "not obtained",
+    "reason": "ETW access denied, administrator unavailable",
+    "attempts": [
+      "test-output/codex-network-0927-catalog-network-a-capture/start.txt",
+      "test-output/codex-network-0927-catalog-network-b-capture/start.txt"
+    ]
+  },
+  "proxyCapture": {
+    "requests": 0,
+    "scope": "isolated catalog cold startup, repeated reads and 6-second idle; proxy-aware requests only",
+    "fullTcpUdpCapture": false
+  },
+  "originalDesktopLifecycleVerified": false,
+  "realChatsOperated": false,
+  "userProcessesStopped": false,
+  "mouseOrClipboardOperated": false,
+  "formalDataTouched": false,
+  "originalBackendEvidence": {
+    "reusedNotRerun": true,
+    "path": "C:\\Users\\Derp\\.codex\\visualizations\\2026\\10\\23\\11111111-1111-4111-8111-000000000001\\network-measure\\cache-verification.json",
+    "nativeHashRechecked": "C81ED464E5E7CAFD09A5FA26AF390C480BED8E9FAB2A87A54B285FBD56E7122A",
+    "productionRateAttributed": false
+  },
+  "testHarnessIssues": [
+    "Initial standalone network trace lacked administrator privilege",
+    "Protocol fixture failed inside sandbox; same fixture passed outside sandbox",
+    "One self-created WPF instance launched with invalid --isolated and was ended; reran with --no-integrations",
+    "Packaged assembly verification initially could not resolve product Json 9 in runner Json 8 context; isolated dependency load context added and actual packaged Observer.Catalog passed",
+    "One attempted global UseWPF build also applied to non-Windows Core and failed; test project now references WindowsDesktop locally without changing Core"
+  ],
+  "publicExport": {
+    "chatIdentifiersRedacted": true,
+    "originalEvidenceRetainedLocally": true
+  }
+}
